@@ -1,4 +1,4 @@
-// DonutiT Cleopatra — Wave 0 schema baseline
+// DonutiT Cleopatra — Wave 0 + Wave 1 (Ledger Core)
 
 generator client {
   provider = "prisma-client"
@@ -16,29 +16,124 @@ enum Role {
   HR
 }
 
+enum LedgerEntryType {
+  INCOME
+  EXPENSE
+  TRANSFER_IN
+  TRANSFER_OUT
+}
+
+enum PaymentChannel {
+  CASH
+  TRANSFER
+  CREDIT
+  OTHER
+}
+
+enum AuditAction {
+  LEDGER_POST
+  LEDGER_VOID
+  DAILY_CLOSE
+  DAILY_CLOSE_UNLOCK
+}
+
 model Store {
-  id        String   @id @default(cuid())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  users     User[]
+  id           String        @id @default(cuid())
+  name         String
+  code         String        @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  users        User[]
+  ledgerEntries LedgerEntry[]
+  dailyCloses  DailyClose[]
+  auditLogs    AuditLog[]
 
   @@index([code])
 }
 
 model User {
-  id               String   @id @default(cuid())
-  email            String   @unique
+  id               String        @id @default(cuid())
+  email            String        @unique
   name             String
   passwordHash     String
-  role             Role     @default(STAFF)
-  canExportReports Boolean  @default(false)
+  role             Role          @default(STAFF)
+  canExportReports Boolean       @default(false)
   storeId          String
-  store            Store    @relation(fields: [storeId], references: [id])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  store            Store         @relation(fields: [storeId], references: [id])
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  ledgerEntries    LedgerEntry[] @relation("LedgerCreatedBy")
+  dailyCloses      DailyClose[]  @relation("DailyCloseBy")
+  unlockedCloses   DailyClose[]  @relation("DailyCloseUnlockedBy")
+  auditLogs        AuditLog[]
 
   @@index([storeId])
   @@index([role])
+}
+
+model LedgerEntry {
+  id            String          @id @default(cuid())
+  storeId       String
+  store         Store           @relation(fields: [storeId], references: [id])
+  entryDate     DateTime
+  type          LedgerEntryType
+  channel       PaymentChannel  @default(CASH)
+  amountCents   Int
+  description   String
+  referenceType String?
+  referenceId   String?
+  isVoided      Boolean         @default(false)
+  voidedAt      DateTime?
+  voidReason    String?
+  reversalOfId  String?         @unique
+  reversalOf    LedgerEntry?    @relation("LedgerReversal", fields: [reversalOfId], references: [id])
+  reversal      LedgerEntry?    @relation("LedgerReversal")
+  createdById   String
+  createdBy     User            @relation("LedgerCreatedBy", fields: [createdById], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([storeId, entryDate])
+  @@index([referenceType, referenceId])
+  @@index([isVoided])
+}
+
+model DailyClose {
+  id              String    @id @default(cuid())
+  storeId         String
+  store           Store     @relation(fields: [storeId], references: [id])
+  closeDate       DateTime
+  isLocked        Boolean   @default(true)
+  cashIncomeCents   Int     @default(0)
+  cashExpenseCents  Int     @default(0)
+  transferIncomeCents Int   @default(0)
+  transferExpenseCents Int  @default(0)
+  note            String?
+  closedById      String
+  closedBy        User      @relation("DailyCloseBy", fields: [closedById], references: [id])
+  unlockedAt      DateTime?
+  unlockedById    String?
+  unlockedBy      User?     @relation("DailyCloseUnlockedBy", fields: [unlockedById], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([storeId, closeDate])
+  @@index([storeId, closeDate])
+  @@index([isLocked])
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  storeId    String
+  store      Store       @relation(fields: [storeId], references: [id])
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  action     AuditAction
+  entityType String
+  entityId   String?
+  payload    String?
+  createdAt  DateTime    @default(now())
+
+  @@index([storeId, createdAt])
+  @@index([entityType, entityId])
 }

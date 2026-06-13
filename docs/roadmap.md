@@ -20,12 +20,12 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 
 ## Wave 1 — Ledger Core
 
-- [ ] Cashflow ledger model + posting service
-- [ ] Daily close + lock semantics
-- [ ] Audit trail for money actions
-- [ ] `ledger-hawk` invariant tests documented
+**Status:** Complete
 
-**Depends on:** Wave 0
+- [x] Cashflow ledger model + posting service
+- [x] Daily close + lock semantics
+- [x] Audit trail for money actions
+- [x] `ledger-hawk` invariant tests documented (`docs/ledger-invariants.md`)
 
 ## Wave 2 — POS + Inventory
 

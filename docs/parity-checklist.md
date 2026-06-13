@@ -38,10 +38,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## Cashflow
 
-- [ ] Ledger entry posting
-- [ ] Daily close
-- [ ] Locked close blocks mutations
-- [ ] Owner unlock daily close
+- [x] Ledger entry posting
+- [x] Daily close
+- [x] Locked close blocks mutations
+- [x] Owner unlock daily close
 
 ## Messenger
 
@@ -66,9 +66,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 - [ ] Export reports — `assertCanExportReports`
 - [ ] Deleted record visibility — Owner only
 - [ ] Inventory cost visibility — authorized roles only
+- [x] Daily close unlock — Owner-only (`daily-close:unlock`)
 
 ## Regression Evidence
 
 - [x] `regress-ranger` route smoke (all main routes 200)
-- [~] `seed-smith` fixtures cover all flows above
-- [ ] Last regression run date: 2026-06-13 (Wave 0 — all routes PASS)
+- [~] `seed-smith` fixtures cover all flows above (ledger + daily close seeded)
+- [x] Last regression run date: 2026-06-13 (Wave 1 — ledger API verified)

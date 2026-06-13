@@ -13,6 +13,7 @@ import {
   toAuthUser,
   type AuthUser,
 } from './lib/auth.js';
+import { createCashflowRouter, handleLedgerError } from './routes/cashflow.js';
 
 const app = express();
 const PORT = Number(process.env.API_PORT) || 3004;
@@ -52,6 +53,7 @@ function requireAuth(req: express.Request, res: express.Response, next: express.
 }
 
 function handleAuthError(err: unknown, res: express.Response) {
+  if (handleLedgerError(err, res)) return;
   if (err instanceof AuthError) {
     res.status(err.status).json({ error: err.message });
     return;
@@ -61,7 +63,7 @@ function handleAuthError(err: unknown, res: express.Response) {
 }
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'donutit-cleopatra-api' });
+  res.json({ ok: true, service: 'donutit-cleopatra-api', wave: 1 });
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -92,7 +94,6 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
   res.json({ user });
 });
 
-/** Example Owner-only guard */
 app.post('/api/pos/void', requireAuth, (req, res) => {
   try {
     const user = (req as express.Request & { user: AuthUser }).user;
@@ -104,7 +105,6 @@ app.post('/api/pos/void', requireAuth, (req, res) => {
   }
 });
 
-/** Example export guard */
 app.get('/api/reports/export', requireAuth, (req, res) => {
   try {
     const user = (req as express.Request & { user: AuthUser }).user;
@@ -114,6 +114,8 @@ app.get('/api/reports/export', requireAuth, (req, res) => {
     handleAuthError(err, res);
   }
 });
+
+app.use('/api/cashflow', createCashflowRouter(requireAuth, handleAuthError));
 
 app.listen(PORT, () => {
   console.log(`DonutiT API http://localhost:${PORT}`);

@@ -1,24 +1,82 @@
 {{> start title="ตั้งค่า — DonutiT" hidePageHeader=true }}
 
-<div class="p-4 lg:p-6">
-    {{> donutit/module-shell
-        moduleId="settings"
-        icon="ri-settings-3-line"
-        title="ตั้งค่าระบบ"
-        subtitle="ร้าน · สิทธิ์ · ธีม"
-        description="ตั้งค่าร้าน สิทธิ์ผู้ใช้ และการแสดงผล — Wave 0"
-    }}
+<div class="p-4 lg:p-6" data-donutit-module="settings">
+    <div class="mb-6">
+        <h1 class="text-xl font-semibold">ตั้งค่าระบบ</h1>
+        <p class="text-sm text-muted-foreground">เข้าสู่ระบบ · บัญชีทดสอบ</p>
+    </div>
 
-    <div class="mt-6 rounded-xl border bg-card p-6">
-        <h2 class="font-medium mb-3">บัญชีทดสอบ (dev)</h2>
-        <div class="text-sm text-muted-foreground space-y-1">
-            <p>owner@donutit.local — Owner</p>
-            <p>manager@donutit.local — Manager</p>
-            <p>staff@donutit.local — Staff</p>
-            <p>hr@donutit.local — HR</p>
-            <p class="pt-2">รหัสผ่าน: <code class="bg-muted px-1 rounded">donutit-dev</code></p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="rounded-xl border bg-card p-6">
+            <h2 class="font-medium mb-4">เข้าสู่ระบบ</h2>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-muted-foreground">อีเมล</label>
+                    <input id="login-email" type="email" value="owner@donutit.local" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                </div>
+                <div>
+                    <label class="text-xs text-muted-foreground">รหัสผ่าน</label>
+                    <input id="login-password" type="password" value="donutit-dev" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                </div>
+                <button id="btn-login" class="w-full px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
+                    เข้าสู่ระบบ
+                </button>
+                <button id="btn-logout" class="w-full px-4 py-2 text-sm font-medium border border-border rounded-lg hover:bg-muted">
+                    ออกจากระบบ
+                </button>
+                <p id="login-status" class="text-sm text-muted-foreground"></p>
+            </div>
+        </div>
+
+        <div class="rounded-xl border bg-card p-6">
+            <h2 class="font-medium mb-3">บัญชีทดสอบ (dev)</h2>
+            <div class="text-sm text-muted-foreground space-y-1">
+                <p>owner@donutit.local — Owner</p>
+                <p>manager@donutit.local — Manager</p>
+                <p>staff@donutit.local — Staff</p>
+                <p>hr@donutit.local — HR</p>
+                <p class="pt-2">รหัสผ่าน: <code class="bg-muted px-1 rounded">donutit-dev</code></p>
+            </div>
         </div>
     </div>
 </div>
+
+<script type="module">
+    import { login, setAuthToken, getAuthToken, apiFetch } from '/components/widgets/donutit/donutit-api.js';
+
+    async function refreshStatus() {
+        const el = document.getElementById('login-status');
+        if (!getAuthToken()) {
+            el.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
+            return;
+        }
+        try {
+            const res = await apiFetch('/api/auth/me');
+            const data = await res.json();
+            el.textContent = `เข้าสู่ระบบ: ${data.user.name} (${data.user.role})`;
+        } catch {
+            el.textContent = 'เซสชันหมดอายุ';
+        }
+    }
+
+    document.getElementById('btn-login')?.addEventListener('click', async () => {
+        try {
+            const user = await login(
+                document.getElementById('login-email').value,
+                document.getElementById('login-password').value,
+            );
+            document.getElementById('login-status').textContent = `สำเร็จ: ${user.name} (${user.role})`;
+        } catch (e) {
+            document.getElementById('login-status').textContent = e.message;
+        }
+    });
+
+    document.getElementById('btn-logout')?.addEventListener('click', () => {
+        setAuthToken('');
+        refreshStatus();
+    });
+
+    refreshStatus();
+</script>
 
 {{> end }}
