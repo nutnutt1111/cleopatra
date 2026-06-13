@@ -1,0 +1,33 @@
+---
+description: DonutiT Cleopatra quality gates and high-risk file conventions
+alwaysApply: true
+---
+
+# DonutiT Cleopatra Quality Conventions
+
+## Before Multi-Module Work
+
+Run `map-master` (`.cursor/agents/map-master.md`) to get a dependency verdict.
+
+## High-Risk Changes
+
+Changes touching money, stock, permissions, or exports require review agents:
+
+- **ledger-hawk** — POS, Pawn, Inventory stock, Cashflow, installments, voids, daily close
+- **gate-keeper** — `assertRole`, exports, cost/deleted visibility, Owner-only actions
+
+## Evidence Before Done Claims
+
+Do not mark `docs/parity-checklist.md` items complete without:
+
+1. Implementing code in the repo
+2. `regress-ranger` smoke evidence
+3. No BLOCK from `ledger-hawk` or `gate-keeper` for that feature
+
+## Staff-Facing UI
+
+Operational modules (POS, inventory, pawn, messenger, cashflow, customers, HR) should pass `ux-patrol` before merge — especially confirmations on void/delete/redeem and Thai label clarity.
+
+## Orchestrator
+
+Full workflow: see `AGENTS.md`.
