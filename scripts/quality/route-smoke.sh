@@ -28,6 +28,8 @@ for route in "${QUALITY_ROUTES[@]}"; do
   if [[ "$code" != "200" ]]; then
     status="FAIL"
     note="http ${code}"
+  elif [[ "$is_business_route" == "true" ]] && echo "$body" | grep -q 'data-donutit-module='; then
+    status="PASS"
   elif [[ "$is_business_route" == "true" ]] && echo "$body" | grep -q "Build beautiful dashboards"; then
     status="FAIL"
     note="fallback (ยังไม่มีหน้าโมดูลจริง)"

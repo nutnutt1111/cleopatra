@@ -1,5 +1,76 @@
 [
     {
+        "type": "category",
+        "label": "DONUTIT"
+    },
+    {
+        "type": "link",
+        "id": "donutit-dashboard",
+        "label": "แดชบอร์ด",
+        "icon": "ri-dashboard-line",
+        "href": "/dashboard"
+    },
+    {
+        "type": "link",
+        "id": "donutit-pos",
+        "label": "ขายหน้าร้าน (POS)",
+        "icon": "ri-store-2-line",
+        "href": "/pos"
+    },
+    {
+        "type": "link",
+        "id": "donutit-inventory",
+        "label": "สินค้าคงคลัง",
+        "icon": "ri-box-3-line",
+        "href": "/inventory"
+    },
+    {
+        "type": "link",
+        "id": "donutit-pawn",
+        "label": "จำนำ",
+        "icon": "ri-hand-coin-line",
+        "href": "/pawn"
+    },
+    {
+        "type": "link",
+        "id": "donutit-messenger",
+        "label": "ส่งของ",
+        "icon": "ri-truck-line",
+        "href": "/messenger"
+    },
+    {
+        "type": "link",
+        "id": "donutit-cashflow",
+        "label": "กระทบยอด",
+        "icon": "ri-book-read-line",
+        "href": "/cashflow-ledger"
+    },
+    {
+        "type": "link",
+        "id": "donutit-customers",
+        "label": "ลูกค้า",
+        "icon": "ri-user-heart-line",
+        "href": "/customers"
+    },
+    {
+        "type": "link",
+        "id": "donutit-hr",
+        "label": "บุคลากร",
+        "icon": "ri-team-line",
+        "href": "/hr"
+    },
+    {
+        "type": "link",
+        "id": "donutit-settings",
+        "label": "ตั้งค่า",
+        "icon": "ri-settings-3-line",
+        "href": "/settings"
+    },
+    {
+        "type": "category",
+        "label": "CLEOPATRA DEMO"
+    },
+    {
         "type": "menu",
         "id": "dashboards",
         "label": "Dashboards",

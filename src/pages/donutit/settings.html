@@ -1,0 +1,24 @@
+{{> start title="ตั้งค่า — DonutiT" hidePageHeader=true }}
+
+<div class="p-4 lg:p-6">
+    {{> donutit/module-shell
+        moduleId="settings"
+        icon="ri-settings-3-line"
+        title="ตั้งค่าระบบ"
+        subtitle="ร้าน · สิทธิ์ · ธีม"
+        description="ตั้งค่าร้าน สิทธิ์ผู้ใช้ และการแสดงผล — Wave 0"
+    }}
+
+    <div class="mt-6 rounded-xl border bg-card p-6">
+        <h2 class="font-medium mb-3">บัญชีทดสอบ (dev)</h2>
+        <div class="text-sm text-muted-foreground space-y-1">
+            <p>owner@donutit.local — Owner</p>
+            <p>manager@donutit.local — Manager</p>
+            <p>staff@donutit.local — Staff</p>
+            <p>hr@donutit.local — HR</p>
+            <p class="pt-2">รหัสผ่าน: <code class="bg-muted px-1 rounded">donutit-dev</code></p>
+        </div>
+    </div>
+</div>
+
+{{> end }}

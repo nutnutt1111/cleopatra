@@ -7,8 +7,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "tsx server/index.ts",
+    "dev:all": "sh -c 'tsx server/index.ts & vite'",
     "build": "vite build",
     "preview": "vite preview --port 3003",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
+    "postinstall": "prisma generate",
     "quality:smoke": "bash scripts/quality/route-smoke.sh",
     "quality:audit": "bash scripts/quality/run-all.sh",
     "quality:audit:extended": "bash scripts/quality/run-all.sh; bash scripts/quality/run-extended.sh | tee -a \"docs/quality/reports/audit-latest-extended.md\"",
@@ -30,21 +36,42 @@
   ],
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.9.3",
     "lightningcss": "^1.28.2",
+    "prisma": "^7.8.0",
     "sass": "^1.97.2",
     "svgo": "^4.0.0",
     "tailwindcss": "^4.1.18",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
     "vite": "^6.0.5",
     "vite-plugin-handlebars": "^2.0.0",
     "vite-plugin-image-optimizer": "^1.1.8"
   },
   "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "@tailwindcss/postcss": "^4.1.18",
     "apexcharts": "^5.3.6",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.10.0",
     "chart.js": "^4.4.7",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "lucide-static": "^0.563.0",
     "postcss": "^8.5.6",
     "sharp": "^0.34.5",
     "shiki": "^3.21.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

@@ -1,0 +1,44 @@
+// DonutiT Cleopatra — Wave 0 schema baseline
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  STAFF
+  HR
+}
+
+model Store {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+
+  @@index([code])
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  name             String
+  passwordHash     String
+  role             Role     @default(STAFF)
+  canExportReports Boolean  @default(false)
+  storeId          String
+  store            Store    @relation(fields: [storeId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([role])
+}

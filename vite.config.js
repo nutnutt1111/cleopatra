@@ -6,6 +6,7 @@ import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { readdirSync, readFileSync } from 'fs';
+import { donutitRoutesPlugin } from './vite.donutit-routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -107,6 +108,7 @@ export default defineConfig(({ command }) => {
         base,
 
         plugins: [
+            donutitRoutesPlugin(resolve(__dirname, 'dist')),
             handlebars({
                 partialDirectory: getPartialDirectories(),
                 context: {
@@ -145,6 +147,12 @@ export default defineConfig(({ command }) => {
             port: Number(process.env.PORT) || 3003,
             open: false,
             https: false,
+            proxy: {
+                '/api': {
+                    target: `http://localhost:${process.env.API_PORT || 3004}`,
+                    changeOrigin: true,
+                },
+            },
         },
 
         build: {

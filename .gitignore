@@ -1,5 +1,12 @@
 node_modules
 package-lock.json
 .agent
-dist/docs/quality/reports/*.md
+dist
+docs/quality/reports/*.md
 !docs/quality/reports/.gitkeep
+/src/generated/prisma
+.env
+dev.db
+dev.db-journal
+prisma/dev.db
+prisma/dev.db-journal
