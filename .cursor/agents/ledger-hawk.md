@@ -57,6 +57,10 @@ Return `BLOCK` if:
 | Daily close lock | No mutation of ledger/payments on or before locked close date |
 | Void symmetry | Void creates reversing entries; original rows marked voided |
 
+## Target Environment
+
+**Dev server:** `http://localhost:3003` — ตรวจ flow การเงินผ่าน API/UI บนเซิร์ฟเวอร์นี้
+
 ## When to Invoke
 
 - Any PR touching payment, ledger, stock, or balance fields

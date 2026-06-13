@@ -45,6 +45,10 @@ npx prisma db push --force-reset
 npx prisma db seed
 ```
 
+## Target Environment
+
+**Dev server:** `http://localhost:3003` — seed ใช้ร่วมกับ regression ที่ `yarn quality:audit`
+
 ## When to Invoke
 
 - After schema changes that affect test flows

@@ -142,7 +142,7 @@ export default defineConfig(({ command }) => {
         publicDir: resolve(__dirname, 'public'),
 
         server: {
-            port: 8081,
+            port: Number(process.env.PORT) || 3003,
             open: false,
             https: false,
         },

@@ -42,6 +42,10 @@ Use status markers:
 - `[x]` — done with evidence
 - `[!]` — blocked or regressed
 
+## Target Environment
+
+**Dev server:** `http://localhost:3003`
+
 ## When to Invoke
 
 - After feature PRs merge

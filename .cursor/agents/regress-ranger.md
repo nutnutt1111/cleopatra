@@ -46,16 +46,27 @@ Build check:
 yarn build
 ```
 
-Route smoke (with server running on default port):
+**Target:** `http://localhost:3003` (DonutiT Cleopatra dev server)
+
+Route smoke:
 
 ```bash
-for route in / /dashboard /pos /inventory /pawn /messenger /cashflow-ledger /settings /customers /hr; do
-  code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:5173${route}")
-  echo "${route} → ${code}"
-done
+yarn quality:smoke
+# หรือ
+QUALITY_BASE_URL=http://localhost:3003 bash scripts/quality/route-smoke.sh
 ```
 
-If the app uses a different base path or port, document the actual values in output.
+Full audit (all 7 agents):
+
+```bash
+yarn quality:audit
+```
+
+Override base URL if needed:
+
+```bash
+QUALITY_BASE_URL=http://localhost:3003 yarn quality:audit
+```
 
 Business-flow checks require seeded data — coordinate with `seed-smith` if fixtures are missing.
 

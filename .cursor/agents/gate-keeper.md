@@ -49,6 +49,10 @@ Return `BLOCK` if:
 
 UI-only hiding (CSS, conditional render) is **not** sufficient. Every sensitive route and Server Action must call the guard.
 
+## Target Environment
+
+**Dev server:** `http://localhost:3003` — ทดสอบ role ผ่าน API routes บนเซิร์ฟเวอร์นี้
+
 ## When to Invoke
 
 - New API routes or Server Actions

@@ -53,6 +53,18 @@ Stop merge when any agent returns:
 - `docs/roadmap.md` — planned waves and dependencies
 - `docs/quality/README.md` — human index for this system
 
+## Target Environment
+
+**Dev server:** [http://localhost:3003](http://localhost:3003)
+
+```bash
+yarn dev          # starts Vite on port 3003
+yarn quality:audit   # run all 7 agents → docs/quality/reports/
+yarn quality:smoke   # route smoke only (regress-ranger)
+```
+
+Config: `scripts/quality/config.sh` — override with `QUALITY_BASE_URL`.
+
 ## Invoking a Subagent
 
 In Cursor, launch a subagent with the agent file as context:

@@ -50,6 +50,10 @@ Store staff use these flows under time pressure. Failures here are **BLOCK USABI
 | Customers | Credit balance visible, payment entry simple |
 | HR | Payroll only visible to authorized roles; no accidental exposure |
 
+## Target Environment
+
+**Dev server:** `http://localhost:3003` — ตรวจ UX บนหน้าจอพนักงานที่รันบนพอร์ตนี้
+
 ## When to Invoke
 
 - After UI PRs for operational modules

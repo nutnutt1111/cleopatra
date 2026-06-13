@@ -40,6 +40,10 @@ Shared-risk file patterns to scan:
 | Auth | `**/auth/**`, `assertRole`, middleware |
 | Shared UI | `src/components/ui/**`, `src/components/widgets/**` |
 
+## Target Environment
+
+**Dev server:** `http://localhost:3003` — รัน `yarn quality:audit` หลังเปิดเซิร์ฟเวอร์
+
 ## When to Invoke
 
 - Before any multi-file or cross-module task starts

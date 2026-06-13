@@ -14,9 +14,17 @@ Seven specialized subagents keep delivery safe across financial, permission, reg
 | 6 | [doc-janitor](../../.cursor/agents/doc-janitor.md) | SYNCED · PARTIAL SYNC · **BLOCK DOC CLAIM** |
 | 7 | [ux-patrol](../../.cursor/agents/ux-patrol.md) | PASS · PASS WITH NITS · **BLOCK USABILITY** |
 
-## Orchestration
+## Target Environment
 
-See [AGENTS.md](../../AGENTS.md) for workflow order and blocking rules.
+**Dev server:** [http://localhost:3003](http://localhost:3003)
+
+```bash
+yarn dev              # เปิดเซิร์ฟเวอร์พอร์ต 3003
+yarn quality:audit    # รันเอเจนต์ทั้ง 7 → docs/quality/reports/
+yarn quality:smoke    # smoke test route อย่างเดียว
+```
+
+Config: `scripts/quality/config.sh`
 
 ## Shared Docs
 
