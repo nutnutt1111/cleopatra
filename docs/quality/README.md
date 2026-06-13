@@ -20,9 +20,14 @@ Seven specialized subagents keep delivery safe across financial, permission, reg
 
 ```bash
 yarn dev                    # เปิดเซิร์ฟเวอร์พอร์ต 3003
-yarn quality:audit          # รันเอเจนต์ทั้ง 7
-yarn quality:audit:extended # audit + ตรวจเพิ่ม (build, sidebar, ภาษาไทย, UX)
-yarn quality:smoke          # smoke test route อย่างเดียว
+yarn dev:api                # API พอร์ต 3004
+yarn quality:hardening      # Wave 5 gate (route + api + seed + ux)
+yarn quality:audit          # รันเอเจนต์ทั้ง 7 + hardening
+yarn quality:audit:extended # audit + ตรวจเพิ่ม (build, sidebar)
+yarn quality:smoke          # route smoke อย่างเดียว
+yarn quality:api            # API flow smoke
+yarn quality:seed           # seed-smith verification
+yarn quality:ux             # ux-patrol static + live checks
 ```
 
 Config: `scripts/quality/config.sh`

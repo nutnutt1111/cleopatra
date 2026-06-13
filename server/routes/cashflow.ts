@@ -220,7 +220,7 @@ export function createCashflowRouter(
   router.get('/audit', requireAuth, async (req, res) => {
     try {
       const user = (req as AuthedRequest).user;
-      assertRole(user, 'OWNER', 'MANAGER');
+      assertRole(user, 'OWNER');
 
       const logs = await prisma.auditLog.findMany({
         where: { storeId: user.storeId },

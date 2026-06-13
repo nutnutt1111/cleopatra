@@ -60,6 +60,7 @@ Stop merge when any agent returns:
 ```bash
 yarn dev          # starts Vite on port 3003
 yarn quality:audit   # run all 7 agents → docs/quality/reports/
+yarn quality:hardening  # Wave 5 gate (route + api + seed + ux)
 yarn quality:smoke   # route smoke only (regress-ranger)
 ```
 

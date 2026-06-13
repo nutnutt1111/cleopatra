@@ -73,7 +73,7 @@ function handleAuthError(err: unknown, res: express.Response) {
 }
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'donutit-cleopatra-api', wave: 4 });
+  res.json({ ok: true, service: 'donutit-cleopatra-api', wave: 5 });
 });
 
 app.post('/api/auth/login', async (req, res) => {

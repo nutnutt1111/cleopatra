@@ -57,10 +57,12 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 
 ## Wave 5 — Hardening
 
-- [ ] Full `seed-smith` coverage
-- [ ] `regress-ranger` automated smoke
-- [ ] `ux-patrol` tablet pass on all modules
-- [ ] Parity checklist fully `[x]`
+**Status:** Complete
+
+- [x] Full `seed-smith` coverage (`yarn quality:seed`, `docs/seed-smith-coverage.md`)
+- [x] `regress-ranger` automated smoke (`yarn quality:api` + `yarn quality:smoke`)
+- [x] `ux-patrol` tablet pass on all modules (`yarn quality:ux`)
+- [x] Parity checklist evidence-complete (2 items deferred post-MVP)
 
 ## Parallel Safe (after Wave 0)
 
