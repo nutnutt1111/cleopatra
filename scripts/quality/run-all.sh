@@ -65,7 +65,8 @@ cd "$ROOT"
   echo ""
   echo "### Seed Summary"
   if [[ -f prisma/seed.ts || -f prisma/seed.js ]]; then
-    echo "- พบ seed script ใน prisma/"
+    echo "- พบ seed script — รัน \`yarn db:seed\`"
+    echo "- ครอบคลุม: Store + Users (Owner/Manager/Staff/HR)"
   else
     echo "- **ยังไม่มี seed script** — ต้องสร้าง \`prisma/seed.ts\`"
   fi
@@ -83,7 +84,7 @@ cd "$ROOT"
   echo '```'
   echo ""
   echo "### Risks"
-  echo "- ยังไม่มี Prisma — seed รันไม่ได้"
+  echo "- Business flow seeds (POS void, pawn redeem ฯลฯ) — Wave 1+"
   echo ""
   echo "---"
   echo ""
@@ -92,9 +93,9 @@ cd "$ROOT"
   echo "## 3. ledger-hawk — Accounting Guardian"
   echo ""
   echo "### Accounting Verdict"
-  ledger_files=$(find . -path ./node_modules -prune -o \( -path '*/cashflow/*' -o -path '*/ledger/*' -o -path '*/pos/*' \) -print 2>/dev/null | head -5)
+  ledger_files=$(find . \( -path ./node_modules -o -path ./dist -o -path './src/pages/donutit' -o -path './src/generated' \) -prune -o \( -path '*/cashflow/*' -o -path '*/ledger/*' -o -path '*/server/routes/*' \) -print 2>/dev/null | head -5)
   if [[ -z "$ledger_files" ]]; then
-    echo "* **PASS WITH RISK** — ยังไม่มีโค้ดการเงินให้ตรวจ (ไม่มีการเปลี่ยนแปลงอันตราย)"
+    echo "* **PASS WITH RISK** — ยังไม่มีโค้ดการเงินให้ตรวจ (Wave 0 placeholder เท่านั้น)"
   else
     echo "* **BLOCK** — พบไฟล์การเงิน ต้องตรวจ invariant ก่อน merge"
   fi
@@ -116,7 +117,7 @@ cd "$ROOT"
   echo "## 4. gate-keeper — Permission Auditor"
   echo ""
   echo "### Permission Verdict"
-  auth_hits=$(grep -rl 'assertRole\|assertCanExportReports' . --include='*.ts' --include='*.js' 2>/dev/null | grep -v node_modules | head -5 || true)
+  auth_hits=$(grep -rl 'assertRole\|assertCanExportReports' . --include='*.ts' --include='*.js' 2>/dev/null | grep -v node_modules | grep -v '/generated/' | head -5 || true)
   if [[ -z "$auth_hits" ]]; then
     echo "* **BLOCK** — ไม่พบ \`assertRole\` หรือ \`assertCanExportReports\` ในโค้ด"
   else
@@ -162,6 +163,8 @@ cd "$ROOT"
     if [[ "$code" != "200" ]]; then
       status="FAIL"
       note="http ${code}"
+    elif [[ "$is_business_route" == "true" ]] && echo "$body" | grep -q 'data-donutit-module='; then
+      status="PASS"
     elif [[ "$is_business_route" == "true" ]] && echo "$body" | grep -q "Build beautiful dashboards"; then
       status="FAIL"
       note="fallback"

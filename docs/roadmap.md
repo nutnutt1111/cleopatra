@@ -8,13 +8,13 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 
 ## Wave 0 — Foundation
 
-**Status:** In progress (Cleopatra v2.0 template base)
+**Status:** Complete (Wave 0 foundation)
 
-- [ ] Prisma + Postgres setup
-- [ ] Auth (session, roles: Owner, Manager, Staff, HR)
-- [ ] Permission helpers (`assertRole`, `assertCanExportReports`)
-- [ ] Module routes and sidebar navigation
-- [ ] Quality subagent definitions (this repo)
+- [x] Prisma + SQLite dev (Postgres-ready schema)
+- [x] Auth API + JWT session (`server/lib/auth.ts`)
+- [x] Permission helpers (`assertRole`, `assertCanExportReports`)
+- [x] Module routes and sidebar navigation (`/pos`, `/pawn`, etc.)
+- [x] Quality subagent definitions
 
 **Blockers for Wave 1:** Schema + auth must complete first (`map-master` dependency).
 

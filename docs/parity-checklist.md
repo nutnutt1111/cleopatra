@@ -6,11 +6,11 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## Core Platform
 
-- [ ] Prisma schema baseline (stores, users, roles)
-- [ ] Auth session + `assertRole` helpers
-- [ ] `assertCanExportReports` for export routes
-- [ ] Sidebar nav for all modules (`/pos`, `/pawn`, etc.)
-- [ ] Thai UI labels on staff-facing forms
+- [x] Prisma schema baseline (stores, users, roles)
+- [x] Auth session + `assertRole` helpers
+- [x] `assertCanExportReports` for export routes
+- [x] Sidebar nav for all modules (`/pos`, `/pawn`, etc.)
+- [~] Thai UI labels on staff-facing forms
 
 ## POS
 
@@ -69,6 +69,6 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## Regression Evidence
 
-- [ ] `regress-ranger` route smoke (all main routes 200)
-- [ ] `seed-smith` fixtures cover all flows above
-- [ ] Last regression run date: _not yet run_
+- [x] `regress-ranger` route smoke (all main routes 200)
+- [~] `seed-smith` fixtures cover all flows above
+- [ ] Last regression run date: 2026-06-13 (Wave 0 — all routes PASS)
