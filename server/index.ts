@@ -6,14 +6,14 @@ import bcrypt from 'bcryptjs';
 import 'dotenv/config';
 import { prisma } from './lib/prisma.js';
 import {
-  assertAction,
   assertCanExportReports,
-  assertRole,
   AuthError,
   toAuthUser,
   type AuthUser,
 } from './lib/auth.js';
 import { createCashflowRouter, handleLedgerError } from './routes/cashflow.js';
+import { createPosRouter, handlePosError } from './routes/pos.js';
+import { createInventoryRouter, handleInventoryError } from './routes/inventory.js';
 
 const app = express();
 const PORT = Number(process.env.API_PORT) || 3004;
@@ -54,6 +54,8 @@ function requireAuth(req: express.Request, res: express.Response, next: express.
 
 function handleAuthError(err: unknown, res: express.Response) {
   if (handleLedgerError(err, res)) return;
+  if (handlePosError(err, res)) return;
+  if (handleInventoryError(err, res)) return;
   if (err instanceof AuthError) {
     res.status(err.status).json({ error: err.message });
     return;
@@ -63,7 +65,7 @@ function handleAuthError(err: unknown, res: express.Response) {
 }
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'donutit-cleopatra-api', wave: 1 });
+  res.json({ ok: true, service: 'donutit-cleopatra-api', wave: 2 });
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -94,17 +96,6 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
   res.json({ user });
 });
 
-app.post('/api/pos/void', requireAuth, (req, res) => {
-  try {
-    const user = (req as express.Request & { user: AuthUser }).user;
-    assertRole(user, 'OWNER', 'MANAGER');
-    assertAction(user, 'pos:void');
-    res.json({ ok: true, message: 'void endpoint ready (Wave 2)' });
-  } catch (err) {
-    handleAuthError(err, res);
-  }
-});
-
 app.get('/api/reports/export', requireAuth, (req, res) => {
   try {
     const user = (req as express.Request & { user: AuthUser }).user;
@@ -116,6 +107,8 @@ app.get('/api/reports/export', requireAuth, (req, res) => {
 });
 
 app.use('/api/cashflow', createCashflowRouter(requireAuth, handleAuthError));
+app.use('/api/pos', createPosRouter(requireAuth, handleAuthError));
+app.use('/api/inventory', createInventoryRouter(requireAuth, handleAuthError));
 
 app.listen(PORT, () => {
   console.log(`DonutiT API http://localhost:${PORT}`);

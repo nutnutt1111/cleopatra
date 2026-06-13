@@ -31,7 +31,7 @@ async function writeAudit(
   params: {
     storeId: string;
     userId: string;
-    action: 'LEDGER_POST' | 'LEDGER_VOID' | 'DAILY_CLOSE' | 'DAILY_CLOSE_UNLOCK';
+    action: 'LEDGER_POST' | 'LEDGER_VOID' | 'DAILY_CLOSE' | 'DAILY_CLOSE_UNLOCK' | 'POS_SALE' | 'POS_VOID' | 'STOCK_MOVE';
     entityType: string;
     entityId?: string;
     payload?: Record<string, unknown>;
@@ -185,4 +185,30 @@ export async function sumLedgerForDate(storeId: string, date: Date, tx: Tx = pri
   }
 
   return { cashIncome, cashExpense, transferIncome, transferExpense, net: cashIncome - cashExpense + transferIncome - transferExpense };
+}
+
+/** Void all active ledger entries for a reference (e.g. POS bill) */
+export async function voidLedgerByReference(
+  user: AuthUser,
+  referenceType: string,
+  referenceId: string,
+  reason: string,
+  tx: Tx = prisma,
+) {
+  const entries = await tx.ledgerEntry.findMany({
+    where: {
+      storeId: user.storeId,
+      referenceType,
+      referenceId,
+      isVoided: false,
+      reversalOfId: null,
+    },
+  });
+
+  const results = [];
+  for (const entry of entries) {
+    const result = await voidLedgerEntry(entry.id, user, reason, tx);
+    results.push(result);
+  }
+  return results;
 }
