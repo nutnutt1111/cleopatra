@@ -38,9 +38,11 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 
 ## Wave 3 — Pawn + Customers
 
-- [ ] Pawn tickets, interest, redeem
-- [ ] Customer credit / receivables
-- [ ] Installments
+**Status:** Complete
+
+- [x] Pawn tickets, interest, redeem
+- [x] Customer credit / receivables
+- [x] Installments
 
 **Depends on:** Wave 1, Wave 2 (shared stock/ledger)
 

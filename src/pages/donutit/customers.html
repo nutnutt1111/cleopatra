@@ -1,13 +1,104 @@
 {{> start title="ลูกค้า — DonutiT" hidePageHeader=true }}
 
-<div class="p-4 lg:p-6">
-    {{> donutit/module-shell
-        moduleId="customers"
-        icon="ri-user-heart-line"
-        title="ลูกค้า"
-        subtitle="เครดิต · ลูกหนี้"
-        description="ข้อมูลลูกค้า บัญชีเครดิต และยอดลูกหนี้คงค้าง — Wave 3"
-    }}
+<div class="p-4 lg:p-6" data-donutit-module="customers">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-semibold">ลูกค้า</h1>
+            <p class="text-sm text-muted-foreground">เครดิต · ลูกหนี้ · ผ่อนชำระ</p>
+        </div>
+        <span class="text-xs px-3 py-1 rounded-full bg-amber-500/10 text-amber-700">Wave 3</span>
+    </div>
+    <p id="customers-status" class="text-sm text-muted-foreground mb-4"></p>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div class="space-y-4">
+            <div class="rounded-xl border bg-card p-4">
+                <h2 class="font-medium mb-3">เพิ่มลูกค้า</h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-muted-foreground">ชื่อ</label>
+                        <input id="cust-name" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">เบอร์โทร</label>
+                        <input id="cust-phone" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">วงเงินเครดิต (บาท)</label>
+                        <input id="cust-limit" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border text-sm" />
+                    </div>
+                    <button id="btn-add-customer" class="w-full px-4 py-2 text-sm bg-secondary border border-border rounded-lg hover:bg-muted">
+                        บันทึกลูกค้า
+                    </button>
+                </div>
+            </div>
+
+            <div class="rounded-xl border bg-card p-4">
+                <h2 class="font-medium mb-3">ขายเครดิต / ผ่อนชำระ</h2>
+                <div class="space-y-3">
+                    <select id="cust-sale-customer" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"></select>
+                    <div>
+                        <label class="text-xs text-muted-foreground">รายละเอียด</label>
+                        <input id="cust-sale-desc" class="w-full mt-1 px-3 py-2 rounded-lg border border-border text-sm" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-muted-foreground">ยอด (บาท)</label>
+                            <input id="cust-sale-total" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs text-muted-foreground">จำนวนงวด (0=ไม่ผ่อน)</label>
+                            <input id="cust-sale-installments" type="number" min="0" value="0" class="w-full mt-1 px-3 py-2 rounded-lg border border-border text-sm" />
+                        </div>
+                    </div>
+                    <button id="btn-credit-sale" class="w-full px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
+                        บันทึกขายเครดิต
+                    </button>
+                </div>
+            </div>
+
+            <div class="rounded-xl border bg-card p-4">
+                <h2 class="font-medium mb-3">รับชำระลูกหนี้</h2>
+                <div class="space-y-3">
+                    <select id="cust-pay-customer" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"></select>
+                    <select id="cust-pay-sale" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm">
+                        <option value="">— ชำระทั่วไป —</option>
+                    </select>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-muted-foreground">จำนวน (บาท)</label>
+                            <input id="cust-pay-amount" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs text-muted-foreground">ช่องทาง</label>
+                            <select id="cust-pay-channel" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm">
+                                <option value="CASH">เงินสด</option>
+                                <option value="TRANSFER">โอน</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">รายละเอียดโอน</label>
+                        <input id="cust-pay-transfer" class="w-full mt-1 px-3 py-2 rounded-lg border border-border text-sm" />
+                    </div>
+                    <button id="btn-customer-pay" class="w-full px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
+                        บันทึกรับชำระ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-xl border bg-card p-4">
+            <h2 class="font-medium mb-3">รายชื่อลูกค้า</h2>
+            <div id="customers-list" class="max-h-[800px] overflow-y-auto"></div>
+        </div>
+    </div>
 </div>
+
+<script type="module">
+    import { initCustomers } from '/components/widgets/donutit/customers.js';
+    initCustomers();
+    document.addEventListener('page:load', initCustomers);
+</script>
 
 {{> end }}

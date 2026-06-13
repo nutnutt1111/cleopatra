@@ -23,11 +23,11 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## Pawn
 
-- [ ] New pawn ticket
-- [ ] Interest payment
-- [ ] Full redeem
-- [ ] Transfer detail view
-- [ ] Ticket void/reverse (if applicable)
+- [x] New pawn ticket
+- [x] Interest payment
+- [x] Full redeem
+- [x] Transfer detail view
+- [x] Ticket void/reverse (Owner/Manager)
 
 ## Inventory
 
@@ -51,9 +51,9 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## Customers
 
-- [ ] Customer profile
-- [ ] Credit account / receivable balance
-- [ ] Credit sale + partial payment
+- [x] Customer profile
+- [x] Credit account / receivable balance
+- [x] Credit sale + partial payment
 
 ## HR
 
@@ -71,5 +71,5 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 ## Regression Evidence
 
 - [x] `regress-ranger` route smoke (all main routes 200)
-- [~] `seed-smith` fixtures cover all flows above (ledger + daily close seeded)
+- [~] `seed-smith` fixtures cover all flows above (ledger + daily close + pawn + customers seeded)
 - [x] Last regression run date: 2026-06-13 (Wave 1 — ledger API verified)

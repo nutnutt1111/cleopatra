@@ -1,4 +1,4 @@
-// DonutiT Cleopatra — Wave 0–2
+// DonutiT Cleopatra — Wave 0–3
 
 generator client {
   provider = "prisma-client"
@@ -38,6 +38,12 @@ enum AuditAction {
   POS_SALE
   POS_VOID
   STOCK_MOVE
+  PAWN_CREATE
+  PAWN_INTEREST
+  PAWN_REDEEM
+  PAWN_VOID
+  CREDIT_SALE
+  CUSTOMER_PAYMENT
 }
 
 enum TrackingType {
@@ -63,6 +69,29 @@ enum StockMoveReason {
   RECEIVE
 }
 
+enum PawnTicketStatus {
+  ACTIVE
+  REDEEMED
+  VOIDED
+}
+
+enum PawnPaymentType {
+  INTEREST
+  REDEEM
+}
+
+enum CreditSaleStatus {
+  OPEN
+  PAID
+  VOIDED
+}
+
+enum InstallmentStatus {
+  ACTIVE
+  COMPLETED
+  DEFAULTED
+}
+
 model Store {
   id            String          @id @default(cuid())
   name          String
@@ -77,6 +106,9 @@ model Store {
   serialItems   SerialItem[]
   stockMoves    StockMovement[]
   posBills      PosBill[]
+  customers     Customer[]
+  pawnTickets   PawnTicket[]
+  creditSales   CreditSale[]
 
   @@index([code])
 }
@@ -99,6 +131,12 @@ model User {
   posBills         PosBill[]       @relation("PosBillCreatedBy")
   voidedBills      PosBill[]       @relation("PosBillVoidedBy")
   stockMoves       StockMovement[]
+  pawnTickets      PawnTicket[]       @relation("PawnCreatedBy")
+  redeemedTickets  PawnTicket[]       @relation("PawnRedeemedBy")
+  voidedTickets    PawnTicket[]       @relation("PawnVoidedBy")
+  pawnPayments     PawnPayment[]
+  creditSales      CreditSale[]       @relation("CreditSaleCreatedBy")
+  customerPayments CustomerPayment[]
 
   @@index([storeId])
   @@index([role])
@@ -263,6 +301,130 @@ model DailyClose {
   @@unique([storeId, closeDate])
   @@index([storeId, closeDate])
   @@index([isLocked])
+}
+
+model Customer {
+  id               String            @id @default(cuid())
+  storeId          String
+  store            Store             @relation(fields: [storeId], references: [id])
+  name             String
+  phone            String?
+  creditLimitCents Int               @default(0)
+  balanceCents     Int               @default(0)
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  pawnTickets      PawnTicket[]
+  creditSales      CreditSale[]
+  payments         CustomerPayment[]
+
+  @@index([storeId, name])
+  @@index([storeId, phone])
+}
+
+model PawnTicket {
+  id                 String           @id @default(cuid())
+  storeId            String
+  store              Store            @relation(fields: [storeId], references: [id])
+  ticketNumber       String
+  customerId         String?
+  customer           Customer?        @relation(fields: [customerId], references: [id])
+  customerName       String
+  customerPhone      String?
+  itemDescription    String
+  principalCents     Int
+  interestRateBps    Int              @default(200)
+  interestPeriodDays Int              @default(30)
+  nextInterestDueAt  DateTime
+  status             PawnTicketStatus @default(ACTIVE)
+  transferDetail     String?
+  createdById        String
+  createdBy          User             @relation("PawnCreatedBy", fields: [createdById], references: [id])
+  redeemedAt         DateTime?
+  redeemedById       String?
+  redeemedBy         User?            @relation("PawnRedeemedBy", fields: [redeemedById], references: [id])
+  voidedAt           DateTime?
+  voidReason         String?
+  voidedById         String?
+  voidedBy           User?            @relation("PawnVoidedBy", fields: [voidedById], references: [id])
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  payments           PawnPayment[]
+
+  @@unique([storeId, ticketNumber])
+  @@index([storeId, status])
+  @@index([customerId])
+}
+
+model PawnPayment {
+  id             String          @id @default(cuid())
+  ticketId       String
+  ticket         PawnTicket      @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  type           PawnPaymentType
+  amountCents    Int
+  channel        PaymentChannel  @default(CASH)
+  transferDetail String?
+  createdById    String
+  createdBy      User            @relation(fields: [createdById], references: [id])
+  createdAt      DateTime        @default(now())
+
+  @@index([ticketId])
+}
+
+model CreditSale {
+  id             String             @id @default(cuid())
+  storeId        String
+  store          Store              @relation(fields: [storeId], references: [id])
+  customerId     String
+  customer       Customer           @relation(fields: [customerId], references: [id])
+  saleNumber     String
+  description    String
+  totalCents     Int
+  paidCents      Int                @default(0)
+  status         CreditSaleStatus   @default(OPEN)
+  createdById    String
+  createdBy      User               @relation("CreditSaleCreatedBy", fields: [createdById], references: [id])
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  installment    InstallmentPlan?
+  payments       CustomerPayment[]
+
+  @@unique([storeId, saleNumber])
+  @@index([storeId, status])
+  @@index([customerId])
+}
+
+model InstallmentPlan {
+  id                     String            @id @default(cuid())
+  creditSaleId           String            @unique
+  creditSale             CreditSale        @relation(fields: [creditSaleId], references: [id], onDelete: Cascade)
+  installmentCount       Int
+  installmentAmountCents Int
+  paidInstallments       Int               @default(0)
+  nextDueDate            DateTime
+  status                 InstallmentStatus @default(ACTIVE)
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+
+  @@index([status, nextDueDate])
+}
+
+model CustomerPayment {
+  id             String         @id @default(cuid())
+  customerId     String
+  customer       Customer       @relation(fields: [customerId], references: [id])
+  creditSaleId   String?
+  creditSale     CreditSale?    @relation(fields: [creditSaleId], references: [id])
+  amountCents    Int
+  channel        PaymentChannel @default(CASH)
+  transferDetail String?
+  note           String?
+  createdById    String
+  createdBy      User           @relation(fields: [createdById], references: [id])
+  createdAt      DateTime       @default(now())
+
+  @@index([customerId, createdAt])
+  @@index([creditSaleId])
 }
 
 model AuditLog {
