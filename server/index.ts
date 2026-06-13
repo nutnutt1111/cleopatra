@@ -68,6 +68,10 @@ function handleAuthError(err: unknown, res: express.Response) {
     res.status(err.status).json({ error: err.message });
     return;
   }
+  if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
+    res.status(409).json({ error: 'ข้อมูลซ้ำ กรุณาลองใหม่' });
+    return;
+  }
   console.error(err);
   res.status(500).json({ error: 'เกิดข้อผิดพลาดภายในระบบ' });
 }
@@ -102,6 +106,11 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/auth/me', requireAuth, (req, res) => {
   const user = (req as express.Request & { user: AuthUser }).user;
   res.json({ user });
+});
+
+app.post('/api/auth/logout', (_req, res) => {
+  res.clearCookie('token');
+  res.json({ ok: true });
 });
 
 app.get('/api/reports/export', requireAuth, (req, res) => {

@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/config.sh"
 
 API="$QUALITY_API_URL"
-PASS="${QUALITY_DEV_PASSWORD}"
+PASS="${QUALITY_DEV_PASSWORD:-donutit-dev}"
 pass=0
 fail=0
 
@@ -103,6 +103,23 @@ if [[ -n "$phone_id" && -n "$serial_id" ]]; then
     "$API/api/pos/bills")
   assert_http "staff discount blocked" "403" "$code"
 fi
+
+# Manager can void POS bill (no nested-tx crash)
+bill_id=$(curl -s -H "Authorization: Bearer $OWNER" "$API/api/pos/bills" \
+  | python3 -c "import sys,json; d=json.load(sys.stdin); print(next((b['id'] for b in d.get('bills',[]) if b.get('status')=='COMPLETED'),''))")
+if [[ -n "$bill_id" ]]; then
+  code=$(curl -s -o /tmp/q-void.json -w "%{http_code}" -X POST -H "Authorization: Bearer $MANAGER" -H 'Content-Type: application/json' \
+    -d '{"reason":"quality smoke void"}' \
+    "$API/api/pos/bills/$bill_id/void")
+  assert_http "manager can void bill" "200" "$code"
+  assert_json "void response ok" "d.get('ok') is True" "$(cat /tmp/q-void.json)"
+else
+  echo "SKIP  manager void — no completed bill in seed"
+fi
+
+# Audit payload visible to owner
+audit_body=$(curl -s -H "Authorization: Bearer $OWNER" "$API/api/cashflow/audit")
+assert_json "audit includes payload field" "all('payload' in l for l in d.get('logs',[]))" "$audit_body"
 
 echo ""
 echo "Summary: ${pass} pass, ${fail} fail"

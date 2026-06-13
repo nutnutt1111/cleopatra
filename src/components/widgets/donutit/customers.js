@@ -1,4 +1,5 @@
-import { apiFetch, getAuthToken } from './donutit-api.js';
+import { apiFetch, isLoggedIn } from './donutit-api.js';
+import { escapeHtml } from './escape-html.js';
 
 let customersCache = [];
 
@@ -12,7 +13,7 @@ async function loadCustomers() {
 
 function renderSelects() {
   const opts = '<option value="">-- เลือกลูกค้า --</option>' +
-    customersCache.map((c) => `<option value="${c.id}">${c.name} (ค้าง ${c.balanceBaht})</option>`).join('');
+    customersCache.map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)} (ค้าง ${escapeHtml(c.balanceBaht)})</option>`).join('');
 
   ['cust-sale-customer', 'cust-pay-customer'].forEach((id) => {
     const el = document.getElementById(id);
@@ -30,7 +31,7 @@ function onPayCustomerChange() {
   if (!customer) return;
 
   customer.openSales.forEach((s) => {
-    saleSel.innerHTML += `<option value="${s.id}">${s.saleNumber} — ค้าง ${s.remainingBaht} บาท</option>`;
+    saleSel.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.saleNumber)} — ค้าง ${escapeHtml(s.remainingBaht)} บาท</option>`;
   });
 }
 
@@ -46,19 +47,19 @@ function renderList() {
   el.innerHTML = customersCache
     .map(
       (c) => `<div class="border border-border rounded-lg p-3 mb-2">
-      <p class="font-medium text-sm">${c.name}</p>
-      <p class="text-xs text-muted-foreground">${c.phone || '—'} · วงเงิน ${c.creditLimitBaht} บาท</p>
-      <p class="text-sm mt-1">ลูกหนี้คงค้าง <strong class="${c.balanceCents > 0 ? 'text-amber-700' : ''}">${c.balanceBaht}</strong> บาท</p>
+      <p class="font-medium text-sm">${escapeHtml(c.name)}</p>
+      <p class="text-xs text-muted-foreground">${escapeHtml(c.phone || '—')} · วงเงิน ${escapeHtml(c.creditLimitBaht)} บาท</p>
+      <p class="text-sm mt-1">ลูกหนี้คงค้าง <strong class="${c.balanceCents > 0 ? 'text-amber-700' : ''}">${escapeHtml(c.balanceBaht)}</strong> บาท</p>
       ${
         c.openSales.length
           ? `<div class="mt-2 space-y-1">
           ${c.openSales
             .map(
               (s) => `<p class="text-xs border-l-2 border-primary pl-2">
-              ${s.saleNumber}: ${s.description} — ค้าง ${s.remainingBaht} บาท
+              ${escapeHtml(s.saleNumber)}: ${escapeHtml(s.description)} — ค้าง ${escapeHtml(s.remainingBaht)} บาท
               ${
                 s.installment
-                  ? `<br/>ผ่อน ${s.installment.paidInstallments}/${s.installment.installmentCount} งวด · งวดละ ${s.installment.installmentAmountBaht} · ครบ ${new Date(s.installment.nextDueDate).toLocaleDateString('th-TH')}`
+                  ? `<br/>ผ่อน ${s.installment.paidInstallments}/${s.installment.installmentCount} งวด · งวดละ ${escapeHtml(s.installment.installmentAmountBaht)} · ครบ ${new Date(s.installment.nextDueDate).toLocaleDateString('th-TH')}`
                   : ''
               }
             </p>`,
@@ -69,7 +70,7 @@ function renderList() {
       }
       ${
         c.recentPayments.length
-          ? `<p class="text-xs text-muted-foreground mt-2">ชำระล่าสุด: ${c.recentPayments.map((p) => `${p.amountBaht} (${p.channel})`).join(', ')}</p>`
+          ? `<p class="text-xs text-muted-foreground mt-2">ชำระล่าสุด: ${c.recentPayments.map((p) => `${escapeHtml(p.amountBaht)} (${escapeHtml(p.channel)})`).join(', ')}</p>`
           : ''
       }
     </div>`,
@@ -77,9 +78,9 @@ function renderList() {
     .join('');
 }
 
-export function initCustomers() {
+export async function initCustomers() {
   if (!document.querySelector('[data-donutit-module="customers"]')) return;
-  if (!getAuthToken()) {
+  if (!(await isLoggedIn())) {
     document.getElementById('customers-status')?.replaceChildren(
       document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
     );

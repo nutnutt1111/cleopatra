@@ -1,6 +1,6 @@
 import { prisma } from './prisma.js';
 import type { AuthUser } from './auth.js';
-import { assertAction, assertRole } from './auth.js';
+import { assertRole } from './auth.js';
 import {
   assertDateNotLocked,
   LedgerError,
@@ -8,7 +8,22 @@ import {
   voidLedgerByReference,
 } from './ledger.js';
 import { toDateOnly } from './ledger-utils.js';
-import type { PaymentChannel } from '../../src/generated/prisma/client.js';
+import { withUniqueRetry, nextDailySequence } from './sequence.js';
+import type { PaymentChannel, Prisma } from '../../src/generated/prisma/client.js';
+
+type Tx = Prisma.TransactionClient;
+
+function todayPrefix(label: string): string {
+  const today = new Date();
+  return `${label}-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
+}
+
+export function overdueInterestPeriods(ticket: { nextInterestDueAt: Date; interestPeriodDays: number }, now: Date): number {
+  if (now <= ticket.nextInterestDueAt) return 0;
+  const msPerDay = 86_400_000;
+  const daysLate = Math.max(0, Math.floor((now.getTime() - ticket.nextInterestDueAt.getTime()) / msPerDay));
+  return Math.max(1, Math.ceil(daysLate / ticket.interestPeriodDays));
+}
 
 export class PawnError extends Error {
   status: number;
@@ -29,13 +44,11 @@ export function interestPerPeriodCents(principalCents: number, interestRateBps: 
   return Math.round((principalCents * interestRateBps) / 10000);
 }
 
-async function nextTicketNumber(storeId: string): Promise<string> {
-  const today = new Date();
-  const prefix = `PAWN-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
-  const count = await prisma.pawnTicket.count({
-    where: { storeId, ticketNumber: { startsWith: prefix } },
-  });
-  return `${prefix}-${String(count + 1).padStart(4, '0')}`;
+async function nextTicketNumber(tx: Tx, storeId: string): Promise<string> {
+  const prefix = todayPrefix('PAWN');
+  return nextDailySequence(tx, prefix, async (t) =>
+    t.pawnTicket.count({ where: { storeId, ticketNumber: { startsWith: prefix } } }),
+  );
 }
 
 export async function createPawnTicket(
@@ -71,11 +84,13 @@ export async function createPawnTicket(
   const interestRateBps = input.interestRateBps ?? 200;
   const interestPeriodDays = input.interestPeriodDays ?? 30;
   const channel = input.channel ?? 'CASH';
-  const ticketNumber = await nextTicketNumber(user.storeId);
   const nextInterestDueAt = addDays(entryDate, interestPeriodDays);
 
-  return prisma.$transaction(async (tx) => {
-    const ticket = await tx.pawnTicket.create({
+  return withUniqueRetry(() =>
+    prisma.$transaction(async (tx) => {
+      const ticketNumber = await nextTicketNumber(tx, user.storeId);
+
+      const ticket = await tx.pawnTicket.create({
       data: {
         storeId: user.storeId,
         ticketNumber,
@@ -123,7 +138,8 @@ export async function createPawnTicket(
     });
 
     return ticket;
-  });
+    }),
+  );
 }
 
 export async function payPawnInterest(
@@ -213,10 +229,9 @@ export async function redeemPawnTicket(
   if (ticket.status !== 'ACTIVE') throw new PawnError('ตั๋วนี้ไถ่ถอนแล้วหรือถูกยกเลิก');
 
   const now = new Date();
-  let extraInterestCents = 0;
-  if (now > ticket.nextInterestDueAt) {
-    extraInterestCents = interestPerPeriodCents(ticket.principalCents, ticket.interestRateBps);
-  }
+  const overduePeriods = overdueInterestPeriods(ticket, now);
+  const extraInterestCents =
+    overduePeriods * interestPerPeriodCents(ticket.principalCents, ticket.interestRateBps);
 
   const amountCents = ticket.principalCents + extraInterestCents;
   const entryDate = toDateOnly(new Date());
@@ -282,7 +297,6 @@ export async function redeemPawnTicket(
 
 export async function voidPawnTicket(user: AuthUser, ticketId: string, reason: string) {
   assertRole(user, 'OWNER', 'MANAGER');
-  assertAction(user, 'pos:void');
 
   if (!reason.trim()) throw new PawnError('กรุณาระบุเหตุผลในการยกเลิกตั๋ว');
 

@@ -426,6 +426,7 @@ model InstallmentPlan {
   creditSale             CreditSale        @relation(fields: [creditSaleId], references: [id], onDelete: Cascade)
   installmentCount       Int
   installmentAmountCents Int
+  installmentPeriodDays  Int               @default(30)
   paidInstallments       Int               @default(0)
   nextDueDate            DateTime
   status                 InstallmentStatus @default(ACTIVE)

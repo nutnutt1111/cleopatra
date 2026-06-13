@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/config.sh"
 
 API="$QUALITY_API_URL"
-PASS="${QUALITY_DEV_PASSWORD}"
+PASS="${QUALITY_DEV_PASSWORD:-donutit-dev}"
 pass=0
 fail=0
 

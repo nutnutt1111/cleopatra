@@ -9,6 +9,7 @@ import {
 } from '../lib/auth.js';
 import { createEmployee, createPayrollRun, HrError, payPayrollRun } from '../lib/hr.js';
 import { formatBaht } from '../lib/ledger-utils.js';
+import { parsePagination } from '../lib/pagination.js';
 import { prisma } from '../lib/prisma.js';
 
 type AuthedRequest = { user: AuthUser };
@@ -27,9 +28,12 @@ export function createHrRouter(
       }
 
       const showSalary = canViewSalary(user);
+      const { limit, offset } = parsePagination(req.query);
       const employees = await prisma.employee.findMany({
         where: { storeId: user.storeId, isActive: true },
         orderBy: { name: 'asc' },
+        skip: offset,
+        take: limit,
       });
 
       res.json({
@@ -45,6 +49,8 @@ export function createHrRouter(
         })),
         canManage: user.role === 'OWNER' || user.role === 'HR',
         canViewPayroll: showSalary,
+        limit,
+        offset,
       });
     } catch (err) {
       handleError(err, res);
@@ -89,6 +95,7 @@ export function createHrRouter(
     try {
       const user = (req as AuthedRequest).user;
       assertHrPayrollAccess(user);
+      const { limit, offset } = parsePagination(req.query, { limit: 20, max: 50 });
 
       const runs = await prisma.payrollRun.findMany({
         where: { storeId: user.storeId },
@@ -97,7 +104,8 @@ export function createHrRouter(
           createdBy: { select: { name: true } },
         },
         orderBy: { createdAt: 'desc' },
-        take: 20,
+        skip: offset,
+        take: limit,
       });
 
       res.json({
@@ -117,6 +125,8 @@ export function createHrRouter(
             amountBaht: formatBaht(l.amountCents),
           })),
         })),
+        limit,
+        offset,
       });
     } catch (err) {
       handleError(err, res);

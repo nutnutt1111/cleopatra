@@ -1,10 +1,19 @@
 import { prisma } from './prisma.js';
 import type { AuthUser } from './auth.js';
-import { assertAction, assertRole } from './auth.js';
+import { assertRole } from './auth.js';
 import { deductStockForSale, restoreStockOnVoid } from './inventory.js';
 import { assertDateNotLocked, LedgerError, postLedgerEntry, voidLedgerByReference } from './ledger.js';
 import { toDateOnly } from './ledger-utils.js';
+import { withUniqueRetry, nextDailySequence } from './sequence.js';
 import type { PaymentChannel } from '../../src/generated/prisma/client.js';
+import type { Prisma } from '../../src/generated/prisma/client.js';
+
+type Tx = Prisma.TransactionClient;
+
+function todayPrefix(label: string): string {
+  const today = new Date();
+  return `${label}-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
+}
 
 export class PosError extends Error {
   status: number;
@@ -26,13 +35,11 @@ export type PaymentInput = {
   amountCents: number;
 };
 
-async function nextBillNumber(storeId: string): Promise<string> {
-  const today = new Date();
-  const prefix = `POS-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
-  const count = await prisma.posBill.count({
-    where: { storeId, billNumber: { startsWith: prefix } },
-  });
-  return `${prefix}-${String(count + 1).padStart(4, '0')}`;
+async function nextBillNumber(tx: Tx, storeId: string): Promise<string> {
+  const prefix = todayPrefix('POS');
+  return nextDailySequence(tx, prefix, async (t) =>
+    t.posBill.count({ where: { storeId, billNumber: { startsWith: prefix } } }),
+  );
 }
 
 export async function createPosBill(
@@ -82,10 +89,11 @@ export async function createPosBill(
   const entryDate = toDateOnly(new Date());
   await assertDateNotLocked(user.storeId, entryDate);
 
-  const billNumber = await nextBillNumber(user.storeId);
+  return withUniqueRetry(() =>
+    prisma.$transaction(async (tx) => {
+      const billNumber = await nextBillNumber(tx, user.storeId);
 
-  return prisma.$transaction(async (tx) => {
-    const bill = await tx.posBill.create({
+      const bill = await tx.posBill.create({
       data: {
         storeId: user.storeId,
         billNumber,
@@ -150,12 +158,12 @@ export async function createPosBill(
     });
 
     return bill;
-  });
+    }),
+  );
 }
 
 export async function voidPosBill(user: AuthUser, billId: string, reason: string) {
   assertRole(user, 'OWNER', 'MANAGER');
-  assertAction(user, 'pos:void');
 
   if (!reason.trim()) throw new PosError('กรุณาระบุเหตุผลในการยกเลิกบิล');
 

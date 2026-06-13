@@ -70,8 +70,10 @@ export function signedAmountCents(type: LedgerEntryType, amountCents: number): n
     case 'EXPENSE':
     case 'TRANSFER_OUT':
       return -amountCents;
-    default:
-      return amountCents;
+    default: {
+      const _exhaustive: never = type;
+      throw new Error(`Unknown ledger entry type: ${_exhaustive}`);
+    }
   }
 }
 

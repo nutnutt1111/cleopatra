@@ -13,9 +13,16 @@ export class HrError extends Error {
   }
 }
 
-async function nextEmployeeCode(storeId: string): Promise<string> {
-  const count = await prisma.employee.count({ where: { storeId } });
-  return `EMP-${String(count + 1).padStart(3, '0')}`;
+import { withUniqueRetry, nextDailySequence } from './sequence.js';
+import type { Prisma } from '../../src/generated/prisma/client.js';
+
+type Tx = Prisma.TransactionClient;
+
+async function nextEmployeeCode(tx: Tx, storeId: string): Promise<string> {
+  const prefix = 'EMP';
+  return nextDailySequence(tx, prefix, async (t) =>
+    t.employee.count({ where: { storeId, employeeCode: { startsWith: prefix } } }),
+  );
 }
 
 export async function createEmployee(
@@ -33,34 +40,39 @@ export async function createEmployee(
   if (!input.name.trim()) throw new HrError('กรุณาระบุชื่อพนักงาน');
   if (input.salaryCents < 0) throw new HrError('เงินเดือนต้องไม่ต่ำกว่า 0');
 
-  const employeeCode = await nextEmployeeCode(user.storeId);
   const hireDate = toDateOnly(input.hireDate ?? new Date());
 
-  const employee = await prisma.employee.create({
-    data: {
-      storeId: user.storeId,
-      employeeCode,
-      name: input.name.trim(),
-      phone: input.phone?.trim() ?? null,
-      position: input.position?.trim() ?? null,
-      salaryCents: input.salaryCents,
-      hireDate,
-      createdById: user.id,
-    },
-  });
+  return withUniqueRetry(() =>
+    prisma.$transaction(async (tx) => {
+      const employeeCode = await nextEmployeeCode(tx, user.storeId);
 
-  await prisma.auditLog.create({
-    data: {
-      storeId: user.storeId,
-      userId: user.id,
-      action: 'HR_EMPLOYEE_CREATE',
-      entityType: 'Employee',
-      entityId: employee.id,
-      payload: JSON.stringify({ employeeCode, salaryCents: input.salaryCents }),
-    },
-  });
+      const employee = await tx.employee.create({
+        data: {
+          storeId: user.storeId,
+          employeeCode,
+          name: input.name.trim(),
+          phone: input.phone?.trim() ?? null,
+          position: input.position?.trim() ?? null,
+          salaryCents: input.salaryCents,
+          hireDate,
+          createdById: user.id,
+        },
+      });
 
-  return employee;
+      await tx.auditLog.create({
+        data: {
+          storeId: user.storeId,
+          userId: user.id,
+          action: 'HR_EMPLOYEE_CREATE',
+          entityType: 'Employee',
+          entityId: employee.id,
+          payload: JSON.stringify({ employeeCode, salaryCents: input.salaryCents }),
+        },
+      });
+
+      return employee;
+    }),
+  );
 }
 
 export async function createPayrollRun(

@@ -1,4 +1,5 @@
-import { apiFetch, getAuthToken } from './donutit-api.js';
+import { apiFetch, isLoggedIn } from './donutit-api.js';
+import { escapeHtml } from './escape-html.js';
 
 async function refresh() {
   const [prodRes, moveRes] = await Promise.all([
@@ -17,13 +18,13 @@ async function refresh() {
           p.trackingType === 'QUANTITY'
             ? `${p.qtyOnHand} ชิ้น`
             : `${p.serials.length} serial พร้อมขาย`;
-        const cost = p.costBaht ? `${p.costBaht} บาท` : '—';
+        const cost = p.costBaht ? `${escapeHtml(p.costBaht)} บาท` : '—';
         return `<tr class="border-b border-border">
-        <td class="px-4 py-3 text-sm">${p.sku}</td>
-        <td class="px-4 py-3 text-sm">${p.name}</td>
+        <td class="px-4 py-3 text-sm">${escapeHtml(p.sku)}</td>
+        <td class="px-4 py-3 text-sm">${escapeHtml(p.name)}</td>
         <td class="px-4 py-3 text-sm">${p.trackingType === 'SERIALIZED' ? 'มี Serial' : 'นับจำนวน'}</td>
-        <td class="px-4 py-3 text-sm">${stock}</td>
-        <td class="px-4 py-3 text-sm text-right">${p.priceBaht}</td>
+        <td class="px-4 py-3 text-sm">${escapeHtml(stock)}</td>
+        <td class="px-4 py-3 text-sm text-right">${escapeHtml(p.priceBaht)}</td>
         <td class="px-4 py-3 text-sm text-right cost-cell">${cost}</td>
       </tr>`;
       })
@@ -39,8 +40,8 @@ async function refresh() {
       ? allSerials
           .map(
             (s) => `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs border border-border mr-2 mb-2">
-            ${s.serialNumber} · ${s.productName}
-            <span class="ml-1 ${s.status === 'AVAILABLE' ? 'text-green-600' : 'text-muted-foreground'}">${s.statusLabel}</span>
+            ${escapeHtml(s.serialNumber)} · ${escapeHtml(s.productName)}
+            <span class="ml-1 ${s.status === 'AVAILABLE' ? 'text-green-600' : 'text-muted-foreground'}">${escapeHtml(s.statusLabel)}</span>
           </span>`,
           )
           .join('')
@@ -53,9 +54,9 @@ async function refresh() {
       ? moves
           .map(
             (m) => `<div class="text-xs py-1 border-b border-border">
-            ${new Date(m.createdAt).toLocaleString('th-TH')} · ${m.productName}
-            ${m.serialNumber ? `[${m.serialNumber}]` : ''}
-            · ${m.qtyDelta > 0 ? '+' : ''}${m.qtyDelta} · ${m.reason}
+            ${new Date(m.createdAt).toLocaleString('th-TH')} · ${escapeHtml(m.productName)}
+            ${m.serialNumber ? `[${escapeHtml(m.serialNumber)}]` : ''}
+            · ${m.qtyDelta > 0 ? '+' : ''}${m.qtyDelta} · ${escapeHtml(m.reason)}
           </div>`,
           )
           .join('')
@@ -63,9 +64,9 @@ async function refresh() {
   }
 }
 
-export function initInventory() {
+export async function initInventory() {
   if (!document.querySelector('[data-donutit-module="inventory"]')) return;
-  if (!getAuthToken()) {
+  if (!(await isLoggedIn())) {
     document.getElementById('inv-status')?.replaceChildren(
       document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
     );

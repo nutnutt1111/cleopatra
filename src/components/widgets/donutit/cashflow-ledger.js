@@ -1,4 +1,5 @@
-import { getAuthToken, apiFetch } from './donutit-api.js';
+import { isLoggedIn, apiFetch } from './donutit-api.js';
+import { escapeHtml } from './escape-html.js';
 
 const TYPE_LABELS = {
   INCOME: 'รายรับ',
@@ -64,15 +65,15 @@ function renderLedgerTable(entries) {
           ? '<span class="text-xs text-amber-600">กลับรายการ</span>'
           : '';
       return `<tr class="border-b border-border hover:bg-muted/30 ${voided}">
-        <td class="px-4 py-3 text-sm">${e.entryDate}</td>
-        <td class="px-4 py-3 text-sm">${TYPE_LABELS[e.type] || e.type}${reversal}</td>
-        <td class="px-4 py-3 text-sm">${CHANNEL_LABELS[e.channel] || e.channel}</td>
-        <td class="px-4 py-3 text-sm text-right font-medium">${e.amountBaht}</td>
-        <td class="px-4 py-3 text-sm">${e.description} ${badge}</td>
+        <td class="px-4 py-3 text-sm">${escapeHtml(e.entryDate)}</td>
+        <td class="px-4 py-3 text-sm">${escapeHtml(TYPE_LABELS[e.type] || e.type)}${reversal}</td>
+        <td class="px-4 py-3 text-sm">${escapeHtml(CHANNEL_LABELS[e.channel] || e.channel)}</td>
+        <td class="px-4 py-3 text-sm text-right font-medium">${escapeHtml(e.amountBaht)}</td>
+        <td class="px-4 py-3 text-sm">${escapeHtml(e.description)} ${badge}</td>
         <td class="px-4 py-3 text-sm text-right">
           ${
             !e.isVoided && !e.isReversal
-              ? `<button data-void-id="${e.id}" class="text-xs text-destructive hover:underline">ยกเลิก</button>`
+              ? `<button data-void-id="${escapeHtml(e.id)}" class="text-xs text-destructive hover:underline">ยกเลิก</button>`
               : '—'
           }
         </td>
@@ -113,8 +114,8 @@ function renderCloses(closes) {
     .map(
       (c) => `<div class="flex items-center justify-between py-2 border-b border-border last:border-0">
       <div>
-        <p class="text-sm font-medium">${c.closeDate}</p>
-        <p class="text-xs text-muted-foreground">สุทธิ ${formatNet(c)} · โดย ${c.closedByName}</p>
+        <p class="text-sm font-medium">${escapeHtml(c.closeDate)}</p>
+        <p class="text-xs text-muted-foreground">สุทธิ ${formatNet(c)} · โดย ${escapeHtml(c.closedByName)}</p>
       </div>
       <span class="text-xs px-2 py-1 rounded-full ${c.isLocked ? 'bg-red-500/10 text-red-600' : 'bg-green-500/10 text-green-600'}">
         ${c.isLocked ? 'ล็อกแล้ว' : 'ปลดล็อก'}
@@ -125,11 +126,13 @@ function renderCloses(closes) {
 }
 
 function formatNet(c) {
-  const income =
-    parseFloat(c.cashIncomeBaht.replace(/,/g, '')) + parseFloat(c.transferIncomeBaht.replace(/,/g, ''));
-  const expense =
-    parseFloat(c.cashExpenseBaht.replace(/,/g, '')) + parseFloat(c.transferExpenseBaht.replace(/,/g, ''));
-  return (income - expense).toLocaleString('th-TH', { minimumFractionDigits: 2 });
+  const netCents =
+    c.netCents ??
+    (c.cashIncomeCents ?? 0) -
+      (c.cashExpenseCents ?? 0) +
+      (c.transferIncomeCents ?? 0) -
+      (c.transferExpenseCents ?? 0);
+  return (netCents / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 });
 }
 
 async function refreshAll() {
@@ -147,7 +150,7 @@ async function refreshAll() {
   }
 }
 
-export function initCashflowLedger() {
+export async function initCashflowLedger() {
   const root = document.querySelector('[data-donutit-module="cashflow-ledger"]');
   if (!root) return;
 
@@ -222,7 +225,7 @@ export function initCashflowLedger() {
     }
   });
 
-  if (!getAuthToken()) {
+  if (!(await isLoggedIn())) {
     setStatus(document.getElementById('ledger-status'), 'เข้าสู่ระบบที่ /settings เพื่อดูข้อมูล (dev: owner@donutit.local)', true);
     return;
   }

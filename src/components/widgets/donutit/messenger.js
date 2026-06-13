@@ -1,4 +1,5 @@
-import { apiFetch, getAuthToken } from './donutit-api.js';
+import { apiFetch, isLoggedIn } from './donutit-api.js';
+import { escapeHtml } from './escape-html.js';
 
 async function loadJobs() {
   const res = await apiFetch('/api/messenger/jobs');
@@ -20,20 +21,20 @@ function renderJobs(jobs) {
       (j) => `<div class="border border-border rounded-lg p-3 mb-2 ${j.status === 'CANCELLED' ? 'opacity-60' : ''}">
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0">
-          <p class="font-medium text-sm">${j.jobNumber}</p>
-          <p class="text-xs text-muted-foreground">${j.customerName}${j.customerPhone ? ` · ${j.customerPhone}` : ''}</p>
-          <p class="text-sm mt-1">${j.address}</p>
-          ${j.description ? `<p class="text-xs text-muted-foreground">${j.description}</p>` : ''}
-          <p class="text-sm mt-1">ค่าส่ง <strong>${j.deliveryFeeBaht}</strong> บาท (${j.feeChannel})</p>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-muted">${j.statusLabel}</span>
-          ${j.cancelReason ? `<p class="text-xs text-destructive mt-1">ยกเลิก: ${j.cancelReason}</p>` : ''}
+          <p class="font-medium text-sm">${escapeHtml(j.jobNumber)}</p>
+          <p class="text-xs text-muted-foreground">${escapeHtml(j.customerName)}${j.customerPhone ? ` · ${escapeHtml(j.customerPhone)}` : ''}</p>
+          <p class="text-sm mt-1">${escapeHtml(j.address)}</p>
+          ${j.description ? `<p class="text-xs text-muted-foreground">${escapeHtml(j.description)}</p>` : ''}
+          <p class="text-sm mt-1">ค่าส่ง <strong>${escapeHtml(j.deliveryFeeBaht)}</strong> บาท (${escapeHtml(j.feeChannel)})</p>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-muted">${escapeHtml(j.statusLabel)}</span>
+          ${j.cancelReason ? `<p class="text-xs text-destructive mt-1">ยกเลิก: ${escapeHtml(j.cancelReason)}</p>` : ''}
         </div>
         ${
           j.status === 'PENDING' || j.status === 'IN_TRANSIT'
             ? `<div class="flex flex-col gap-1 shrink-0">
-            ${j.status === 'PENDING' ? `<button data-transit="${j.id}" class="text-xs px-2 py-1 bg-secondary border border-border rounded">กำลังส่ง</button>` : ''}
-            <button data-deliver="${j.id}" class="text-xs px-2 py-1 bg-primary text-primary-foreground rounded">ส่งสำเร็จ</button>
-            <button data-cancel="${j.id}" class="text-xs text-destructive hover:underline">ยกเลิก</button>
+            ${j.status === 'PENDING' ? `<button data-transit="${escapeHtml(j.id)}" class="text-xs px-2 py-1 bg-secondary border border-border rounded">กำลังส่ง</button>` : ''}
+            <button data-deliver="${escapeHtml(j.id)}" class="text-xs px-2 py-1 bg-primary text-primary-foreground rounded">ส่งสำเร็จ</button>
+            <button data-cancel="${escapeHtml(j.id)}" class="text-xs text-destructive hover:underline">ยกเลิก</button>
           </div>`
             : ''
         }
@@ -52,7 +53,7 @@ function renderJobs(jobs) {
 
   el.querySelectorAll('[data-deliver]').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!confirm('ยืนยันส่งสำเร็จ? ค่าจัดส่งจะบันทึกเป็นรายจ่าย')) return;
+      if (!confirm('ยืนยันส่งสำเร็จ? ค่าจัดส่งจะบันทึกเป็นรายรับ')) return;
       const res = await apiFetch(`/api/messenger/jobs/${btn.getAttribute('data-deliver')}/deliver`, { method: 'POST' });
       if (!res.ok) alert((await res.json()).error);
       else {
@@ -78,9 +79,9 @@ function renderJobs(jobs) {
   });
 }
 
-export function initMessenger() {
+export async function initMessenger() {
   if (!document.querySelector('[data-donutit-module="messenger"]')) return;
-  if (!getAuthToken()) {
+  if (!(await isLoggedIn())) {
     document.getElementById('messenger-status')?.replaceChildren(
       document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
     );

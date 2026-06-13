@@ -3,7 +3,10 @@ import type { AuthUser } from './auth.js';
 import { assertAction, assertRole } from './auth.js';
 import { assertDateNotLocked, postLedgerEntry } from './ledger.js';
 import { toDateOnly } from './ledger-utils.js';
-import type { PaymentChannel } from '../../src/generated/prisma/client.js';
+import { withUniqueRetry, nextDailySequence } from './sequence.js';
+import type { PaymentChannel, Prisma } from '../../src/generated/prisma/client.js';
+
+type Tx = Prisma.TransactionClient;
 
 export class CustomerError extends Error {
   status: number;
@@ -20,13 +23,16 @@ function addDays(date: Date, days: number): Date {
   return d;
 }
 
-async function nextSaleNumber(storeId: string): Promise<string> {
+function todayPrefix(label: string): string {
   const today = new Date();
-  const prefix = `CR-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
-  const count = await prisma.creditSale.count({
-    where: { storeId, saleNumber: { startsWith: prefix } },
-  });
-  return `${prefix}-${String(count + 1).padStart(4, '0')}`;
+  return `${label}-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
+}
+
+async function nextSaleNumber(tx: Tx, storeId: string): Promise<string> {
+  const prefix = todayPrefix('CR');
+  return nextDailySequence(tx, prefix, async (t) =>
+    t.creditSale.count({ where: { storeId, saleNumber: { startsWith: prefix } } }),
+  );
 }
 
 export async function createCustomer(
@@ -68,75 +74,94 @@ export async function createCreditSale(
   if (!input.description.trim()) throw new CustomerError('กรุณาระบุรายละเอียด');
   if (input.totalCents <= 0) throw new CustomerError('ยอดขายต้องมากกว่า 0');
 
-  const customer = await prisma.customer.findFirst({
-    where: { id: input.customerId, storeId: user.storeId, isActive: true },
-  });
-  if (!customer) throw new CustomerError('ไม่พบลูกค้า', 404);
-
-  const newBalance = customer.balanceCents + input.totalCents;
-  if (customer.creditLimitCents > 0 && newBalance > customer.creditLimitCents) {
-    if (user.role !== 'OWNER') {
-      throw new CustomerError(
-        `ยอดลูกหนี้เกินวงเงิน (${customer.creditLimitCents / 100} บาท) — ต้องเป็น Owner`,
-        403,
-      );
-    }
-    assertAction(user, 'customer:credit-override');
-  }
-
   const entryDate = toDateOnly(new Date());
   await assertDateNotLocked(user.storeId, entryDate);
 
-  const saleNumber = await nextSaleNumber(user.storeId);
   const installmentCount = input.installmentCount ?? 0;
   const installmentPeriodDays = input.installmentPeriodDays ?? 30;
 
-  return prisma.$transaction(async (tx) => {
-    const sale = await tx.creditSale.create({
-      data: {
-        storeId: user.storeId,
-        customerId: customer.id,
-        saleNumber,
-        description: input.description.trim(),
-        totalCents: input.totalCents,
-        createdById: user.id,
-      },
-    });
+  return withUniqueRetry(() =>
+    prisma.$transaction(async (tx) => {
+      const customer = await tx.customer.findFirst({
+        where: { id: input.customerId, storeId: user.storeId, isActive: true },
+      });
+      if (!customer) throw new CustomerError('ไม่พบลูกค้า', 404);
 
-    if (installmentCount >= 2) {
-      const installmentAmountCents = Math.ceil(input.totalCents / installmentCount);
-      await tx.installmentPlan.create({
+      const newBalance = customer.balanceCents + input.totalCents;
+      if (customer.creditLimitCents > 0 && newBalance > customer.creditLimitCents) {
+        if (user.role !== 'OWNER') {
+          throw new CustomerError(
+            `ยอดลูกหนี้เกินวงเงิน (${customer.creditLimitCents / 100} บาท) — ต้องเป็น Owner`,
+            403,
+          );
+        }
+        assertAction(user, 'customer:credit-override');
+      }
+
+      const saleNumber = await nextSaleNumber(tx, user.storeId);
+
+      const sale = await tx.creditSale.create({
         data: {
-          creditSaleId: sale.id,
-          installmentCount,
-          installmentAmountCents,
-          nextDueDate: addDays(entryDate, installmentPeriodDays),
+          storeId: user.storeId,
+          customerId: customer.id,
+          saleNumber,
+          description: input.description.trim(),
+          totalCents: input.totalCents,
+          createdById: user.id,
         },
       });
-    }
 
-    await tx.customer.update({
-      where: { id: customer.id },
-      data: { balanceCents: newBalance },
-    });
+      if (installmentCount >= 2) {
+        const installmentAmountCents = Math.ceil(input.totalCents / installmentCount);
+        await tx.installmentPlan.create({
+          data: {
+            creditSaleId: sale.id,
+            installmentCount,
+            installmentAmountCents,
+            installmentPeriodDays,
+            nextDueDate: addDays(entryDate, installmentPeriodDays),
+          },
+        });
+      }
 
-    await tx.auditLog.create({
-      data: {
-        storeId: user.storeId,
-        userId: user.id,
-        action: 'CREDIT_SALE',
-        entityType: 'CreditSale',
-        entityId: sale.id,
-        payload: JSON.stringify({
-          saleNumber,
-          totalCents: input.totalCents,
-          installmentCount,
-        }),
-      },
-    });
+      await tx.customer.update({
+        where: { id: customer.id },
+        data: { balanceCents: newBalance },
+      });
 
-    return sale;
-  });
+      await postLedgerEntry(
+        {
+          storeId: user.storeId,
+          userId: user.id,
+          entryDate,
+          type: 'INCOME',
+          channel: 'CREDIT',
+          amountCents: input.totalCents,
+          description: `ขายเครดิต ${sale.saleNumber} — ${customer.name}`,
+          referenceType: 'CREDIT_SALE',
+          referenceId: sale.id,
+        },
+        tx,
+      );
+
+      await tx.auditLog.create({
+        data: {
+          storeId: user.storeId,
+          userId: user.id,
+          action: 'CREDIT_SALE',
+          entityType: 'CreditSale',
+          entityId: sale.id,
+          payload: JSON.stringify({
+            saleNumber,
+            totalCents: input.totalCents,
+            installmentCount,
+          }),
+        },
+      });
+
+      return sale;
+    }),
+  );
 }
 
 export async function recordCustomerPayment(
@@ -154,33 +179,33 @@ export async function recordCustomerPayment(
 
   if (input.amountCents <= 0) throw new CustomerError('จำนวนเงินต้องมากกว่า 0');
 
-  const customer = await prisma.customer.findFirst({
-    where: { id: input.customerId, storeId: user.storeId, isActive: true },
-  });
-  if (!customer) throw new CustomerError('ไม่พบลูกค้า', 404);
-  if (input.amountCents > customer.balanceCents) {
-    throw new CustomerError('จำนวนเงินเกินยอดลูกหนี้คงค้าง');
-  }
-
-  let creditSale = null;
-  if (input.creditSaleId) {
-    creditSale = await prisma.creditSale.findFirst({
-      where: { id: input.creditSaleId, customerId: customer.id, storeId: user.storeId },
-      include: { installment: true },
-    });
-    if (!creditSale) throw new CustomerError('ไม่พบรายการขายเครดิต', 404);
-    if (creditSale.status !== 'OPEN') throw new CustomerError('รายการขายนี้ปิดแล้ว');
-    const remaining = creditSale.totalCents - creditSale.paidCents;
-    if (input.amountCents > remaining) {
-      throw new CustomerError('จำนวนเงินเกินยอดค้างของรายการนี้');
-    }
-  }
-
   const entryDate = toDateOnly(new Date());
   await assertDateNotLocked(user.storeId, entryDate);
   const channel = input.channel ?? 'CASH';
 
   return prisma.$transaction(async (tx) => {
+    const customer = await tx.customer.findFirst({
+      where: { id: input.customerId, storeId: user.storeId, isActive: true },
+    });
+    if (!customer) throw new CustomerError('ไม่พบลูกค้า', 404);
+    if (input.amountCents > customer.balanceCents) {
+      throw new CustomerError('จำนวนเงินเกินยอดลูกหนี้คงค้าง');
+    }
+
+    let creditSale = null;
+    if (input.creditSaleId) {
+      creditSale = await tx.creditSale.findFirst({
+        where: { id: input.creditSaleId, customerId: customer.id, storeId: user.storeId },
+        include: { installment: true },
+      });
+      if (!creditSale) throw new CustomerError('ไม่พบรายการขายเครดิต', 404);
+      if (creditSale.status !== 'OPEN') throw new CustomerError('รายการขายนี้ปิดแล้ว');
+      const remaining = creditSale.totalCents - creditSale.paidCents;
+      if (input.amountCents > remaining) {
+        throw new CustomerError('จำนวนเงินเกินยอดค้างของรายการนี้');
+      }
+    }
+
     const payment = await tx.customerPayment.create({
       data: {
         customerId: customer.id,
@@ -195,7 +220,7 @@ export async function recordCustomerPayment(
 
     await tx.customer.update({
       where: { id: customer.id },
-      data: { balanceCents: customer.balanceCents - input.amountCents },
+      data: { balanceCents: { decrement: input.amountCents } },
     });
 
     if (creditSale) {
@@ -216,7 +241,7 @@ export async function recordCustomerPayment(
             paidInstallments: newPaidInstallments,
             nextDueDate: completed
               ? plan.nextDueDate
-              : addDays(plan.nextDueDate, 30),
+              : addDays(plan.nextDueDate, plan.installmentPeriodDays),
             status: completed ? 'COMPLETED' : 'ACTIVE',
           },
         });

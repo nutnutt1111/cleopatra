@@ -41,9 +41,9 @@ export async function closeDay(user: AuthUser, closeDateInput: string | Date, no
     throw new LedgerError('วันนี้ปิดแล้ว', 409);
   }
 
-  const totals = await sumLedgerForDate(user.storeId, closeDate);
-
   const record = await prisma.$transaction(async (tx) => {
+    const totals = await sumLedgerForDate(user.storeId, closeDate, tx);
+
     const close = await tx.dailyClose.upsert({
       where: { storeId_closeDate: { storeId: user.storeId, closeDate } },
       update: {
@@ -81,6 +81,18 @@ export async function closeDay(user: AuthUser, closeDateInput: string | Date, no
 
     return close;
   });
+
+  const totals = {
+    cashIncome: record.cashIncomeCents,
+    cashExpense: record.cashExpenseCents,
+    transferIncome: record.transferIncomeCents,
+    transferExpense: record.transferExpenseCents,
+    net:
+      record.cashIncomeCents -
+      record.cashExpenseCents +
+      record.transferIncomeCents -
+      record.transferExpenseCents,
+  };
 
   return { close: record, totals };
 }
