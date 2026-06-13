@@ -1,4 +1,4 @@
-import type { Prisma } from '../../src/generated/prisma/client.js';
+import type { AuditAction, Prisma } from '../../src/generated/prisma/client.js';
 import { prisma } from './prisma.js';
 import type { AuthUser } from './auth.js';
 import { oppositeType, signedAmountCents, toDateOnly } from './ledger-utils.js';
@@ -31,7 +31,7 @@ async function writeAudit(
   params: {
     storeId: string;
     userId: string;
-    action: 'LEDGER_POST' | 'LEDGER_VOID' | 'DAILY_CLOSE' | 'DAILY_CLOSE_UNLOCK' | 'POS_SALE' | 'POS_VOID' | 'STOCK_MOVE';
+    action: AuditAction;
     entityType: string;
     entityId?: string;
     payload?: Record<string, unknown>;

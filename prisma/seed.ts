@@ -4,6 +4,8 @@ import { postLedgerEntry } from '../server/lib/ledger.js';
 import { closeDay } from '../server/lib/daily-close.js';
 import { toAuthUser } from '../server/lib/auth.js';
 import { createPosBill } from '../server/lib/pos.js';
+import { createPawnTicket, payPawnInterest } from '../server/lib/pawn.js';
+import { createCustomer, createCreditSale, recordCustomerPayment } from '../server/lib/customers.js';
 import bcrypt from 'bcryptjs';
 
 const DEV_PASSWORD = 'donutit-dev';
@@ -46,6 +48,12 @@ async function main() {
   const owner = userRecords.find((u) => u.role === 'OWNER')!;
 
   // Clear seed data (order matters for FKs)
+  await prisma.customerPayment.deleteMany({ where: { customer: { storeId: store.id } } });
+  await prisma.installmentPlan.deleteMany({ where: { creditSale: { storeId: store.id } } });
+  await prisma.creditSale.deleteMany({ where: { storeId: store.id } });
+  await prisma.pawnPayment.deleteMany({ where: { ticket: { storeId: store.id } } });
+  await prisma.pawnTicket.deleteMany({ where: { storeId: store.id } });
+  await prisma.customer.deleteMany({ where: { storeId: store.id } });
   await prisma.stockMovement.deleteMany({ where: { storeId: store.id } });
   await prisma.posPayment.deleteMany({ where: { bill: { storeId: store.id } } });
   await prisma.posBillLine.deleteMany({ where: { bill: { storeId: store.id } } });
@@ -138,6 +146,7 @@ async function main() {
     },
   });
 
+  const manager = userRecords.find((u) => u.role === 'MANAGER')!;
   const staff = userRecords.find((u) => u.role === 'STAFF')!;
 
   // Sample split-payment bill (cash + transfer) — uses serial1
@@ -149,9 +158,50 @@ async function main() {
     ],
   });
 
+  // Wave 3 — Customers + Pawn
+  const customerA = await createCustomer(toAuthUser(owner), {
+    name: 'คุณสมชาย ใจดี',
+    phone: '081-234-5678',
+    creditLimitCents: 5000000,
+  });
+
+  const customerB = await createCustomer(toAuthUser(owner), {
+    name: 'คุณมาลี รักษ์ดี',
+    phone: '089-876-5432',
+    creditLimitCents: 2000000,
+  });
+
+  const pawnTicket = await createPawnTicket(toAuthUser(staff), {
+    customerName: customerA.name,
+    customerPhone: customerA.phone ?? undefined,
+    customerId: customerA.id,
+    itemDescription: 'สร้อยทองคำ 1 บาท',
+    principalCents: 1200000,
+    interestRateBps: 200,
+    channel: 'CASH',
+  });
+
+  await payPawnInterest(toAuthUser(staff), pawnTicket.id, { channel: 'TRANSFER', transferDetail: 'กสิกร xxx-1234' });
+
+  const creditSale = await createCreditSale(toAuthUser(manager), {
+    customerId: customerB.id,
+    description: 'มือถือผ่อน 3 งวด',
+    totalCents: 1500000,
+    installmentCount: 3,
+  });
+
+  await recordCustomerPayment(toAuthUser(staff), {
+    customerId: customerB.id,
+    amountCents: 500000,
+    channel: 'CASH',
+    creditSaleId: creditSale.id,
+  });
+
   console.log('Seed complete — store:', store.code);
   console.log('Ledger: 4 manual entries + POS bill', sampleBill.billNumber);
   console.log('Products: phone (2 serial), cable (qty 50→49 after sale)');
+  console.log('Pawn:', pawnTicket.ticketNumber, '(interest paid once)');
+  console.log('Customers:', customerA.name, customerB.name, '(1 partial installment payment)');
   console.log('Dev password:', DEV_PASSWORD);
 }
 

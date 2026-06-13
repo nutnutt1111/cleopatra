@@ -57,6 +57,7 @@ After `yarn db:seed`:
 - 1 locked daily close (2 days ago)
 - 2 products (serialized phone + qty cable)
 - 1 POS bill with split payment (cash + transfer)
+- 2 customers, 1 pawn ticket, 1 credit sale with installment
 
 ## Wave 2 — POS Invariants
 
@@ -68,3 +69,23 @@ After `yarn db:seed`:
 | P4 | Void reverses POS ledger entries | `voidLedgerByReference('POS', billId)` |
 | P5 | Staff cannot apply discount | role check in `createPosBill()` |
 | P6 | Cost hidden from Staff | `canViewCost()` in inventory API |
+
+## Wave 3 — Pawn Invariants
+
+| ID | Invariant | Enforcement |
+|----|-----------|-------------|
+| W3-P1 | Pawn create posts EXPENSE for principal | `createPawnTicket()` |
+| W3-P2 | Interest posts INCOME, extends due date | `payPawnInterest()` |
+| W3-P3 | Redeem posts INCOME (principal + overdue interest) | `redeemPawnTicket()` |
+| W3-P4 | Void reverses PAWN ledger entry | `voidLedgerByReference('PAWN', ticketId)` |
+| W3-C1 | Credit sale increases customer balance | `createCreditSale()` |
+| W3-C2 | Payment decreases balance, posts INCOME | `recordCustomerPayment()` |
+| W3-C3 | Credit limit enforced (Owner override) | `createCreditSale()` role check |
+| W3-C4 | Installment plan tracks paid installments | `InstallmentPlan.paidInstallments` |
+
+## Seed Evidence (Wave 3)
+
+After `yarn db:seed`:
+- 2 customers with credit limits
+- 1 active pawn ticket with 1 interest payment (transfer detail)
+- 1 credit sale with 3-installment plan + 1 partial payment

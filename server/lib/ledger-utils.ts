@@ -44,6 +44,15 @@ export const AUDIT_LABELS: Record<AuditAction, string> = {
   LEDGER_VOID: 'ยกเลิกรายการ',
   DAILY_CLOSE: 'ปิดวัน',
   DAILY_CLOSE_UNLOCK: 'ปลดล็อกปิดวัน',
+  POS_SALE: 'ขาย POS',
+  POS_VOID: 'ยกเลิก POS',
+  STOCK_MOVE: 'เคลื่อนไหวสต็อก',
+  PAWN_CREATE: 'เปิดตั๋วจำนำ',
+  PAWN_INTEREST: 'รับดอกเบี้ยจำนำ',
+  PAWN_REDEEM: 'ไถ่ถอนจำนำ',
+  PAWN_VOID: 'ยกเลิกตั๋วจำนำ',
+  CREDIT_SALE: 'ขายเครดิต',
+  CUSTOMER_PAYMENT: 'รับชำระลูกหนี้',
 };
 
 /** Signed amount for balance: income/transfer_in positive, expense/transfer_out negative */
