@@ -48,8 +48,10 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 
 ## Wave 4 — Messenger + HR
 
-- [ ] Messenger jobs + delivery fee expense
-- [ ] HR employee + payroll (gated)
+**Status:** Complete
+
+- [x] Messenger jobs + delivery fee expense
+- [x] HR employee + payroll (gated)
 
 **Depends on:** Wave 1 (ledger for fees)
 

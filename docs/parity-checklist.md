@@ -45,9 +45,9 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## Messenger
 
-- [ ] Create delivery job
-- [ ] Mark delivered
-- [ ] Delivery fee expense posted to ledger
+- [x] Create delivery job
+- [x] Mark delivered
+- [x] Delivery fee expense posted to ledger
 
 ## Customers
 
@@ -57,8 +57,8 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## HR
 
-- [ ] Employee records (role-gated)
-- [ ] Payroll view (Owner/HR only)
+- [x] Employee records (role-gated)
+- [x] Payroll view (Owner/HR only)
 
 ## Permissions
 
@@ -71,5 +71,5 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 ## Regression Evidence
 
 - [x] `regress-ranger` route smoke (all main routes 200)
-- [~] `seed-smith` fixtures cover all flows above (ledger + daily close + pawn + customers seeded)
+- [~] `seed-smith` fixtures cover all flows above (ledger + pawn + customers + messenger + HR seeded)
 - [x] Last regression run date: 2026-06-13 (Wave 1 — ledger API verified)

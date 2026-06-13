@@ -1,13 +1,62 @@
 {{> start title="บุคลากร — DonutiT" hidePageHeader=true }}
 
-<div class="p-4 lg:p-6">
-    {{> donutit/module-shell
-        moduleId="hr"
-        icon="ri-team-line"
-        title="บุคลากร (HR)"
-        subtitle="พนักงาน · เงินเดือน"
-        description="ข้อมูลพนักงานและเงินเดือน — เฉพาะ Owner/HR (Wave 4)"
-    }}
+<div class="p-4 lg:p-6" data-donutit-module="hr">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-semibold">บุคลากร (HR)</h1>
+            <p class="text-sm text-muted-foreground">พนักงาน · เงินเดือน — เฉพาะ Owner/HR</p>
+        </div>
+        <span class="text-xs px-3 py-1 rounded-full bg-blue-500/10 text-blue-700">Wave 4</span>
+    </div>
+    <p id="hr-status" class="text-sm text-muted-foreground mb-4"></p>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div class="space-y-4">
+            <div id="hr-manage-panel" class="rounded-xl border bg-card p-4 hidden">
+                <h2 class="font-medium mb-3">เพิ่มพนักงาน</h2>
+                <div class="space-y-3">
+                    <input id="hr-emp-name" placeholder="ชื่อ" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                    <input id="hr-emp-phone" placeholder="เบอร์โทร" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                    <input id="hr-emp-position" placeholder="ตำแหน่ง" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                    <input id="hr-emp-salary" type="number" min="0" step="0.01" placeholder="เงินเดือน (บาท)" class="w-full px-3 py-2 rounded-lg border border-border text-sm" />
+                    <button id="btn-add-employee" class="w-full px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
+                        บันทึกพนักงาน
+                    </button>
+                </div>
+            </div>
+
+            <div id="hr-payroll-panel" class="rounded-xl border bg-card p-4 hidden">
+                <h2 class="font-medium mb-3">สร้างรอบเงินเดือน</h2>
+                <div class="space-y-3">
+                    <input id="hr-period-label" placeholder="ชื่อรอบ เช่น มิ.ย. 2026" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                    <div class="grid grid-cols-2 gap-3">
+                        <input id="hr-period-start" type="date" class="w-full px-3 py-2 rounded-lg border border-border text-sm" />
+                        <input id="hr-period-end" type="date" class="w-full px-3 py-2 rounded-lg border border-border text-sm" />
+                    </div>
+                    <button id="btn-create-payroll" class="w-full px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
+                        สร้างรอบเงินเดือน
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div class="rounded-xl border bg-card p-4">
+                <h2 class="font-medium mb-3">พนักงาน</h2>
+                <div id="hr-employees"></div>
+            </div>
+            <div id="hr-payroll-list-wrap" class="rounded-xl border bg-card p-4 hidden">
+                <h2 class="font-medium mb-3">รอบเงินเดือน</h2>
+                <div id="hr-payroll-list" class="max-h-[400px] overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script type="module">
+    import { initHr } from '/components/widgets/donutit/hr.js';
+    initHr();
+    document.addEventListener('page:load', initHr);
+</script>
 
 {{> end }}

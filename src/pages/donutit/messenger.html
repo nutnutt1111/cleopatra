@@ -1,13 +1,65 @@
 {{> start title="ส่งของ — DonutiT" hidePageHeader=true }}
 
-<div class="p-4 lg:p-6">
-    {{> donutit/module-shell
-        moduleId="messenger"
-        icon="ri-truck-line"
-        title="ส่งของ (Messenger)"
-        subtitle="งานส่ง · ค่าจัดส่ง"
-        description="สร้างงานส่ง อัปเดตสถานะส่งสำเร็จ และบันทึกค่าใช้จ่ายจัดส่ง — Wave 4"
-    }}
+<div class="p-4 lg:p-6" data-donutit-module="messenger">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-semibold">ส่งของ (Messenger)</h1>
+            <p class="text-sm text-muted-foreground">งานส่ง · ค่าจัดส่ง → บันทึกรายจ่าย</p>
+        </div>
+        <span class="text-xs px-3 py-1 rounded-full bg-blue-500/10 text-blue-700">Wave 4</span>
+    </div>
+    <p id="messenger-status" class="text-sm text-muted-foreground mb-4"></p>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div class="rounded-xl border bg-card p-4">
+            <h2 class="font-medium mb-3">สร้างงานส่งใหม่</h2>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-muted-foreground">ชื่อลูกค้า</label>
+                    <input id="msg-customer-name" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                </div>
+                <div>
+                    <label class="text-xs text-muted-foreground">เบอร์โทร</label>
+                    <input id="msg-customer-phone" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                </div>
+                <div>
+                    <label class="text-xs text-muted-foreground">ที่อยู่จัดส่ง</label>
+                    <textarea id="msg-address" rows="2" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm"></textarea>
+                </div>
+                <div>
+                    <label class="text-xs text-muted-foreground">รายละเอียดสินค้า</label>
+                    <input id="msg-description" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-muted-foreground">ค่าจัดส่ง (บาท)</label>
+                        <input id="msg-fee" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border text-sm" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">ช่องทางจ่ายค่าส่ง</label>
+                        <select id="msg-fee-channel" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm">
+                            <option value="CASH">เงินสด</option>
+                            <option value="TRANSFER">โอน</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="btn-create-job" class="w-full px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
+                    สร้างงานส่ง
+                </button>
+            </div>
+        </div>
+
+        <div class="rounded-xl border bg-card p-4">
+            <h2 class="font-medium mb-3">งานส่ง</h2>
+            <div id="messenger-jobs" class="max-h-[700px] overflow-y-auto"></div>
+        </div>
+    </div>
 </div>
+
+<script type="module">
+    import { initMessenger } from '/components/widgets/donutit/messenger.js';
+    initMessenger();
+    document.addEventListener('page:load', initMessenger);
+</script>
 
 {{> end }}

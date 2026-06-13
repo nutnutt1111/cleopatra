@@ -53,6 +53,12 @@ export const AUDIT_LABELS: Record<AuditAction, string> = {
   PAWN_VOID: 'ยกเลิกตั๋วจำนำ',
   CREDIT_SALE: 'ขายเครดิต',
   CUSTOMER_PAYMENT: 'รับชำระลูกหนี้',
+  MESSENGER_CREATE: 'สร้างงานส่ง',
+  MESSENGER_DELIVER: 'ส่งสำเร็จ',
+  MESSENGER_CANCEL: 'ยกเลิกงานส่ง',
+  HR_EMPLOYEE_CREATE: 'เพิ่มพนักงาน',
+  PAYROLL_RUN: 'สร้างรอบเงินเดือน',
+  PAYROLL_PAY: 'จ่ายเงินเดือน',
 };
 
 /** Signed amount for balance: income/transfer_in positive, expense/transfer_out negative */

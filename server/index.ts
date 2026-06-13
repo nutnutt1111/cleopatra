@@ -16,6 +16,8 @@ import { createPosRouter, handlePosError } from './routes/pos.js';
 import { createInventoryRouter, handleInventoryError } from './routes/inventory.js';
 import { createPawnRouter, handlePawnError } from './routes/pawn.js';
 import { createCustomersRouter, handleCustomerError } from './routes/customers.js';
+import { createMessengerRouter, handleMessengerError } from './routes/messenger.js';
+import { createHrRouter, handleHrError } from './routes/hr.js';
 
 const app = express();
 const PORT = Number(process.env.API_PORT) || 3004;
@@ -60,6 +62,8 @@ function handleAuthError(err: unknown, res: express.Response) {
   if (handleInventoryError(err, res)) return;
   if (handlePawnError(err, res)) return;
   if (handleCustomerError(err, res)) return;
+  if (handleMessengerError(err, res)) return;
+  if (handleHrError(err, res)) return;
   if (err instanceof AuthError) {
     res.status(err.status).json({ error: err.message });
     return;
@@ -69,7 +73,7 @@ function handleAuthError(err: unknown, res: express.Response) {
 }
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'donutit-cleopatra-api', wave: 3 });
+  res.json({ ok: true, service: 'donutit-cleopatra-api', wave: 4 });
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -115,6 +119,8 @@ app.use('/api/pos', createPosRouter(requireAuth, handleAuthError));
 app.use('/api/inventory', createInventoryRouter(requireAuth, handleAuthError));
 app.use('/api/pawn', createPawnRouter(requireAuth, handleAuthError));
 app.use('/api/customers', createCustomersRouter(requireAuth, handleAuthError));
+app.use('/api/messenger', createMessengerRouter(requireAuth, handleAuthError));
+app.use('/api/hr', createHrRouter(requireAuth, handleAuthError));
 
 app.listen(PORT, () => {
   console.log(`DonutiT API http://localhost:${PORT}`);
