@@ -19,9 +19,10 @@ Seven specialized subagents keep delivery safe across financial, permission, reg
 **Dev server:** [http://localhost:3003](http://localhost:3003)
 
 ```bash
-yarn dev              # เปิดเซิร์ฟเวอร์พอร์ต 3003
-yarn quality:audit    # รันเอเจนต์ทั้ง 7 → docs/quality/reports/
-yarn quality:smoke    # smoke test route อย่างเดียว
+yarn dev                    # เปิดเซิร์ฟเวอร์พอร์ต 3003
+yarn quality:audit          # รันเอเจนต์ทั้ง 7
+yarn quality:audit:extended # audit + ตรวจเพิ่ม (build, sidebar, ภาษาไทย, UX)
+yarn quality:smoke          # smoke test route อย่างเดียว
 ```
 
 Config: `scripts/quality/config.sh`

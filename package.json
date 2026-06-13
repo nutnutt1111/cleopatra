@@ -11,6 +11,7 @@
     "preview": "vite preview --port 3003",
     "quality:smoke": "bash scripts/quality/route-smoke.sh",
     "quality:audit": "bash scripts/quality/run-all.sh",
+    "quality:audit:extended": "bash scripts/quality/run-all.sh; bash scripts/quality/run-extended.sh | tee -a \"docs/quality/reports/audit-latest-extended.md\"",
     "git": "git add . && git commit -m",
     "postgit": "git push -u origin master && git subtree push --prefix dist origin gh-pages"
   },
