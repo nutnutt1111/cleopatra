@@ -55,4 +55,16 @@
 After `yarn db:seed`:
 - 4 ledger entries across 3 days
 - 1 locked daily close (2 days ago)
-- Audit logs for seed posts + close
+- 2 products (serialized phone + qty cable)
+- 1 POS bill with split payment (cash + transfer)
+
+## Wave 2 — POS Invariants
+
+| ID | Invariant | Enforcement |
+|----|-----------|-------------|
+| P1 | Payment sum = bill total | `createPosBill()` |
+| P2 | Sale deducts stock / marks serial SOLD | `deductStockForSale()` |
+| P3 | Void restores stock / serial AVAILABLE | `restoreStockOnVoid()` |
+| P4 | Void reverses POS ledger entries | `voidLedgerByReference('POS', billId)` |
+| P5 | Staff cannot apply discount | role check in `createPosBill()` |
+| P6 | Cost hidden from Staff | `canViewCost()` in inventory API |

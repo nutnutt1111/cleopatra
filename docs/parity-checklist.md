@@ -14,9 +14,9 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## POS
 
-- [ ] Cash sale
-- [ ] Split payment (cash + transfer)
-- [ ] Void with stock + ledger reversal
+- [x] Cash sale
+- [x] Split payment (cash + transfer)
+- [x] Void with stock + ledger reversal
 - [ ] Discount approval (Owner-gated)
 - [ ] Installment payment on bill
 - [ ] Receipt print/PDF readable
@@ -31,10 +31,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## Inventory
 
-- [ ] Serialized item (create, sell, void restore)
-- [ ] Non-serialized item (qty tracking)
-- [ ] Cost field hidden without permission
-- [ ] Status badges (available, sold, pawned, etc.)
+- [x] Serialized item (create, sell, void restore)
+- [x] Non-serialized item (qty tracking)
+- [x] Cost field hidden without permission
+- [x] Status badges (available, sold, pawned, etc.)
 
 ## Cashflow
 
@@ -62,7 +62,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## Permissions
 
-- [ ] POS void/delete — server guard
+- [x] POS void/delete — server guard
 - [ ] Export reports — `assertCanExportReports`
 - [ ] Deleted record visibility — Owner only
 - [ ] Inventory cost visibility — authorized roles only

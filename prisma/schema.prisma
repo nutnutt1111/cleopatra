@@ -1,4 +1,4 @@
-// DonutiT Cleopatra — Wave 0 + Wave 1 (Ledger Core)
+// DonutiT Cleopatra — Wave 0–2
 
 generator client {
   provider = "prisma-client"
@@ -35,40 +35,183 @@ enum AuditAction {
   LEDGER_VOID
   DAILY_CLOSE
   DAILY_CLOSE_UNLOCK
+  POS_SALE
+  POS_VOID
+  STOCK_MOVE
+}
+
+enum TrackingType {
+  SERIALIZED
+  QUANTITY
+}
+
+enum ItemStatus {
+  AVAILABLE
+  SOLD
+  RESERVED
+}
+
+enum PosBillStatus {
+  COMPLETED
+  VOIDED
+}
+
+enum StockMoveReason {
+  SALE
+  VOID_RESTORE
+  ADJUSTMENT
+  RECEIVE
 }
 
 model Store {
-  id           String        @id @default(cuid())
-  name         String
-  code         String        @unique
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  users        User[]
+  id            String          @id @default(cuid())
+  name          String
+  code          String          @unique
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  users         User[]
   ledgerEntries LedgerEntry[]
-  dailyCloses  DailyClose[]
-  auditLogs    AuditLog[]
+  dailyCloses   DailyClose[]
+  auditLogs     AuditLog[]
+  products      Product[]
+  serialItems   SerialItem[]
+  stockMoves    StockMovement[]
+  posBills      PosBill[]
 
   @@index([code])
 }
 
 model User {
-  id               String        @id @default(cuid())
-  email            String        @unique
+  id               String          @id @default(cuid())
+  email            String          @unique
   name             String
   passwordHash     String
-  role             Role          @default(STAFF)
-  canExportReports Boolean       @default(false)
+  role             Role            @default(STAFF)
+  canExportReports Boolean         @default(false)
   storeId          String
-  store            Store         @relation(fields: [storeId], references: [id])
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  ledgerEntries    LedgerEntry[] @relation("LedgerCreatedBy")
-  dailyCloses      DailyClose[]  @relation("DailyCloseBy")
-  unlockedCloses   DailyClose[]  @relation("DailyCloseUnlockedBy")
+  store            Store           @relation(fields: [storeId], references: [id])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  ledgerEntries    LedgerEntry[]   @relation("LedgerCreatedBy")
+  dailyCloses      DailyClose[]    @relation("DailyCloseBy")
+  unlockedCloses   DailyClose[]    @relation("DailyCloseUnlockedBy")
   auditLogs        AuditLog[]
+  posBills         PosBill[]       @relation("PosBillCreatedBy")
+  voidedBills      PosBill[]       @relation("PosBillVoidedBy")
+  stockMoves       StockMovement[]
 
   @@index([storeId])
   @@index([role])
+}
+
+model Product {
+  id           String       @id @default(cuid())
+  storeId      String
+  store        Store        @relation(fields: [storeId], references: [id])
+  sku          String
+  name         String
+  trackingType TrackingType @default(QUANTITY)
+  priceCents   Int
+  costCents    Int          @default(0)
+  qtyOnHand    Int          @default(0)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  serialItems  SerialItem[]
+  billLines    PosBillLine[]
+  stockMoves   StockMovement[]
+
+  @@unique([storeId, sku])
+  @@index([storeId, trackingType])
+}
+
+model SerialItem {
+  id           String     @id @default(cuid())
+  storeId      String
+  store        Store      @relation(fields: [storeId], references: [id])
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id])
+  serialNumber String
+  status       ItemStatus @default(AVAILABLE)
+  costCents    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  billLines    PosBillLine[]
+  stockMoves   StockMovement[]
+
+  @@unique([storeId, serialNumber])
+  @@index([productId, status])
+}
+
+model StockMovement {
+  id            String          @id @default(cuid())
+  storeId       String
+  store         Store           @relation(fields: [storeId], references: [id])
+  productId     String
+  product       Product         @relation(fields: [productId], references: [id])
+  serialItemId  String?
+  serialItem    SerialItem?     @relation(fields: [serialItemId], references: [id])
+  qtyDelta      Int
+  reason        StockMoveReason
+  referenceType String?
+  referenceId   String?
+  note          String?
+  createdById   String
+  createdBy     User            @relation(fields: [createdById], references: [id])
+  createdAt     DateTime        @default(now())
+
+  @@index([storeId, createdAt])
+  @@index([referenceType, referenceId])
+}
+
+model PosBill {
+  id             String        @id @default(cuid())
+  storeId        String
+  store          Store         @relation(fields: [storeId], references: [id])
+  billNumber     String
+  status         PosBillStatus @default(COMPLETED)
+  subtotalCents  Int
+  discountCents  Int           @default(0)
+  totalCents     Int
+  voidedAt       DateTime?
+  voidReason     String?
+  createdById    String
+  createdBy      User          @relation("PosBillCreatedBy", fields: [createdById], references: [id])
+  voidedById     String?
+  voidedBy       User?         @relation("PosBillVoidedBy", fields: [voidedById], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  lines          PosBillLine[]
+  payments       PosPayment[]
+
+  @@unique([storeId, billNumber])
+  @@index([storeId, status])
+  @@index([createdAt])
+}
+
+model PosBillLine {
+  id             String      @id @default(cuid())
+  billId         String
+  bill           PosBill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product     @relation(fields: [productId], references: [id])
+  serialItemId   String?
+  serialItem     SerialItem? @relation(fields: [serialItemId], references: [id])
+  qty            Int         @default(1)
+  unitPriceCents Int
+  lineTotalCents Int
+
+  @@index([billId])
+}
+
+model PosPayment {
+  id          String         @id @default(cuid())
+  billId      String
+  bill        PosBill        @relation(fields: [billId], references: [id], onDelete: Cascade)
+  channel     PaymentChannel
+  amountCents Int
+
+  @@index([billId])
 }
 
 model LedgerEntry {
@@ -99,23 +242,23 @@ model LedgerEntry {
 }
 
 model DailyClose {
-  id              String    @id @default(cuid())
-  storeId         String
-  store           Store     @relation(fields: [storeId], references: [id])
-  closeDate       DateTime
-  isLocked        Boolean   @default(true)
-  cashIncomeCents   Int     @default(0)
-  cashExpenseCents  Int     @default(0)
-  transferIncomeCents Int   @default(0)
-  transferExpenseCents Int  @default(0)
-  note            String?
-  closedById      String
-  closedBy        User      @relation("DailyCloseBy", fields: [closedById], references: [id])
-  unlockedAt      DateTime?
-  unlockedById    String?
-  unlockedBy      User?     @relation("DailyCloseUnlockedBy", fields: [unlockedById], references: [id])
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                   String   @id @default(cuid())
+  storeId              String
+  store                Store    @relation(fields: [storeId], references: [id])
+  closeDate            DateTime
+  isLocked             Boolean  @default(true)
+  cashIncomeCents      Int      @default(0)
+  cashExpenseCents     Int      @default(0)
+  transferIncomeCents  Int      @default(0)
+  transferExpenseCents Int      @default(0)
+  note                 String?
+  closedById           String
+  closedBy             User     @relation("DailyCloseBy", fields: [closedById], references: [id])
+  unlockedAt           DateTime?
+  unlockedById         String?
+  unlockedBy           User?    @relation("DailyCloseUnlockedBy", fields: [unlockedById], references: [id])
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@unique([storeId, closeDate])
   @@index([storeId, closeDate])

@@ -29,14 +29,12 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 
 ## Wave 2 — POS + Inventory
 
-- [ ] POS bill, payments, void
-- [ ] Split payment
-- [ ] Inventory serialized / non-serialized
-- [ ] Stock movement on sale/void
+**Status:** Complete
 
-**Depends on:** Wave 1 (ledger), Wave 0 (auth)
-
-**Conflict risk:** POS payment routes + inventory stock — `DO NOT RUN IN PARALLEL` with pawn redeem work.
+- [x] POS bill, payments, void
+- [x] Split payment
+- [x] Inventory serialized / non-serialized
+- [x] Stock movement on sale/void
 
 ## Wave 3 — Pawn + Customers
 

@@ -3,6 +3,7 @@ import { prisma } from '../server/lib/prisma.js';
 import { postLedgerEntry } from '../server/lib/ledger.js';
 import { closeDay } from '../server/lib/daily-close.js';
 import { toAuthUser } from '../server/lib/auth.js';
+import { createPosBill } from '../server/lib/pos.js';
 import bcrypt from 'bcryptjs';
 
 const DEV_PASSWORD = 'donutit-dev';
@@ -44,7 +45,13 @@ async function main() {
 
   const owner = userRecords.find((u) => u.role === 'OWNER')!;
 
-  // Clear wave 1 seed data for idempotent re-run
+  // Clear seed data (order matters for FKs)
+  await prisma.stockMovement.deleteMany({ where: { storeId: store.id } });
+  await prisma.posPayment.deleteMany({ where: { bill: { storeId: store.id } } });
+  await prisma.posBillLine.deleteMany({ where: { bill: { storeId: store.id } } });
+  await prisma.posBill.deleteMany({ where: { storeId: store.id } });
+  await prisma.serialItem.deleteMany({ where: { storeId: store.id } });
+  await prisma.product.deleteMany({ where: { storeId: store.id } });
   await prisma.auditLog.deleteMany({ where: { storeId: store.id } });
   await prisma.ledgerEntry.deleteMany({ where: { storeId: store.id } });
   await prisma.dailyClose.deleteMany({ where: { storeId: store.id } });
@@ -101,8 +108,50 @@ async function main() {
     referenceType: 'SEED',
   });
 
+  // Wave 2 — Products
+  const phone = await prisma.product.create({
+    data: {
+      storeId: store.id,
+      sku: 'PHONE-001',
+      name: 'มือถือมือสอง',
+      trackingType: 'SERIALIZED',
+      priceCents: 890000,
+      costCents: 750000,
+    },
+  });
+  const serial1 = await prisma.serialItem.create({
+    data: { storeId: store.id, productId: phone.id, serialNumber: 'SN-001-A', costCents: 750000 },
+  });
+  const serial2 = await prisma.serialItem.create({
+    data: { storeId: store.id, productId: phone.id, serialNumber: 'SN-001-B', costCents: 760000 },
+  });
+
+  const cable = await prisma.product.create({
+    data: {
+      storeId: store.id,
+      sku: 'CABLE-USB',
+      name: 'สายชาร์จ USB',
+      trackingType: 'QUANTITY',
+      priceCents: 15000,
+      costCents: 8000,
+      qtyOnHand: 50,
+    },
+  });
+
+  const staff = userRecords.find((u) => u.role === 'STAFF')!;
+
+  // Sample split-payment bill (cash + transfer) — uses serial1
+  const sampleBill = await createPosBill(toAuthUser(staff), {
+    lines: [{ productId: phone.id, serialItemId: serial1.id }],
+    payments: [
+      { channel: 'CASH', amountCents: 500000 },
+      { channel: 'TRANSFER', amountCents: 390000 },
+    ],
+  });
+
   console.log('Seed complete — store:', store.code);
-  console.log('Ledger: 4 entries, 1 locked daily close (2 days ago)');
+  console.log('Ledger: 4 manual entries + POS bill', sampleBill.billNumber);
+  console.log('Products: phone (2 serial), cable (qty 50→49 after sale)');
   console.log('Dev password:', DEV_PASSWORD);
 }
 
