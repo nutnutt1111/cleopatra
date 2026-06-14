@@ -48,17 +48,23 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 
 ## Wave 4 — Messenger + HR
 
-- [ ] Messenger jobs + delivery fee expense
-- [ ] HR employee + payroll (gated)
+**Status:** Complete
+
+- [x] Messenger jobs + delivery fee **INCOME** (fee collected from customer)
+- [x] HR employee + payroll (gated)
 
 **Depends on:** Wave 1 (ledger for fees)
 
 ## Wave 5 — Hardening
 
-- [ ] Full `seed-smith` coverage
-- [ ] `regress-ranger` automated smoke
-- [ ] `ux-patrol` tablet pass on all modules
-- [ ] Parity checklist fully `[x]`
+**Status:** Complete (merged via [PR #7](https://github.com/nutnutt1111/cleopatra/pull/7), 2026-06-14)
+
+- [x] Full `seed-smith` coverage (`yarn quality:seed`, `docs/seed-smith-coverage.md`)
+- [x] `regress-ranger` automated smoke (`yarn quality:api` + `yarn quality:smoke`)
+- [x] `ux-patrol` tablet pass on all modules (`yarn quality:ux`)
+- [x] Grumpy HARDTEST (`yarn quality:hardtest`) — pawn race, credit limit, CORS
+- [x] Extended review scripts (`review-audit.sh`, `money-audit.sh`)
+- [x] Parity checklist evidence-complete (2 items deferred post-MVP)
 
 ## Parallel Safe (after Wave 0)
 
@@ -72,3 +78,13 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 1. Schema → ledger → POS/pawn payment logic
 2. Permission helpers → any export or void endpoint
 3. Seed data → regression runs
+
+## Post-merge follow-ups (PR #7)
+
+**PR #7 merged:** 2026-06-14 → `cursor/wave-4-messenger-hr-e20d` @ `ab71b59`
+
+**Follow-up work:** Open — see [follow-ups-pr7.md](./follow-ups-pr7.md)
+
+- [ ] **FU-1 (P1)** Do not trust JWT role claims — reload user from DB per request
+- [ ] **FU-2 (P1)** CSRF protection for cookie-auth mutating routes
+- [ ] **FU-3 (P2)** Normalize race-conflict HTTP status codes to 409

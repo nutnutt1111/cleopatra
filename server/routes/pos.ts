@@ -4,6 +4,7 @@ import { assertRole } from '../lib/auth.js';
 import { canViewCost, InventoryError } from '../lib/inventory.js';
 import { createPosBill, PosError, voidPosBill } from '../lib/pos.js';
 import { formatBaht } from '../lib/ledger-utils.js';
+import { parsePagination } from '../lib/pagination.js';
 import { prisma } from '../lib/prisma.js';
 import type { PaymentChannel } from '../../src/generated/prisma/client.js';
 
@@ -18,6 +19,7 @@ export function createPosRouter(
   router.get('/bills', requireAuth, async (req, res) => {
     try {
       const user = (req as AuthedRequest).user;
+      const { limit, offset } = parsePagination(req.query);
       const bills = await prisma.posBill.findMany({
         where: { storeId: user.storeId },
         include: {
@@ -26,7 +28,8 @@ export function createPosRouter(
           createdBy: { select: { name: true } },
         },
         orderBy: { createdAt: 'desc' },
-        take: 50,
+        skip: offset,
+        take: limit,
       });
 
       res.json({
@@ -52,6 +55,8 @@ export function createPosRouter(
             amountBaht: formatBaht(p.amountCents),
           })),
         })),
+        limit,
+        offset,
       });
     } catch (err) {
       handleError(err, res);

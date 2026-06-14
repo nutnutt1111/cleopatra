@@ -107,6 +107,6 @@ When relevant changes are present, demand reruns of:
 4. Pawn interest payment → principal unchanged, interest ledger posted
 5. Pawn full redeem → ticket closed, items released, ledger balanced
 6. Inventory serialized sale → serial status sold; void restores available
-7. Messenger delivered job → delivery fee expense posted
+7. Messenger delivered job → delivery fee **INCOME** posted (fee collected)
 8. Daily close → subsequent mutations blocked for closed date
 9. Customer credit sale + partial payment → receivable balance correct

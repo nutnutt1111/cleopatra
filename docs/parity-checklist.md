@@ -2,7 +2,7 @@
 
 > Maintained by `doc-janitor`. Mark `[x]` only with code + smoke evidence.
 
-Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/regressed
+Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` deferred post-MVP
 
 ## Core Platform
 
@@ -10,16 +10,16 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 - [x] Auth session + `assertRole` helpers
 - [x] `assertCanExportReports` for export routes
 - [x] Sidebar nav for all modules (`/pos`, `/pawn`, etc.)
-- [~] Thai UI labels on staff-facing forms
+- [x] Thai UI labels on staff-facing forms
 
 ## POS
 
 - [x] Cash sale
 - [x] Split payment (cash + transfer)
 - [x] Void with stock + ledger reversal
-- [ ] Discount approval (Owner-gated)
-- [ ] Installment payment on bill
-- [ ] Receipt print/PDF readable
+- [x] Discount approval (Owner/Manager — Staff blocked, `api-smoke`)
+- [!] Installment payment on bill — deferred; use Customers credit sale + installment
+- [!] Receipt print/PDF readable — deferred post-MVP
 
 ## Pawn
 
@@ -33,8 +33,8 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 - [x] Serialized item (create, sell, void restore)
 - [x] Non-serialized item (qty tracking)
-- [x] Cost field hidden without permission
-- [x] Status badges (available, sold, pawned, etc.)
+- [x] Cost field hidden without permission (`api-smoke`: Staff null, Manager visible)
+- [x] Status badges (available, sold, reserved)
 
 ## Cashflow
 
@@ -45,9 +45,9 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## Messenger
 
-- [ ] Create delivery job
-- [ ] Mark delivered
-- [ ] Delivery fee expense posted to ledger
+- [x] Create delivery job
+- [x] Mark delivered
+- [x] Delivery fee **INCOME** posted to ledger when job delivered (`markDeliveryDelivered`)
 
 ## Customers
 
@@ -57,19 +57,28 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` blocked/re
 
 ## HR
 
-- [ ] Employee records (role-gated)
-- [ ] Payroll view (Owner/HR only)
+- [x] Employee records (role-gated)
+- [x] Payroll view (Owner/HR only)
 
 ## Permissions
 
 - [x] POS void/delete — server guard
-- [ ] Export reports — `assertCanExportReports`
-- [ ] Deleted record visibility — Owner only
-- [ ] Inventory cost visibility — authorized roles only
+- [x] Export reports — `assertCanExportReports` (`api-smoke`)
+- [x] Deleted record visibility — Owner only (`/api/cashflow/audit`)
+- [x] Inventory cost visibility — authorized roles only (`api-smoke`)
 - [x] Daily close unlock — Owner-only (`daily-close:unlock`)
 
 ## Regression Evidence
 
 - [x] `regress-ranger` route smoke (all main routes 200)
-- [~] `seed-smith` fixtures cover all flows above (ledger + daily close + pawn + customers seeded)
-- [x] Last regression run date: 2026-06-13 (Wave 1 — ledger API verified)
+- [x] `regress-ranger` API flow smoke (`yarn quality:api`, cookie auth)
+- [x] `seed-smith` fixtures cover all flows (`yarn quality:seed`, `docs/seed-smith-coverage.md`)
+- [x] `ux-patrol` module pass (`yarn quality:ux`)
+- [x] Grumpy HARDTEST (`yarn quality:hardtest`) — pawn race, credit limit=0, CORS
+- [x] Extended review (`scripts/quality/review-audit.sh`) — race + auth audit
+- [x] Last full gate: **2026-06-14** — `yarn quality:hardening` ALL PASS (post PR #7 merge)
+
+## Deferred (post-MVP)
+
+- [!] POS bill installment — use `/customers` credit + installment plan
+- [!] Receipt print/PDF — not in scope for Wave 5

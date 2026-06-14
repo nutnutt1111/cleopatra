@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import type { AuthUser } from '../lib/auth.js';
-import { assertAction, assertRole } from '../lib/auth.js';
+import { assertRole } from '../lib/auth.js';
 import { closeDay, unlockDay } from '../lib/daily-close.js';
 import { LedgerError, postLedgerEntry, voidLedgerEntry } from '../lib/ledger.js';
 import { formatBaht, parseBahtToCents, toDateOnly, LedgerParseError } from '../lib/ledger-utils.js';
+import { parsePagination } from '../lib/pagination.js';
 import { prisma } from '../lib/prisma.js';
 import type { LedgerEntryType, PaymentChannel } from '../../src/generated/prisma/client.js';
 
@@ -53,6 +54,7 @@ export function createCashflowRouter(
       const user = (req as AuthedRequest).user;
       const from = req.query.from ? toDateOnly(String(req.query.from)) : undefined;
       const to = req.query.to ? toDateOnly(String(req.query.to)) : undefined;
+      const { limit, offset } = parsePagination(req.query, { limit: 50, max: 200 });
 
       const entries = await prisma.ledgerEntry.findMany({
         where: {
@@ -68,10 +70,11 @@ export function createCashflowRouter(
         },
         include: { createdBy: { select: { name: true } } },
         orderBy: [{ entryDate: 'desc' }, { createdAt: 'desc' }],
-        take: 200,
+        skip: offset,
+        take: limit,
       });
 
-      res.json({ entries: entries.map(serializeEntry) });
+      res.json({ entries: entries.map(serializeEntry), limit, offset });
     } catch (err) {
       handleError(err, res);
     }
@@ -138,6 +141,7 @@ export function createCashflowRouter(
   router.get('/daily-close', requireAuth, async (req, res) => {
     try {
       const user = (req as AuthedRequest).user;
+      const { limit, offset } = parsePagination(req.query, { limit: 30, max: 100 });
       const closes = await prisma.dailyClose.findMany({
         where: { storeId: user.storeId },
         include: {
@@ -145,7 +149,8 @@ export function createCashflowRouter(
           unlockedBy: { select: { name: true } },
         },
         orderBy: { closeDate: 'desc' },
-        take: 30,
+        skip: offset,
+        take: limit,
       });
 
       res.json({
@@ -157,11 +162,19 @@ export function createCashflowRouter(
           cashExpenseBaht: formatBaht(c.cashExpenseCents),
           transferIncomeBaht: formatBaht(c.transferIncomeCents),
           transferExpenseBaht: formatBaht(c.transferExpenseCents),
+          cashIncomeCents: c.cashIncomeCents,
+          cashExpenseCents: c.cashExpenseCents,
+          transferIncomeCents: c.transferIncomeCents,
+          transferExpenseCents: c.transferExpenseCents,
+          netCents:
+            c.cashIncomeCents - c.cashExpenseCents + c.transferIncomeCents - c.transferExpenseCents,
           note: c.note,
           closedByName: c.closedBy.name,
           unlockedByName: c.unlockedBy?.name ?? null,
           unlockedAt: c.unlockedAt?.toISOString() ?? null,
         })),
+        limit,
+        offset,
       });
     } catch (err) {
       handleError(err, res);
@@ -188,8 +201,13 @@ export function createCashflowRouter(
         },
         totals: {
           netBaht: formatBaht(result.totals.net),
+          netCents: result.totals.net,
           cashIncomeBaht: formatBaht(result.totals.cashIncome),
+          cashIncomeCents: result.totals.cashIncome,
           cashExpenseBaht: formatBaht(result.totals.cashExpense),
+          cashExpenseCents: result.totals.cashExpense,
+          transferIncomeCents: result.totals.transferIncome,
+          transferExpenseCents: result.totals.transferExpense,
         },
       });
     } catch (err) {
@@ -220,24 +238,39 @@ export function createCashflowRouter(
   router.get('/audit', requireAuth, async (req, res) => {
     try {
       const user = (req as AuthedRequest).user;
-      assertRole(user, 'OWNER', 'MANAGER');
+      assertRole(user, 'OWNER');
+      const { limit, offset } = parsePagination(req.query, { limit: 50, max: 100 });
 
       const logs = await prisma.auditLog.findMany({
         where: { storeId: user.storeId },
         include: { user: { select: { name: true } } },
         orderBy: { createdAt: 'desc' },
-        take: 50,
+        skip: offset,
+        take: limit,
       });
 
       res.json({
-        logs: logs.map((l) => ({
-          id: l.id,
-          action: l.action,
-          entityType: l.entityType,
-          entityId: l.entityId,
-          userName: l.user.name,
-          createdAt: l.createdAt.toISOString(),
-        })),
+        logs: logs.map((l) => {
+          let payload: unknown = null;
+          if (l.payload) {
+            try {
+              payload = JSON.parse(l.payload);
+            } catch {
+              payload = l.payload;
+            }
+          }
+          return {
+            id: l.id,
+            action: l.action,
+            entityType: l.entityType,
+            entityId: l.entityId,
+            payload,
+            userName: l.user.name,
+            createdAt: l.createdAt.toISOString(),
+          };
+        }),
+        limit,
+        offset,
       });
     } catch (err) {
       handleError(err, res);

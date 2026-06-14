@@ -6,6 +6,8 @@ import { toAuthUser } from '../server/lib/auth.js';
 import { createPosBill } from '../server/lib/pos.js';
 import { createPawnTicket, payPawnInterest } from '../server/lib/pawn.js';
 import { createCustomer, createCreditSale, recordCustomerPayment } from '../server/lib/customers.js';
+import { createDeliveryJob, markDeliveryDelivered } from '../server/lib/messenger.js';
+import { createEmployee, createPayrollRun } from '../server/lib/hr.js';
 import bcrypt from 'bcryptjs';
 
 const DEV_PASSWORD = 'donutit-dev';
@@ -48,6 +50,10 @@ async function main() {
   const owner = userRecords.find((u) => u.role === 'OWNER')!;
 
   // Clear seed data (order matters for FKs)
+  await prisma.payrollLine.deleteMany({ where: { payrollRun: { storeId: store.id } } });
+  await prisma.payrollRun.deleteMany({ where: { storeId: store.id } });
+  await prisma.employee.deleteMany({ where: { storeId: store.id } });
+  await prisma.deliveryJob.deleteMany({ where: { storeId: store.id } });
   await prisma.customerPayment.deleteMany({ where: { customer: { storeId: store.id } } });
   await prisma.installmentPlan.deleteMany({ where: { creditSale: { storeId: store.id } } });
   await prisma.creditSale.deleteMany({ where: { storeId: store.id } });
@@ -197,12 +203,59 @@ async function main() {
     creditSaleId: creditSale.id,
   });
 
+  // Wave 4 — Messenger + HR
+  const pendingJob = await createDeliveryJob(toAuthUser(staff), {
+    customerName: 'คุณวิชัย รับของ',
+    customerPhone: '082-111-2222',
+    address: '123 ถ.สุขุมวิท กรุงเทพฯ',
+    description: 'มือถือ 1 เครื่อง',
+    deliveryFeeCents: 8000,
+    feeChannel: 'CASH',
+  });
+
+  const deliveredJob = await createDeliveryJob(toAuthUser(manager), {
+    customerName: customerA.name,
+    customerPhone: customerA.phone ?? undefined,
+    address: '45 ถ.พระราม 4',
+    description: 'สายชาร์จ x2',
+    deliveryFeeCents: 5000,
+    feeChannel: 'TRANSFER',
+  });
+  await markDeliveryDelivered(toAuthUser(staff), deliveredJob.id);
+
+  const hrUser = userRecords.find((u) => u.role === 'HR')!;
+
+  await createEmployee(toAuthUser(hrUser), {
+    name: 'สมหญิง ขายดี',
+    phone: '083-555-6666',
+    position: 'พนักงานขาย',
+    salaryCents: 1500000,
+  });
+  await createEmployee(toAuthUser(hrUser), {
+    name: 'สมศักดิ์ จัดส่ง',
+    phone: '084-777-8888',
+    position: 'แมสเซนเจอร์',
+    salaryCents: 1200000,
+  });
+
+  const payrollDraft = await createPayrollRun(toAuthUser(hrUser), {
+    periodLabel: 'มิ.ย. 2026',
+    periodStart: today,
+    periodEnd: today,
+  });
+
   console.log('Seed complete — store:', store.code);
   console.log('Ledger: 4 manual entries + POS bill', sampleBill.billNumber);
   console.log('Products: phone (2 serial), cable (qty 50→49 after sale)');
   console.log('Pawn:', pawnTicket.ticketNumber, '(interest paid once)');
   console.log('Customers:', customerA.name, customerB.name, '(1 partial installment payment)');
+  console.log('Messenger:', pendingJob.jobNumber, '(pending),', deliveredJob.jobNumber, '(delivered, fee posted)');
+  console.log('HR: 2 employees, payroll draft', payrollDraft.periodLabel, formatBaht(payrollDraft.totalCents), 'บาท');
   console.log('Dev password:', DEV_PASSWORD);
+}
+
+function formatBaht(cents: number): string {
+  return (cents / 100).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 main()

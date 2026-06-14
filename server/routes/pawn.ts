@@ -10,6 +10,7 @@ import {
   voidPawnTicket,
 } from '../lib/pawn.js';
 import { formatBaht } from '../lib/ledger-utils.js';
+import { parsePagination } from '../lib/pagination.js';
 import { prisma } from '../lib/prisma.js';
 import type { PaymentChannel } from '../../src/generated/prisma/client.js';
 
@@ -24,6 +25,7 @@ export function createPawnRouter(
   router.get('/tickets', requireAuth, async (req, res) => {
     try {
       const user = (req as AuthedRequest).user;
+      const { limit, offset } = parsePagination(req.query);
       const tickets = await prisma.pawnTicket.findMany({
         where: { storeId: user.storeId },
         include: {
@@ -31,7 +33,8 @@ export function createPawnRouter(
           createdBy: { select: { name: true } },
         },
         orderBy: { createdAt: 'desc' },
-        take: 50,
+        skip: offset,
+        take: limit,
       });
 
       res.json({
@@ -62,6 +65,8 @@ export function createPawnRouter(
             createdAt: p.createdAt.toISOString(),
           })),
         })),
+        limit,
+        offset,
       });
     } catch (err) {
       handleError(err, res);

@@ -3,6 +3,7 @@ import type { AuthUser } from './auth.js';
 import { assertAction } from './auth.js';
 import { LedgerError, assertDateNotLocked, sumLedgerForDate } from './ledger.js';
 import { toDateOnly } from './ledger-utils.js';
+import { mergeAuditPayload } from './audit-context.js';
 import type { Prisma } from '../../src/generated/prisma/client.js';
 
 type Tx = Prisma.TransactionClient;
@@ -25,7 +26,7 @@ async function writeAudit(
       action: params.action,
       entityType: params.entityType,
       entityId: params.entityId,
-      payload: params.payload ? JSON.stringify(params.payload) : null,
+      payload: params.payload ? JSON.stringify(mergeAuditPayload(params.payload) ?? {}) : null,
     },
   });
 }
@@ -41,9 +42,9 @@ export async function closeDay(user: AuthUser, closeDateInput: string | Date, no
     throw new LedgerError('วันนี้ปิดแล้ว', 409);
   }
 
-  const totals = await sumLedgerForDate(user.storeId, closeDate);
-
   const record = await prisma.$transaction(async (tx) => {
+    const totals = await sumLedgerForDate(user.storeId, closeDate, tx);
+
     const close = await tx.dailyClose.upsert({
       where: { storeId_closeDate: { storeId: user.storeId, closeDate } },
       update: {
@@ -81,6 +82,18 @@ export async function closeDay(user: AuthUser, closeDateInput: string | Date, no
 
     return close;
   });
+
+  const totals = {
+    cashIncome: record.cashIncomeCents,
+    cashExpense: record.cashExpenseCents,
+    transferIncome: record.transferIncomeCents,
+    transferExpense: record.transferExpenseCents,
+    net:
+      record.cashIncomeCents -
+      record.cashExpenseCents +
+      record.transferIncomeCents -
+      record.transferExpenseCents,
+  };
 
   return { close: record, totals };
 }

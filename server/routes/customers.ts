@@ -8,6 +8,7 @@ import {
   recordCustomerPayment,
 } from '../lib/customers.js';
 import { formatBaht } from '../lib/ledger-utils.js';
+import { parsePagination } from '../lib/pagination.js';
 import { prisma } from '../lib/prisma.js';
 import type { PaymentChannel } from '../../src/generated/prisma/client.js';
 
@@ -22,6 +23,7 @@ export function createCustomersRouter(
   router.get('/', requireAuth, async (req, res) => {
     try {
       const user = (req as AuthedRequest).user;
+      const { limit, offset } = parsePagination(req.query);
       const customers = await prisma.customer.findMany({
         where: { storeId: user.storeId, isActive: true },
         include: {
@@ -33,6 +35,8 @@ export function createCustomersRouter(
           payments: { orderBy: { createdAt: 'desc' }, take: 5 },
         },
         orderBy: { name: 'asc' },
+        skip: offset,
+        take: limit,
       });
 
       res.json({
@@ -66,6 +70,8 @@ export function createCustomersRouter(
             createdAt: p.createdAt.toISOString(),
           })),
         })),
+        limit,
+        offset,
       });
     } catch (err) {
       handleError(err, res);

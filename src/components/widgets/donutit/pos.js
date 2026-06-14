@@ -1,4 +1,5 @@
-import { apiFetch, getAuthToken } from './donutit-api.js';
+import { apiFetch, isLoggedIn } from './donutit-api.js';
+import { escapeHtml } from './escape-html.js';
 
 let productsCache = [];
 
@@ -15,7 +16,7 @@ function renderProductSelect() {
   if (!sel) return;
   sel.innerHTML = '<option value="">-- เลือกสินค้า --</option>';
   productsCache.forEach((p) => {
-    sel.innerHTML += `<option value="${p.id}" data-type="${p.trackingType}" data-price="${p.priceCents}">${p.name} (${p.priceBaht} บาท)</option>`;
+    sel.innerHTML += `<option value="${escapeHtml(p.id)}" data-type="${escapeHtml(p.trackingType)}" data-price="${p.priceCents}">${escapeHtml(p.name)} (${escapeHtml(p.priceBaht)} บาท)</option>`;
   });
 }
 
@@ -33,7 +34,7 @@ function onProductChange() {
     serialWrap?.classList.remove('hidden');
     serialSel.innerHTML = '<option value="">-- เลือก Serial --</option>';
     product.serials.forEach((s) => {
-      serialSel.innerHTML += `<option value="${s.id}">${s.serialNumber}</option>`;
+      serialSel.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.serialNumber)}</option>`;
     });
   } else {
     serialWrap?.classList.add('hidden');
@@ -53,7 +54,7 @@ function renderCart() {
   el.innerHTML = cart
     .map(
       (item, i) => `<div class="flex justify-between py-2 border-b border-border text-sm">
-      <span>${item.name}${item.serial ? ` [${item.serial}]` : ''} x${item.qty}</span>
+      <span>${escapeHtml(item.name)}${item.serial ? ` [${escapeHtml(item.serial)}]` : ''} x${item.qty}</span>
       <span>${(item.lineTotalCents / 100).toFixed(2)}</span>
       <button data-remove="${i}" class="text-destructive text-xs">ลบ</button>
     </div>`,
@@ -94,17 +95,17 @@ async function loadBills() {
       (b) => `<div class="border border-border rounded-lg p-3 mb-2 ${b.status === 'VOIDED' ? 'opacity-60' : ''}">
       <div class="flex justify-between items-start">
         <div>
-          <p class="font-medium text-sm">${b.billNumber}</p>
-          <p class="text-xs text-muted-foreground">${b.createdByName} · ${new Date(b.createdAt).toLocaleString('th-TH')}</p>
-          <p class="text-sm mt-1">รวม <strong>${b.totalBaht}</strong> บาท
+          <p class="font-medium text-sm">${escapeHtml(b.billNumber)}</p>
+          <p class="text-xs text-muted-foreground">${escapeHtml(b.createdByName)} · ${new Date(b.createdAt).toLocaleString('th-TH')}</p>
+          <p class="text-sm mt-1">รวม <strong>${escapeHtml(b.totalBaht)}</strong> บาท
             ${b.payments.length > 1 ? `<span class="text-xs text-primary">(แยกจ่าย ${b.payments.length} ช่องทาง)</span>` : ''}
           </p>
-          <p class="text-xs text-muted-foreground">${b.lines.map((l) => l.productName).join(', ')}</p>
-          ${b.status === 'VOIDED' ? `<p class="text-xs text-destructive">ยกเลิก: ${b.voidReason}</p>` : ''}
+          <p class="text-xs text-muted-foreground">${b.lines.map((l) => escapeHtml(l.productName)).join(', ')}</p>
+          ${b.status === 'VOIDED' ? `<p class="text-xs text-destructive">ยกเลิก: ${escapeHtml(b.voidReason)}</p>` : ''}
         </div>
         ${
           b.status === 'COMPLETED'
-            ? `<button data-void-bill="${b.id}" class="text-xs text-destructive hover:underline">void</button>`
+            ? `<button data-void-bill="${escapeHtml(b.id)}" class="text-xs text-destructive hover:underline">void</button>`
             : '<span class="text-xs text-muted-foreground">voided</span>'
         }
       </div>
@@ -131,9 +132,9 @@ async function loadBills() {
   });
 }
 
-export function initPos() {
+export async function initPos() {
   if (!document.querySelector('[data-donutit-module="pos"]')) return;
-  if (!getAuthToken()) {
+  if (!(await isLoggedIn())) {
     document.getElementById('pos-status')?.replaceChildren(
       document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
     );

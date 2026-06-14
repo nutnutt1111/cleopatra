@@ -89,3 +89,14 @@ After `yarn db:seed`:
 - 2 customers with credit limits
 - 1 active pawn ticket with 1 interest payment (transfer detail)
 - 1 credit sale with 3-installment plan + 1 partial payment
+- 2 delivery jobs (1 delivered with fee **INCOME**), 2 employees, 1 payroll draft
+
+## Wave 4 — Messenger + HR Invariants
+
+| ID | Invariant | Enforcement |
+|----|-----------|-------------|
+| W4-M1 | Deliver posts **INCOME** when fee > 0 (fee collected) | `markDeliveryDelivered()` |
+| W4-M2 | Cancel only before delivered | `cancelDeliveryJob()` |
+| W4-H1 | Payroll view Owner/HR only | `assertHrPayrollAccess()` |
+| W4-H2 | Pay payroll posts EXPENSE | `payPayrollRun()` |
+| W4-H3 | Manager sees employees without salary | `canViewSalary()` redaction |

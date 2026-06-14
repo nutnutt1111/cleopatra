@@ -16,28 +16,65 @@ Seven specialized subagents keep delivery safe across financial, permission, reg
 
 ## Target Environment
 
-**Dev server:** [http://localhost:3003](http://localhost:3003)
+| Service | URL |
+|---------|-----|
+| Frontend | [http://localhost:3003](http://localhost:3003) |
+| API | [http://localhost:3004](http://localhost:3004) |
 
 ```bash
-yarn dev                    # เปิดเซิร์ฟเวอร์พอร์ต 3003
-yarn quality:audit          # รันเอเจนต์ทั้ง 7
-yarn quality:audit:extended # audit + ตรวจเพิ่ม (build, sidebar, ภาษาไทย, UX)
-yarn quality:smoke          # smoke test route อย่างเดียว
+yarn dev                    # Vite :3003
+yarn dev:api                # API :3004
+yarn dev:all                # both
+
+# Merge gate (run before release)
+yarn quality:hardening      # route → api → hardtest → seed → ux
+
+# Individual checks
+yarn quality:smoke            # route smoke
+yarn quality:api              # API flow smoke (cookie jar)
+yarn quality:hardtest         # Grumpy abuse/race tests
+yarn quality:seed             # seed-smith verification
+yarn quality:ux               # ux-patrol
+
+# Extended review (PR #7)
+yarn quality:review           # race-reaper + auth-attacker
+yarn quality:money            # money-invariant DB scan
+
+# Agent report (does NOT include hardening/hardtest)
+yarn quality:audit            # generates docs/quality/reports/
+yarn quality:audit:extended   # audit + extended checks
 ```
 
 Config: `scripts/quality/config.sh`
 
+## Hardening Gate (`yarn quality:hardening`)
+
+Orchestrator: `scripts/quality/hardening.sh`
+
+| Step | Script | Agent |
+|------|--------|-------|
+| 1 | `route-smoke.sh` | regress-ranger |
+| 2 | `api-smoke.sh` | regress-ranger |
+| 3 | `hardtest.sh` | Grumpy HARDTEST |
+| 4 | `seed-verify.sh` | seed-smith |
+| 5 | `ux-patrol.sh` | ux-patrol |
+
 ## Shared Docs
 
+- [Project Status](../PROJECT-STATUS.md) — delivery log + branch map
 - [Parity Checklist](../parity-checklist.md) — what is actually done
-- [Roadmap](../roadmap.md) — planned waves and dependencies
+- [Roadmap](../roadmap.md) — waves and follow-ups
+- [Follow-ups PR #7](../follow-ups-pr7.md) — open security items
 
 ## Merge Gate
 
-Do not merge to main when any of these verdicts are active:
+Do not merge when any of these verdicts are active:
 
 - `ledger-hawk` → BLOCK
 - `gate-keeper` → BLOCK
 - `regress-ranger` → BLOCK
+- `hardtest.sh` → any BLOCKER fail
 - `doc-janitor` → BLOCK DOC CLAIM
 - `ux-patrol` → BLOCK USABILITY
+
+**Last full gate pass:** 2026-06-14 (`yarn quality:hardening` after PR #7 merge)

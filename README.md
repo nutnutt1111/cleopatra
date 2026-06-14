@@ -1,148 +1,101 @@
-<div align="center">
-  
-  <h1>Cleopatra</h1>
-  <p><strong>Modern Admin Dashboard Template</strong></p>
-  
-  [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
-  [![Vite](https://img.shields.io/badge/Vite-5.0-646CFF.svg)](https://vitejs.dev/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-38B2AC.svg)](https://tailwindcss.com/)
-  
-  <p>A beautifully designed, production-ready admin dashboard built with <strong>Tailwind CSS v4</strong> and <strong>Vite</strong>.</p>
-  
-  [Live Demo](https://moesaid.github.io/cleopatra/)
-</div>
+# DonutiT Cleopatra
+
+Store-management platform for Thai retail and pawn operations — built on the [Cleopatra](https://github.com/moesaid/cleopatra) admin template (Vite + Tailwind v4).
+
+**Status:** Waves 0–5 complete · [PR #7](https://github.com/nutnutt1111/cleopatra/pull/7) merged (2026-06-14)  
+**Full status:** [docs/PROJECT-STATUS.md](docs/PROJECT-STATUS.md)
 
 ---
 
-## Version 2.0 - Complete Rewrite
+## Modules
 
-Version 2.0 is a **complete rewrite** from the ground up. The entire codebase has been rebuilt with a modern architecture, improved developer experience, and better performance.
-
-**What's New:**
-- Rebuilt with Tailwind CSS v4 and Vite
-- 4 unique dashboard templates
-- 10 accent colors + Light/Dark themes
-- SPA-like navigation without page reloads
-- Widget-based component architecture
-- Redesigned landing page
-
-**Documentation:**
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Project structure and architecture rules
-- [COMPONENT_GUIDE.md](COMPONENT_GUIDE.md) - How to create and use components
-
----
-
-## Preview
-
-<div align="center">
-  <img src="public/images/demo_1.png" alt="Analytics Dashboard" width="100%">
-</div>
-
-### 4 Dashboard Templates
-
-| Analytics | E-commerce |
-|-----------|------------|
-| ![Analytics](public/images/demo_1.png) | ![E-commerce](public/images/demo_2.png) |
-
-| Crypto | Mission Control |
-|--------|-----------------|
-| ![Crypto](public/images/demo_3.png) | ![Mission Control](public/images/demo_4.png) |
-
----
-
-## Features
-
-- **4 Dashboard Templates** - Analytics, E-commerce, Crypto, Mission Control
-- **2 Themes** - Light & Dark mode
-- **47+ Pages** - Authentication, Apps, Components, Forms, and more
-- **15+ Components** - Buttons, Cards, Tables, Charts, Modals, etc.
-- **SPA Navigation** - Smooth transitions without page reloads
-- **Responsive Design** - Works on all devices
-- **Modern Stack** - Vite, Tailwind CSS v4, Handlebars
-
----
-
-## Why Pure JavaScript?
-
-Cleopatra is built with vanilla JavaScript intentionally:
-
-- **Zero Framework Lock-in** - Use it with any backend (Laravel, Django, Rails, Node, or static)
-- **Faster Load Times** - No framework runtime overhead
-- **Easy to Understand** - Simple, readable code without framework abstractions
-- **Future Proof** - Vanilla JS never goes out of style
-- **Lightweight** - Smaller bundle size means faster page loads
-- **Full Control** - No hidden magic, you own every line of code
-
-This makes Cleopatra perfect for developers who want a clean starting point without the complexity of React, Vue, or Angular.
+| Module | Description |
+|--------|-------------|
+| **POS** | Cash sales, split payment, void + stock reversal |
+| **Inventory** | Serialized + quantity products, role-gated cost |
+| **Pawn** | Tickets, interest, redeem, void |
+| **Messenger** | Delivery jobs + fee collection |
+| **Cashflow** | Ledger, daily close, audit trail |
+| **Customers** | Credit sales, installments, receivables |
+| **HR** | Employees, payroll (Owner/HR gated) |
 
 ---
 
 ## Quick Start
 
 ```bash
-# Clone the repository
-git clone https://github.com/moesaid/cleopatra.git
+yarn install
+cp .env.example .env        # optional — defaults work for dev
 
-# Navigate to directory
-cd cleopatra
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+yarn db:reset               # migrate + seed dev data
+yarn dev:all                # API :3004 + frontend :3003
 ```
 
-Open [http://localhost:8081](http://localhost:8081)
+Open [http://localhost:3003](http://localhost:3003) — login via **Settings** with `owner@donutit.local` / `donutit-dev`.
+
+### Quality gate (before release)
+
+```bash
+yarn quality:hardening      # route + api + hardtest + seed + ux
+```
+
+See [docs/quality/README.md](docs/quality/README.md) for all `quality:*` scripts.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | Vite, Tailwind CSS v4, vanilla JS widgets |
+| API | Express, Prisma, SQLite (Postgres-ready schema) |
+| Auth | httpOnly cookie JWT (`credentials: 'include'`) |
+| Ports | Frontend **3003**, API **3004** |
 
 ---
 
 ## Project Structure
 
 ```
+server/                 # Express API
+  index.ts              # Auth, CORS, helmet, routes
+  lib/                  # Business logic (pos, pawn, ledger, …)
+  routes/               # REST handlers per module
+prisma/
+  schema.prisma         # Data model (waves 0–5)
+  seed.ts               # seed-smith fixtures
 src/
-├── components/
-│   ├── layout/      # App shell, header, sidebar
-│   ├── ui/          # Buttons, cards, alerts, modals
-│   ├── widgets/     # Dashboard widgets, charts, stats
-│   └── charts/      # ApexCharts & Chart.js components
-├── pages/           # Route files
-├── styles/          # Global styles & Tailwind config
-└── js/              # JavaScript modules
+  pages/donutit/        # Module HTML pages
+  components/widgets/donutit/  # JS widgets + donutit-api.js
+docs/
+  PROJECT-STATUS.md     # ← start here for full delivery log
+  parity-checklist.md   # What's done vs deferred
+  roadmap.md            # Waves + follow-ups
+scripts/quality/        # Automated gates (hardening, hardtest, …)
+.cursor/agents/         # 7 quality subagents
 ```
 
 ---
 
-## Customization
+## Documentation
 
-### Theme Colors
-
-Choose from 10 accent colors:
-
-| | | | | |
-|---|---|---|---|---|
-| Black (default) | Blue | Green | Orange | Yellow |
-| Olive | Slate | Cyan | Purple | Rose |
-
-### Theme Modes
-
-- **Light Mode** - Clean white interface
-- **Dark Mode** - Easy on the eyes
+- [Project status & wave log](docs/PROJECT-STATUS.md)
+- [Parity checklist](docs/parity-checklist.md)
+- [Roadmap & follow-ups](docs/roadmap.md)
+- [Ledger invariants](docs/ledger-invariants.md)
+- [Seed coverage](docs/seed-smith-coverage.md)
+- [Post-merge security (FU-1–3)](docs/follow-ups-pr7.md)
+- [Quality subagents](docs/quality/README.md)
+- [Agent orchestrator](AGENTS.md)
 
 ---
 
-## Tech Stack
+## Cleopatra Template (upstream)
 
-| Tool | Purpose |
-|------|---------|
-| **Vite** | Build tool & dev server |
-| **Tailwind CSS v4** | Utility-first styling |
-| **Handlebars** | Template partials |
-| **ApexCharts** | Interactive charts |
-| **Chart.js** | Additional chart types |
+This repo extends Cleopatra v2.0 — a production-ready admin dashboard template.
 
----
+- [ARCHITECTURE.md](ARCHITECTURE.md) — Cleopatra widget architecture
+- [COMPONENT_GUIDE.md](COMPONENT_GUIDE.md) — Component patterns
+- Original demo: [moesaid.github.io/cleopatra](https://moesaid.github.io/cleopatra/)
 
-## License
-
-MIT © [Mohamed Said](https://moesaid.com)
+MIT © [Mohamed Said](https://moesaid.com) (Cleopatra template)

@@ -16,7 +16,6 @@ export class AuthError extends Error {
 }
 
 const OWNER_ONLY_ACTIONS = new Set([
-  'pos:void',
   'pos:delete',
   'daily-close:unlock',
   'discount:approve',
@@ -53,6 +52,25 @@ export function assertAction(user: AuthUser, action: string): void {
     return;
   }
   assertOwnerOnly(user, action);
+}
+
+/** HR payroll and salary visibility — Owner or HR only */
+export function assertHrPayrollAccess(user: AuthUser): void {
+  assertRole(user, 'OWNER', 'HR');
+}
+
+/** Employee record management */
+export function assertHrManageAccess(user: AuthUser): void {
+  assertRole(user, 'OWNER', 'HR');
+}
+
+/** View employee list (salary may be redacted) */
+export function canViewEmployees(user: AuthUser): boolean {
+  return user.role === 'OWNER' || user.role === 'HR' || user.role === 'MANAGER';
+}
+
+export function canViewSalary(user: AuthUser): boolean {
+  return user.role === 'OWNER' || user.role === 'HR';
 }
 
 export function toAuthUser(user: User): AuthUser {

@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
 # DonutiT Cleopatra — Quality audit target
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+if [[ -f "$ROOT_DIR/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$ROOT_DIR/.env"
+  set +a
+fi
+
 export QUALITY_BASE_URL="${QUALITY_BASE_URL:-http://localhost:3003}"
+export QUALITY_API_URL="${QUALITY_API_URL:-http://localhost:3004}"
 export QUALITY_TIMEOUT="${QUALITY_TIMEOUT:-10}"
 export QUALITY_REPORT_DIR="${QUALITY_REPORT_DIR:-docs/quality/reports}"
+export QUALITY_DEV_PASSWORD="${QUALITY_DEV_PASSWORD:-${SEED_DEV_PASSWORD:-}}"
 
 # Core routes (regress-ranger)
 export QUALITY_ROUTES=(

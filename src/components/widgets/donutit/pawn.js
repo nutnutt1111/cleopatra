@@ -1,4 +1,5 @@
-import { apiFetch, getAuthToken } from './donutit-api.js';
+import { apiFetch, isLoggedIn } from './donutit-api.js';
+import { escapeHtml } from './escape-html.js';
 
 const STATUS_LABELS = {
   ACTIVE: 'ใช้งาน',
@@ -26,22 +27,22 @@ function renderTickets(tickets) {
       (t) => `<div class="border border-border rounded-lg p-3 mb-2 ${t.status !== 'ACTIVE' ? 'opacity-70' : ''}">
       <div class="flex justify-between items-start gap-2">
         <div class="min-w-0">
-          <p class="font-medium text-sm">${t.ticketNumber}</p>
-          <p class="text-xs text-muted-foreground">${t.customerName}${t.customerPhone ? ` · ${t.customerPhone}` : ''}</p>
-          <p class="text-sm mt-1">${t.itemDescription}</p>
-          <p class="text-sm">เงินต้น <strong>${t.principalBaht}</strong> บาท · ดอกเบี้ย ${t.interestPerPeriodBaht} บาท/งวด (${t.interestRatePercent}%)</p>
+          <p class="font-medium text-sm">${escapeHtml(t.ticketNumber)}</p>
+          <p class="text-xs text-muted-foreground">${escapeHtml(t.customerName)}${t.customerPhone ? ` · ${escapeHtml(t.customerPhone)}` : ''}</p>
+          <p class="text-sm mt-1">${escapeHtml(t.itemDescription)}</p>
+          <p class="text-sm">เงินต้น <strong>${escapeHtml(t.principalBaht)}</strong> บาท · ดอกเบี้ย ${escapeHtml(t.interestPerPeriodBaht)} บาท/งวด (${escapeHtml(t.interestRatePercent)}%)</p>
           <p class="text-xs text-muted-foreground">ครบดอกถัดไป: ${new Date(t.nextInterestDueAt).toLocaleDateString('th-TH')}</p>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-muted">${STATUS_LABELS[t.status] || t.status}</span>
-          ${t.transferDetail ? `<p class="text-xs mt-1 text-primary">โอน: ${t.transferDetail}</p>` : ''}
+          <span class="text-xs px-2 py-0.5 rounded-full bg-muted">${escapeHtml(STATUS_LABELS[t.status] || t.status)}</span>
+          ${t.transferDetail ? `<p class="text-xs mt-1 text-primary">โอน: ${escapeHtml(t.transferDetail)}</p>` : ''}
           ${t.payments.length ? `<p class="text-xs mt-1 text-muted-foreground">ชำระแล้ว ${t.payments.length} ครั้ง</p>` : ''}
-          ${t.status === 'VOIDED' ? `<p class="text-xs text-destructive">ยกเลิก: ${t.voidReason}</p>` : ''}
+          ${t.status === 'VOIDED' ? `<p class="text-xs text-destructive">ยกเลิก: ${escapeHtml(t.voidReason)}</p>` : ''}
         </div>
         ${
           t.status === 'ACTIVE'
             ? `<div class="flex flex-col gap-1 shrink-0">
-            <button data-interest="${t.id}" class="text-xs px-2 py-1 bg-secondary border border-border rounded hover:bg-muted">รับดอกเบี้ย</button>
-            <button data-redeem="${t.id}" class="text-xs px-2 py-1 bg-primary text-primary-foreground rounded">ไถ่ถอน</button>
-            <button data-void="${t.id}" class="text-xs text-destructive hover:underline">void</button>
+            <button data-interest="${escapeHtml(t.id)}" class="text-xs px-2 py-1 bg-secondary border border-border rounded hover:bg-muted">รับดอกเบี้ย</button>
+            <button data-redeem="${escapeHtml(t.id)}" class="text-xs px-2 py-1 bg-primary text-primary-foreground rounded">ไถ่ถอน</button>
+            <button data-void="${escapeHtml(t.id)}" class="text-xs text-destructive hover:underline">void</button>
           </div>`
             : ''
         }
@@ -110,9 +111,9 @@ function renderTickets(tickets) {
   });
 }
 
-export function initPawn() {
+export async function initPawn() {
   if (!document.querySelector('[data-donutit-module="pawn"]')) return;
-  if (!getAuthToken()) {
+  if (!(await isLoggedIn())) {
     document.getElementById('pawn-status')?.replaceChildren(
       document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
     );

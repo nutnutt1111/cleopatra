@@ -1,6 +1,7 @@
 import type { AuditAction, Prisma } from '../../src/generated/prisma/client.js';
 import { prisma } from './prisma.js';
 import type { AuthUser } from './auth.js';
+import { mergeAuditPayload } from './audit-context.js';
 import { oppositeType, signedAmountCents, toDateOnly } from './ledger-utils.js';
 import type { LedgerEntryType, PaymentChannel } from '../../src/generated/prisma/client.js';
 
@@ -44,7 +45,7 @@ async function writeAudit(
       action: params.action,
       entityType: params.entityType,
       entityId: params.entityId,
-      payload: params.payload ? JSON.stringify(params.payload) : null,
+      payload: JSON.stringify(mergeAuditPayload(params.payload) ?? {}),
     },
   });
 }
@@ -99,37 +100,37 @@ export async function voidLedgerEntry(
   entryId: string,
   user: AuthUser,
   reason: string,
-  tx: Tx = prisma,
+  tx?: Tx,
 ) {
   if (!reason.trim()) {
     throw new LedgerError('กรุณาระบุเหตุผลในการยกเลิก');
   }
 
-  const original = await tx.ledgerEntry.findFirst({
-    where: { id: entryId, storeId: user.storeId },
-  });
+  const runVoid = async (client: Tx) => {
+    const original = await client.ledgerEntry.findFirst({
+      where: { id: entryId, storeId: user.storeId },
+    });
 
-  if (!original) {
-    throw new LedgerError('ไม่พบรายการ', 404);
-  }
-  if (original.isVoided) {
-    throw new LedgerError('รายการนี้ถูกยกเลิกแล้ว');
-  }
-  if (original.reversalOfId) {
-    throw new LedgerError('ไม่สามารถยกเลิกรายการกลับรายการได้');
-  }
+    if (!original) {
+      throw new LedgerError('ไม่พบรายการ', 404);
+    }
+    if (original.isVoided) {
+      throw new LedgerError('รายการนี้ถูกยกเลิกแล้ว');
+    }
+    if (original.reversalOfId) {
+      throw new LedgerError('ไม่สามารถยกเลิกรายการกลับรายการได้');
+    }
 
-  await assertDateNotLocked(user.storeId, original.entryDate, tx);
+    await assertDateNotLocked(user.storeId, original.entryDate, client);
 
-  const now = new Date();
+    const now = new Date();
 
-  return tx.$transaction(async (inner) => {
-    await inner.ledgerEntry.update({
+    await client.ledgerEntry.update({
       where: { id: original.id },
       data: { isVoided: true, voidedAt: now, voidReason: reason },
     });
 
-    const reversal = await inner.ledgerEntry.create({
+    const reversal = await client.ledgerEntry.create({
       data: {
         storeId: original.storeId,
         entryDate: original.entryDate,
@@ -144,7 +145,7 @@ export async function voidLedgerEntry(
       },
     });
 
-    await writeAudit(inner, {
+    await writeAudit(client, {
       storeId: user.storeId,
       userId: user.id,
       action: 'LEDGER_VOID',
@@ -154,7 +155,12 @@ export async function voidLedgerEntry(
     });
 
     return { original, reversal };
-  });
+  };
+
+  if (tx) {
+    return runVoid(tx);
+  }
+  return prisma.$transaction(runVoid);
 }
 
 export async function sumLedgerForDate(storeId: string, date: Date, tx: Tx = prisma) {
@@ -193,9 +199,10 @@ export async function voidLedgerByReference(
   referenceType: string,
   referenceId: string,
   reason: string,
-  tx: Tx = prisma,
+  tx?: Tx,
 ) {
-  const entries = await tx.ledgerEntry.findMany({
+  const client = tx ?? prisma;
+  const entries = await client.ledgerEntry.findMany({
     where: {
       storeId: user.storeId,
       referenceType,

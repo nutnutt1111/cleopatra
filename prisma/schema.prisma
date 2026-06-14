@@ -1,4 +1,4 @@
-// DonutiT Cleopatra — Wave 0–3
+// DonutiT Cleopatra — Waves 0–5 (see docs/PROJECT-STATUS.md)
 
 generator client {
   provider = "prisma-client"
@@ -44,6 +44,12 @@ enum AuditAction {
   PAWN_VOID
   CREDIT_SALE
   CUSTOMER_PAYMENT
+  MESSENGER_CREATE
+  MESSENGER_DELIVER
+  MESSENGER_CANCEL
+  HR_EMPLOYEE_CREATE
+  PAYROLL_RUN
+  PAYROLL_PAY
 }
 
 enum TrackingType {
@@ -92,6 +98,18 @@ enum InstallmentStatus {
   DEFAULTED
 }
 
+enum DeliveryJobStatus {
+  PENDING
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum PayrollStatus {
+  DRAFT
+  PAID
+}
+
 model Store {
   id            String          @id @default(cuid())
   name          String
@@ -109,6 +127,9 @@ model Store {
   customers     Customer[]
   pawnTickets   PawnTicket[]
   creditSales   CreditSale[]
+  deliveryJobs  DeliveryJob[]
+  employees     Employee[]
+  payrollRuns   PayrollRun[]
 
   @@index([code])
 }
@@ -137,6 +158,11 @@ model User {
   pawnPayments     PawnPayment[]
   creditSales      CreditSale[]       @relation("CreditSaleCreatedBy")
   customerPayments CustomerPayment[]
+  deliveryJobs     DeliveryJob[]     @relation("DeliveryCreatedBy")
+  deliveredJobs    DeliveryJob[]     @relation("DeliveryDeliveredBy")
+  employeesCreated Employee[]        @relation("EmployeeCreatedBy")
+  payrollRuns      PayrollRun[]      @relation("PayrollCreatedBy")
+  payrollPaid      PayrollRun[]      @relation("PayrollPaidBy")
 
   @@index([storeId])
   @@index([role])
@@ -364,6 +390,8 @@ model PawnPayment {
   amountCents    Int
   channel        PaymentChannel  @default(CASH)
   transferDetail String?
+  /** Idempotency key for interest payments — one per due period */
+  periodKey      String?         @unique
   createdById    String
   createdBy      User            @relation(fields: [createdById], references: [id])
   createdAt      DateTime        @default(now())
@@ -400,6 +428,7 @@ model InstallmentPlan {
   creditSale             CreditSale        @relation(fields: [creditSaleId], references: [id], onDelete: Cascade)
   installmentCount       Int
   installmentAmountCents Int
+  installmentPeriodDays  Int               @default(30)
   paidInstallments       Int               @default(0)
   nextDueDate            DateTime
   status                 InstallmentStatus @default(ACTIVE)
@@ -425,6 +454,89 @@ model CustomerPayment {
 
   @@index([customerId, createdAt])
   @@index([creditSaleId])
+}
+
+model DeliveryJob {
+  id               String            @id @default(cuid())
+  storeId          String
+  store            Store             @relation(fields: [storeId], references: [id])
+  jobNumber        String
+  customerName     String
+  customerPhone    String?
+  address          String
+  description      String?
+  deliveryFeeCents Int               @default(0)
+  feeChannel       PaymentChannel    @default(CASH)
+  status           DeliveryJobStatus @default(PENDING)
+  createdById      String
+  createdBy        User              @relation("DeliveryCreatedBy", fields: [createdById], references: [id])
+  deliveredAt      DateTime?
+  deliveredById    String?
+  deliveredBy      User?             @relation("DeliveryDeliveredBy", fields: [deliveredById], references: [id])
+  cancelledAt      DateTime?
+  cancelReason     String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@unique([storeId, jobNumber])
+  @@index([storeId, status])
+  @@index([createdAt])
+}
+
+model Employee {
+  id           String        @id @default(cuid())
+  storeId      String
+  store        Store         @relation(fields: [storeId], references: [id])
+  employeeCode String
+  name         String
+  phone        String?
+  position     String?
+  salaryCents  Int           @default(0)
+  hireDate     DateTime
+  isActive     Boolean       @default(true)
+  createdById  String
+  createdBy    User          @relation("EmployeeCreatedBy", fields: [createdById], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  payrollLines PayrollLine[]
+
+  @@unique([storeId, employeeCode])
+  @@index([storeId, isActive])
+}
+
+model PayrollRun {
+  id          String        @id @default(cuid())
+  storeId     String
+  store       Store         @relation(fields: [storeId], references: [id])
+  periodLabel String
+  periodStart DateTime
+  periodEnd   DateTime
+  totalCents  Int
+  status      PayrollStatus @default(DRAFT)
+  createdById String
+  createdBy   User          @relation("PayrollCreatedBy", fields: [createdById], references: [id])
+  paidAt      DateTime?
+  paidById    String?
+  paidBy      User?         @relation("PayrollPaidBy", fields: [paidById], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  lines       PayrollLine[]
+
+  @@index([storeId, status])
+  @@index([periodStart, periodEnd])
+}
+
+model PayrollLine {
+  id           String     @id @default(cuid())
+  payrollRunId String
+  payrollRun   PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  employeeId   String
+  employee     Employee   @relation(fields: [employeeId], references: [id])
+  amountCents  Int
+  note         String?
+
+  @@index([payrollRunId])
+  @@index([employeeId])
 }
 
 model AuditLog {
