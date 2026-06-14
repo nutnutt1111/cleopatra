@@ -47,8 +47,12 @@ export function createPinKeypad(options = {}) {
     renderDots();
     notifyChange();
 
-    if (pin.length === maxLength && onComplete) {
-      onComplete(pin);
+    if (pin.length === maxLength) {
+      if (!isValidPin(pin)) {
+        clearPin();
+        return;
+      }
+      if (onComplete) onComplete(pin);
     }
   }
 

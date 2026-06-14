@@ -329,6 +329,13 @@
     },
     {
         "type": "link",
+        "id": "employee-settings",
+        "label": "Employee Profile",
+        "icon": "ri-id-card-line",
+        "href": "/pages/settings/employee.html"
+    },
+    {
+        "type": "link",
         "id": "theme",
         "label": "Theme",
         "icon": "ri-palette-line",

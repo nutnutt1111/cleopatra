@@ -4,11 +4,13 @@ import { initAuthTheme, markAuthPageLoaded } from './theme-init.js';
 import { AUTH_CONFIG } from './config.js';
 import {
   hideAuthError,
+  getQueryParam,
   redirectTo,
   requireAuthenticatedSession,
   showAuthError,
 } from './auth-flow.js';
 import { markDevicePinRegistered } from './device.js';
+import { isValidPin } from './pin-crypto.js';
 import { saveDevicePin } from './pin-service.js';
 import { createPinKeypad } from '../../components/auth/pin-keypad.js';
 
@@ -78,10 +80,22 @@ async function bootstrapSetPinPage() {
         return;
       }
 
+      if (!isValidPin(pin)) {
+        showAuthError(errorBox, 'PIN ต้องเป็นตัวเลข 6 หลักเท่านั้น');
+        keypad.shakeDots();
+        step = STEPS.ENTER;
+        firstPin = '';
+        updateCopy();
+        keypad.clearPin();
+        return;
+      }
+
       try {
         const { pinSalt } = await saveDevicePin(session.user.id, pin);
-        markDevicePinRegistered(session.user.id, session.user.email, pinSalt);
-        redirectTo(AUTH_CONFIG.redirectAfterLogin);
+        markDevicePinRegistered(session.user.id, session.user.email, pinSalt, pin);
+
+        const fromSettings = getQueryParam('from') === 'settings';
+        redirectTo(fromSettings ? AUTH_CONFIG.routes.employeeSettings : AUTH_CONFIG.redirectAfterLogin);
       } catch (error) {
         showAuthError(errorBox, error?.message || 'ไม่สามารถบันทึก PIN ได้');
         step = STEPS.ENTER;

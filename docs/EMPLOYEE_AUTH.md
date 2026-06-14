@@ -62,6 +62,14 @@ npm run dev
 
 Open: http://localhost:3003/login
 
+### 5. Employee settings
+
+Open **Settings → Employee Profile** (`/pages/settings/employee.html`) to view/edit:
+
+- ชื่อพนักงาน (stored in `employee_profiles`)
+- อีเมล (from Supabase session)
+- รหัส PIN 6 หลัก (masked, show/hide toggle — device-local display only)
+
 ## Routes
 
 | URL | Purpose |
@@ -70,6 +78,7 @@ Open: http://localhost:3003/login
 | `/set-pin` | First-time PIN setup (requires Supabase session) |
 | `/enter-pin` | Quick unlock with PIN |
 | `/forgot-password` | Password reset email |
+| `/pages/settings/employee.html` | Employee profile (name, email, PIN) |
 
 ## Files
 

@@ -40,12 +40,27 @@ export function getStoredPinSalt() {
   return localStorage.getItem(AUTH_CONFIG.storageKeys.pinSalt);
 }
 
-export function markDevicePinRegistered(userId, email, pinSalt) {
+export function storePinForDisplay(pin) {
+  localStorage.setItem(AUTH_CONFIG.storageKeys.pinDisplay, pin);
+}
+
+export function getStoredPinDisplay() {
+  return localStorage.getItem(AUTH_CONFIG.storageKeys.pinDisplay);
+}
+
+export function hasStoredPinDisplay() {
+  return Boolean(getStoredPinDisplay());
+}
+
+export function markDevicePinRegistered(userId, email, pinSalt, pinDisplay) {
   localStorage.setItem(AUTH_CONFIG.storageKeys.pinUserId, userId);
   localStorage.setItem(AUTH_CONFIG.storageKeys.pinUserEmail, email || '');
   localStorage.setItem(AUTH_CONFIG.storageKeys.pinEnabled, 'true');
   if (pinSalt) {
     storePinSalt(pinSalt);
+  }
+  if (pinDisplay) {
+    storePinForDisplay(pinDisplay);
   }
   localStorage.removeItem(AUTH_CONFIG.storageKeys.pinUnlocked);
 }
@@ -54,6 +69,7 @@ export function clearDevicePinRegistration() {
   localStorage.removeItem(AUTH_CONFIG.storageKeys.pinUserId);
   localStorage.removeItem(AUTH_CONFIG.storageKeys.pinUserEmail);
   localStorage.removeItem(AUTH_CONFIG.storageKeys.pinSalt);
+  localStorage.removeItem(AUTH_CONFIG.storageKeys.pinDisplay);
   localStorage.removeItem(AUTH_CONFIG.storageKeys.pinEnabled);
   localStorage.removeItem(AUTH_CONFIG.storageKeys.pinUnlocked);
 }
