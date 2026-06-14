@@ -61,6 +61,13 @@
     },
     {
         "type": "link",
+        "id": "donutit-login",
+        "label": "เข้าสู่ระบบ",
+        "icon": "ri-login-box-line",
+        "href": "/login"
+    },
+    {
+        "type": "link",
         "id": "donutit-settings",
         "label": "ตั้งค่า",
         "icon": "ri-settings-3-line",
@@ -205,8 +212,8 @@
         "children": [
             {
                 "id": "login",
-                "label": "Login",
-                "href": "/pages/extra/login.html"
+                "label": "เข้าสู่ระบบ (DonutiT)",
+                "href": "/login"
             },
             {
                 "id": "register",

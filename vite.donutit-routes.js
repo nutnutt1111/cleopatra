@@ -4,6 +4,7 @@ import { mkdirSync, copyFileSync, existsSync } from 'fs';
 /** DonutiT clean URL routes → HTML pages */
 export const DONUTIT_ROUTES = {
     '/dashboard': '/pages/donutit/dashboard.html',
+    '/login': '/pages/donutit/settings.html',
     '/pos': '/pages/donutit/pos.html',
     '/inventory': '/pages/donutit/inventory.html',
     '/pawn': '/pages/donutit/pawn.html',
