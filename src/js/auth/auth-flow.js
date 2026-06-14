@@ -37,14 +37,20 @@ export async function resolveInitialAuthRoute() {
 
 export async function afterEmailLogin(user) {
   const hasPin = await devicePinExists(user.id);
+  const next = getQueryParam('next');
 
   if (hasPin) {
     markDevicePinRegistered(user.id, user.email, null);
-    redirectTo(AUTH_CONFIG.redirectAfterLogin);
+    setPinUnlocked(true);
+    redirectTo(getPostLoginRedirect());
     return;
   }
 
-  redirectTo(AUTH_CONFIG.routes.setPin);
+  const setPinUrl = next
+    ? `${AUTH_CONFIG.routes.setPin}?next=${encodeURIComponent(next)}`
+    : AUTH_CONFIG.routes.setPin;
+
+  redirectTo(setPinUrl);
 }
 
 export async function afterPinUnlock() {
@@ -53,7 +59,7 @@ export async function afterPinUnlock() {
   setPinUnlocked(true);
 
   if (session) {
-    redirectTo(AUTH_CONFIG.redirectAfterLogin);
+    redirectTo(getPostLoginRedirect());
     return;
   }
 
@@ -70,6 +76,24 @@ export function fallbackToEmailLogin(clearPin = false) {
 
 export function getQueryParam(name) {
   return new URLSearchParams(window.location.search).get(name);
+}
+
+export function getPostLoginRedirect() {
+  const next = getQueryParam('next');
+
+  if (next && next.startsWith('/') && !next.startsWith('//')) {
+    return next;
+  }
+
+  return AUTH_CONFIG.redirectAfterLogin || AUTH_CONFIG.routes.dashboard;
+}
+
+export function getLoginUrlWithNext(nextPath) {
+  if (!nextPath) {
+    return AUTH_CONFIG.routes.login;
+  }
+
+  return `${AUTH_CONFIG.routes.login}?next=${encodeURIComponent(nextPath)}`;
 }
 
 export function showAuthError(container, message) {

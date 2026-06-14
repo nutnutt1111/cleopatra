@@ -4,6 +4,7 @@ import { initAuthTheme, markAuthPageLoaded } from './theme-init.js';
 import { AUTH_CONFIG } from './config.js';
 import {
   hideAuthError,
+  getPostLoginRedirect,
   getQueryParam,
   redirectTo,
   requireAuthenticatedSession,
@@ -95,7 +96,7 @@ async function bootstrapSetPinPage() {
         markDevicePinRegistered(session.user.id, session.user.email, pinSalt, pin);
 
         const fromSettings = getQueryParam('from') === 'settings';
-        redirectTo(fromSettings ? AUTH_CONFIG.routes.employeeSettings : AUTH_CONFIG.redirectAfterLogin);
+        redirectTo(fromSettings ? AUTH_CONFIG.routes.employeeSettings : getPostLoginRedirect());
       } catch (error) {
         showAuthError(errorBox, error?.message || 'ไม่สามารถบันทึก PIN ได้');
         step = STEPS.ENTER;
@@ -110,7 +111,7 @@ async function bootstrapSetPinPage() {
 
   document.getElementById('skip-pin-link')?.addEventListener('click', (event) => {
     event.preventDefault();
-    redirectTo(AUTH_CONFIG.redirectAfterLogin);
+    redirectTo(getPostLoginRedirect());
   });
 }
 

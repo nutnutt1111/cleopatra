@@ -1,5 +1,6 @@
 import { AUTH_CONFIG, isSupabaseConfigured } from './config.js';
 import {
+  getLoginUrlWithNext,
   hideAuthError,
   redirectTo,
   setLoading,
@@ -77,7 +78,7 @@ async function bootstrapEmployeeSettings() {
 
   const session = await getCurrentSession();
   if (!session?.user) {
-    redirectTo(AUTH_CONFIG.routes.login);
+    redirectTo(getLoginUrlWithNext(AUTH_CONFIG.routes.employeeSettings));
     return;
   }
 
