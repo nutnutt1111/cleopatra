@@ -1,0 +1,23 @@
+{{> auth-start title="ตั้ง PIN" }}
+
+<div class="w-full max-w-sm mx-auto text-center">
+    <div class="mb-8">
+        <h1 id="set-pin-title" class="text-2xl font-semibold text-foreground mb-2">ตั้ง PIN 6 หลัก</h1>
+        <p id="set-pin-subtitle" class="text-sm text-muted-foreground">ใช้สำหรับปลดล็อกอุปกรณ์นี้อย่างรวดเร็ว</p>
+    </div>
+
+    <div id="set-pin-error"
+        class="hidden mb-6 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+    </div>
+
+    <div id="set-pin-dots" class="flex items-center justify-center gap-4 mb-10 min-h-[1.5rem]"></div>
+
+    <div id="set-pin-keypad" class="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs mx-auto"></div>
+
+    <button id="skip-pin-link" type="button"
+        class="mt-8 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        ข้ามไปก่อน
+    </button>
+</div>
+
+{{> auth-end authScript="/js/auth/set-pin.js" }}

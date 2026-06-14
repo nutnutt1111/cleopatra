@@ -1,0 +1,26 @@
+{{> auth-start title="ใส่ PIN" }}
+
+<div class="w-full max-w-sm mx-auto text-center">
+    <div class="mb-8">
+        <h1 class="text-2xl font-semibold text-foreground mb-2">ใส่ PIN</h1>
+        <p class="text-sm text-muted-foreground">
+            ปลดล็อกด้วย PIN 6 หลัก
+            <span id="pin-user-email" class="block mt-1 text-foreground/80"></span>
+        </p>
+    </div>
+
+    <div id="enter-pin-error"
+        class="hidden mb-6 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+    </div>
+
+    <div id="enter-pin-dots" class="flex items-center justify-center gap-4 mb-10 min-h-[1.5rem]"></div>
+
+    <div id="enter-pin-keypad" class="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs mx-auto"></div>
+
+    <a id="use-email-link" href="/login"
+        class="inline-flex mt-8 text-sm text-primary hover:text-primary/80 font-medium transition-colors">
+        เข้าสู่ระบบด้วยอีเมลแทน
+    </a>
+</div>
+
+{{> auth-end authScript="/js/auth/enter-pin.js" }}

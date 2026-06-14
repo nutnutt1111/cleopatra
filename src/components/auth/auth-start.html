@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link rel="icon" type="image/png" href="/images/fav.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        #auth-app {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #auth-loading {
+            position: fixed;
+            inset: 0;
+            background: var(--background, #fff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #auth-loading .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border, #e5e7eb);
+            border-top-color: var(--primary, #111);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pin-shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-8px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(8px);
+            }
+        }
+
+        .animate-pin-shake {
+            animation: pin-shake 0.4s ease-in-out;
+        }
+
+        body.loaded #auth-app {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.2s;
+        }
+
+        body.loaded #auth-loading {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-foreground min-h-screen">
+    <div id="auth-loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="auth-app" class="min-h-screen flex flex-col">
+        <header class="flex items-center justify-between px-4 sm:px-6 py-4">
+            <a href="/pages/index.html" class="flex items-center gap-2">
+                <img src="/images/logo.png" alt="Cleopatra"
+                    class="w-8 h-8 object-contain dark:invert dark:brightness-200">
+                <span class="font-semibold text-foreground">Cleopatra</span>
+            </a>
+            <button id="auth-theme-toggle" type="button"
+                class="w-10 h-10 flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                aria-label="สลับโหมดสี">
+                <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m02.12 5.66l-.71-.71M6.34 6.34l-.71-.71m12.02 12.02l-.71-.71M17.66 6.34l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+            </button>
+        </header>
+
+        <main class="flex-1 flex items-center justify-center px-4 pb-10">

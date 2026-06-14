@@ -50,6 +50,7 @@ import { initRealEstateChart } from '../components/widgets/real-estate/real-esta
 
 // Router
 import { initRouter } from '../components/layout/router';
+import { initLogoutButtons } from './auth/session.js';
 
 // Expose for code transformer
 window.reinitCodeCopy = reinitCodeCopy;
@@ -59,6 +60,7 @@ window.reinitCodeCopy = reinitCodeCopy;
 function initComponents() {
     initNavbar();
     initSidebar();
+    initLogoutButtons();
     initCodeCopy();
     initAccordion();
     initCheckbox();
