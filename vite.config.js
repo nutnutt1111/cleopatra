@@ -144,6 +144,7 @@ export default defineConfig(({ command }) => {
         publicDir: resolve(__dirname, 'public'),
 
         server: {
+            host: true,
             port: Number(process.env.PORT) || 3003,
             open: false,
             https: false,
