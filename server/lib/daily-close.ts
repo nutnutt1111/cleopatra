@@ -3,6 +3,7 @@ import type { AuthUser } from './auth.js';
 import { assertAction } from './auth.js';
 import { LedgerError, assertDateNotLocked, sumLedgerForDate } from './ledger.js';
 import { toDateOnly } from './ledger-utils.js';
+import { mergeAuditPayload } from './audit-context.js';
 import type { Prisma } from '../../src/generated/prisma/client.js';
 
 type Tx = Prisma.TransactionClient;
@@ -25,7 +26,7 @@ async function writeAudit(
       action: params.action,
       entityType: params.entityType,
       entityId: params.entityId,
-      payload: params.payload ? JSON.stringify(params.payload) : null,
+      payload: params.payload ? JSON.stringify(mergeAuditPayload(params.payload) ?? {}) : null,
     },
   });
 }

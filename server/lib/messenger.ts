@@ -3,6 +3,7 @@ import type { AuthUser } from './auth.js';
 import { assertRole } from './auth.js';
 import { assertDateNotLocked, postLedgerEntry } from './ledger.js';
 import { toDateOnly } from './ledger-utils.js';
+import { todayDocPrefix } from './date-utils.js';
 import { withUniqueRetry, nextDailySequence } from './sequence.js';
 import type { PaymentChannel, Prisma } from '../../src/generated/prisma/client.js';
 
@@ -17,13 +18,8 @@ export class MessengerError extends Error {
   }
 }
 
-function todayPrefix(label: string): string {
-  const today = new Date();
-  return `${label}-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
-}
-
 async function nextJobNumber(tx: Tx, storeId: string): Promise<string> {
-  const prefix = todayPrefix('DLV');
+  const prefix = todayDocPrefix('DLV');
   return nextDailySequence(tx, prefix, async (t) =>
     t.deliveryJob.count({ where: { storeId, jobNumber: { startsWith: prefix } } }),
   );

@@ -1,6 +1,7 @@
 import type { AuditAction, Prisma } from '../../src/generated/prisma/client.js';
 import { prisma } from './prisma.js';
 import type { AuthUser } from './auth.js';
+import { mergeAuditPayload } from './audit-context.js';
 import { oppositeType, signedAmountCents, toDateOnly } from './ledger-utils.js';
 import type { LedgerEntryType, PaymentChannel } from '../../src/generated/prisma/client.js';
 
@@ -44,7 +45,7 @@ async function writeAudit(
       action: params.action,
       entityType: params.entityType,
       entityId: params.entityId,
-      payload: params.payload ? JSON.stringify(params.payload) : null,
+      payload: JSON.stringify(mergeAuditPayload(params.payload) ?? {}),
     },
   });
 }

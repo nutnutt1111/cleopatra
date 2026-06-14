@@ -21,6 +21,7 @@
 | Pawn interest | PAWN ticket with 1 interest payment (transfer detail) |
 | Pawn redeem | (runtime test available via API) |
 | Customer credit | 2 customers with credit limits |
+| Credit limit zero | `creditLimitCents=0` means no credit sales until limit is set > 0 |
 | Installment | Credit sale 3 installments + 1 partial payment |
 | Inventory serialized | Phone with 2 serials (1 sold) |
 | Inventory quantity | Cable qty 50→49 after sale |

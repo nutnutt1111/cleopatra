@@ -3,6 +3,7 @@ import type { AuthUser } from './auth.js';
 import { assertAction, assertRole } from './auth.js';
 import { assertDateNotLocked, postLedgerEntry } from './ledger.js';
 import { toDateOnly } from './ledger-utils.js';
+import { todayDocPrefix } from './date-utils.js';
 import { withUniqueRetry, nextDailySequence } from './sequence.js';
 import type { PaymentChannel, Prisma } from '../../src/generated/prisma/client.js';
 
@@ -23,13 +24,8 @@ function addDays(date: Date, days: number): Date {
   return d;
 }
 
-function todayPrefix(label: string): string {
-  const today = new Date();
-  return `${label}-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
-}
-
 async function nextSaleNumber(tx: Tx, storeId: string): Promise<string> {
-  const prefix = todayPrefix('CR');
+  const prefix = todayDocPrefix('CR');
   return nextDailySequence(tx, prefix, async (t) =>
     t.creditSale.count({ where: { storeId, saleNumber: { startsWith: prefix } } }),
   );
@@ -87,8 +83,12 @@ export async function createCreditSale(
       });
       if (!customer) throw new CustomerError('ไม่พบลูกค้า', 404);
 
+      if (customer.creditLimitCents <= 0) {
+        throw new CustomerError('ลูกค้านี้ยังไม่มีวงเงินเครดิต — ตั้งวงเงินก่อนขายเครดิต');
+      }
+
       const newBalance = customer.balanceCents + input.totalCents;
-      if (customer.creditLimitCents > 0 && newBalance > customer.creditLimitCents) {
+      if (newBalance > customer.creditLimitCents) {
         if (user.role !== 'OWNER') {
           throw new CustomerError(
             `ยอดลูกหนี้เกินวงเงิน (${customer.creditLimitCents / 100} บาท) — ต้องเป็น Owner`,

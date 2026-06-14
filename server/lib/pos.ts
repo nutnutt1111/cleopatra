@@ -4,16 +4,12 @@ import { assertRole } from './auth.js';
 import { deductStockForSale, restoreStockOnVoid } from './inventory.js';
 import { assertDateNotLocked, LedgerError, postLedgerEntry, voidLedgerByReference } from './ledger.js';
 import { toDateOnly } from './ledger-utils.js';
+import { todayDocPrefix } from './date-utils.js';
 import { withUniqueRetry, nextDailySequence } from './sequence.js';
 import type { PaymentChannel } from '../../src/generated/prisma/client.js';
 import type { Prisma } from '../../src/generated/prisma/client.js';
 
 type Tx = Prisma.TransactionClient;
-
-function todayPrefix(label: string): string {
-  const today = new Date();
-  return `${label}-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
-}
 
 export class PosError extends Error {
   status: number;
@@ -36,7 +32,7 @@ export type PaymentInput = {
 };
 
 async function nextBillNumber(tx: Tx, storeId: string): Promise<string> {
-  const prefix = todayPrefix('POS');
+  const prefix = todayDocPrefix('POS');
   return nextDailySequence(tx, prefix, async (t) =>
     t.posBill.count({ where: { storeId, billNumber: { startsWith: prefix } } }),
   );

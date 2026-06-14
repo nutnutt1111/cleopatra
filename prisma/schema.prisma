@@ -390,6 +390,8 @@ model PawnPayment {
   amountCents    Int
   channel        PaymentChannel  @default(CASH)
   transferDetail String?
+  /** Idempotency key for interest payments — one per due period */
+  periodKey      String?         @unique
   createdById    String
   createdBy      User            @relation(fields: [createdById], references: [id])
   createdAt      DateTime        @default(now())
