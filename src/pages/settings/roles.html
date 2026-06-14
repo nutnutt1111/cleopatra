@@ -1,0 +1,33 @@
+{{> start pageTitle="สิทธิ์การใช้งาน" pageDescription="กำหนดบทบาทและสิทธิ์ของพนักงาน" hideProfileButton=true }}
+
+<div id="roles-settings-page" class="max-w-3xl space-y-6">
+    <div class="bg-card text-card-foreground rounded-xl border border-border p-6">
+        <h3 class="text-lg font-semibold mb-2">สิทธิ์การใช้งาน</h3>
+        <p class="text-sm text-muted-foreground mb-6">หน้านี้จะใช้กำหนดสิทธิ์แบบละเอียดในอนาคต — ตอนนี้แสดงบทบาทมาตรฐานของระบบ</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="rounded-xl border border-border p-4">
+                <h4 class="font-semibold text-foreground">Admin</h4>
+                <p class="text-sm text-muted-foreground mt-1">จัดการพนักงาน สิทธิ์ และการตั้งค่าระบบทั้งหมด</p>
+            </div>
+            <div class="rounded-xl border border-border p-4">
+                <h4 class="font-semibold text-foreground">Manager</h4>
+                <p class="text-sm text-muted-foreground mt-1">ดูและจัดการพนักงาน เปิด/ปิดใช้งานบัญชี</p>
+            </div>
+            <div class="rounded-xl border border-border p-4">
+                <h4 class="font-semibold text-foreground">Staff</h4>
+                <p class="text-sm text-muted-foreground mt-1">ใช้งานระบบปกติ จัดการโปรไฟล์และ PIN ของตัวเอง</p>
+            </div>
+            <div class="rounded-xl border border-border p-4">
+                <h4 class="font-semibold text-foreground">Viewer</h4>
+                <p class="text-sm text-muted-foreground mt-1">ดูข้อมูลได้อย่างเดียว ไม่สามารถแก้ไข</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-sm text-amber-800 dark:text-amber-200">
+        การกำหนดสิทธิ์แบบละเอียด (RBAC) จะพัฒนาในขั้นถัดไป — ตอนนี้ใช้คอลัมน์ <code class="px-1 py-0.5 bg-muted rounded text-xs">role</code> ในตาราง <code class="px-1 py-0.5 bg-muted rounded text-xs">employee_profiles</code>
+    </div>
+</div>
+
+{{> end }}

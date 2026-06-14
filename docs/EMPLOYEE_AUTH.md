@@ -62,13 +62,30 @@ npm run dev
 
 Open: http://localhost:3003/login
 
-### 5. Employee settings
+### 5. Settings
 
-Open **Settings → Employee Profile** (`/pages/settings/employee.html`) to view/edit:
+Settings แยกเป็น 2 กลุ่มใน Sidebar:
 
-- ชื่อพนักงาน (stored in `employee_profiles`)
-- อีเมล (from Supabase session)
-- รหัส PIN 6 หลัก (masked, show/hide toggle — device-local display only)
+**บัญชีของฉัน**
+
+| URL | Purpose |
+|-----|---------|
+| `/pages/settings/profile.html` | โปรไฟล์ของฉัน (ชื่อ, อีเมล, บทบาท) |
+| `/pages/settings/security.html` | ความปลอดภัย / PIN 6 หลัก |
+| `/pages/settings/appearance.html` | Accent color + Light/Dark mode |
+
+**จัดการระบบ** (Admin / Manager)
+
+| URL | Purpose |
+|-----|---------|
+| `/pages/settings/employees.html` | รายชื่อพนักงานทั้งหมด |
+| `/pages/settings/employees-new.html` | เพิ่มพนักงานใหม่ |
+| `/pages/settings/roles.html` | สิทธิ์การใช้งาน (placeholder) |
+
+Legacy URLs redirect automatically:
+
+- `/pages/settings/employee.html` → `profile.html`
+- `/pages/settings/theme.html` → `appearance.html`
 
 ## Routes
 
@@ -78,7 +95,10 @@ Open **Settings → Employee Profile** (`/pages/settings/employee.html`) to view
 | `/set-pin` | First-time PIN setup (requires Supabase session) |
 | `/enter-pin` | Quick unlock with PIN |
 | `/forgot-password` | Password reset email |
-| `/pages/settings/employee.html` | Employee profile (name, email, PIN) |
+| `/pages/settings/profile.html` | โปรไฟล์ของฉัน |
+| `/pages/settings/security.html` | PIN / ความปลอดภัย |
+| `/pages/settings/appearance.html` | Theme / การแสดงผล |
+| `/pages/settings/employees.html` | รายชื่อพนักงาน (Admin/Manager) |
 
 ## Files
 

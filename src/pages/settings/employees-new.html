@@ -1,0 +1,73 @@
+{{> start pageTitle="เพิ่มพนักงานใหม่" pageDescription="สร้างบัญชีพนักงานและกำหนดบทบาท" hideProfileButton=true }}
+
+<div id="employees-new-page" class="max-w-2xl space-y-6">
+    <div class="flex items-center gap-3">
+        <a href="/pages/settings/employees.html" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            ← กลับไปรายชื่อพนักงาน
+        </a>
+    </div>
+
+    <div class="bg-card text-card-foreground rounded-xl border border-border p-6 sm:p-8">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                <i class="ri-user-add-line text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold">เพิ่มพนักงานใหม่</h3>
+                <p class="text-sm text-muted-foreground mt-1">สร้างบัญชี Supabase และบันทึกโปรไฟล์พนักงาน</p>
+            </div>
+        </div>
+
+        <div id="employees-new-error" class="hidden mb-4 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"></div>
+        <div id="employees-new-success" class="hidden mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300"></div>
+
+        <form id="employees-new-form" class="space-y-5" novalidate>
+            <div>
+                <label for="new-employee-name" class="block text-sm font-medium text-foreground mb-1.5">ชื่อ</label>
+                <input id="new-employee-name" type="text" required placeholder="ชื่อ-นามสกุล"
+                    class="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            </div>
+
+            <div>
+                <label for="new-employee-email" class="block text-sm font-medium text-foreground mb-1.5">อีเมล</label>
+                <input id="new-employee-email" type="email" required placeholder="name@company.com"
+                    class="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            </div>
+
+            <div>
+                <label for="new-employee-password" class="block text-sm font-medium text-foreground mb-1.5">รหัสผ่านเริ่มต้น</label>
+                <input id="new-employee-password" type="password" required placeholder="อย่างน้อย 6 ตัวอักษร" minlength="6"
+                    class="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="new-employee-role" class="block text-sm font-medium text-foreground mb-1.5">บทบาท</label>
+                    <select id="new-employee-role"
+                        class="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <option value="staff">Staff</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                        <option value="viewer">Viewer</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="new-employee-status" class="block text-sm font-medium text-foreground mb-1.5">สถานะ</label>
+                    <select id="new-employee-status"
+                        class="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                        <option value="pending">รอดำเนินการ</option>
+                        <option value="active">ใช้งาน</option>
+                        <option value="inactive">ปิดใช้งาน</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="employees-new-submit" type="submit"
+                class="w-full sm:w-auto px-6 py-2.5 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors">
+                สร้างบัญชี / ส่ง invite
+            </button>
+        </form>
+    </div>
+</div>
+
+{{> end }}

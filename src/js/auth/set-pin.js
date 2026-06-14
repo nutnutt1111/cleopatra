@@ -96,7 +96,7 @@ async function bootstrapSetPinPage() {
         markDevicePinRegistered(session.user.id, session.user.email, pinSalt, pin);
 
         const fromSettings = getQueryParam('from') === 'settings';
-        redirectTo(fromSettings ? AUTH_CONFIG.routes.employeeSettings : getPostLoginRedirect());
+        redirectTo(fromSettings ? AUTH_CONFIG.routes.settings.security : getPostLoginRedirect());
       } catch (error) {
         showAuthError(errorBox, error?.message || 'ไม่สามารถบันทึก PIN ได้');
         step = STEPS.ENTER;

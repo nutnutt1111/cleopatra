@@ -9,7 +9,22 @@ export const AUTH_CONFIG = {
     enterPin: '/enter-pin',
     forgotPassword: '/forgot-password',
     dashboard: '/pages/index.html',
-    employeeSettings: '/pages/settings/employee.html',
+    settings: {
+      profile: '/pages/settings/profile.html',
+      security: '/pages/settings/security.html',
+      appearance: '/pages/settings/appearance.html',
+      employees: '/pages/settings/employees.html',
+      employeesNew: '/pages/settings/employees-new.html',
+      roles: '/pages/settings/roles.html',
+    },
+    // Legacy aliases
+    employeeSettings: '/pages/settings/profile.html',
+  },
+  roles: {
+    admin: 'admin',
+    manager: 'manager',
+    staff: 'staff',
+    viewer: 'viewer',
   },
   storageKeys: {
     deviceId: 'employee_device_id',

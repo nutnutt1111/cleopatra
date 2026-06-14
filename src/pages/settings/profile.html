@@ -1,0 +1,47 @@
+{{> start pageTitle="โปรไฟล์ของฉัน" pageDescription="จัดการข้อมูลส่วนตัวของคุณ" hideProfileButton=true }}
+
+<div id="profile-settings-page" class="max-w-2xl space-y-6">
+    <div class="bg-card text-card-foreground rounded-xl border border-border p-6 sm:p-8">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                <i class="ri-user-3-line text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold">โปรไฟล์ของฉัน</h3>
+                <p class="text-sm text-muted-foreground mt-1">ข้อมูลพื้นฐานของบัญชีพนักงาน</p>
+            </div>
+        </div>
+
+        <div id="profile-settings-error" class="hidden mb-4 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"></div>
+        <div id="profile-settings-success" class="hidden mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300"></div>
+
+        <form id="profile-settings-form" class="space-y-5" novalidate>
+            <div>
+                <label for="profile-name" class="block text-sm font-medium text-foreground mb-1.5">ชื่อพนักงาน</label>
+                <input id="profile-name" name="full_name" type="text" autocomplete="name" placeholder="กรอกชื่อ-นามสกุล"
+                    class="w-full px-4 py-2.5 bg-muted/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            </div>
+
+            <div>
+                <label for="profile-email" class="block text-sm font-medium text-foreground mb-1.5">อีเมล</label>
+                <input id="profile-email" name="email" type="email" readonly
+                    class="w-full px-4 py-2.5 bg-muted/30 border border-border rounded-xl text-muted-foreground cursor-not-allowed">
+                <p class="text-xs text-muted-foreground mt-1.5">อีเมลใช้สำหรับเข้าสู่ระบบหลัก (Supabase Auth)</p>
+            </div>
+
+            <div>
+                <label for="profile-role" class="block text-sm font-medium text-foreground mb-1.5">ตำแหน่ง / บทบาท</label>
+                <input id="profile-role" name="role" type="text" readonly
+                    class="w-full px-4 py-2.5 bg-muted/30 border border-border rounded-xl text-muted-foreground cursor-not-allowed">
+                <p class="text-xs text-muted-foreground mt-1.5">บทบาทถูกกำหนดโดยผู้ดูแลระบบ</p>
+            </div>
+
+            <button id="profile-save-btn" type="submit"
+                class="px-6 py-2.5 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors">
+                บันทึก
+            </button>
+        </form>
+    </div>
+</div>
+
+{{> end }}

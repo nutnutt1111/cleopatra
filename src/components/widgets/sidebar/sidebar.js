@@ -198,18 +198,26 @@ const menuData = [
         label: 'SETTINGS'
     },
     {
-        type: 'link',
-        id: 'employee-settings',
-        label: 'ข้อมูลพนักงาน',
-        icon: 'id-card',
-        href: '/pages/settings/employee.html'
+        type: 'menu',
+        id: 'settings-account',
+        label: 'บัญชีของฉัน',
+        icon: 'user-circle',
+        children: [
+            { id: 'settings-profile', label: 'โปรไฟล์ของฉัน', href: '/pages/settings/profile.html', icon: 'user' },
+            { id: 'settings-security', label: 'ความปลอดภัย / PIN', href: '/pages/settings/security.html', icon: 'shield' },
+            { id: 'settings-appearance', label: 'การแสดงผล', href: '/pages/settings/appearance.html', icon: 'palette' },
+        ]
     },
     {
-        type: 'link',
-        id: 'theme',
-        label: 'Theme',
-        icon: 'palette',
-        href: '/pages/settings/theme.html'
+        type: 'menu',
+        id: 'settings-system',
+        label: 'จัดการระบบ',
+        icon: 'settings',
+        children: [
+            { id: 'settings-employees', label: 'พนักงานทั้งหมด', href: '/pages/settings/employees.html', icon: 'users' },
+            { id: 'settings-employees-new', label: 'เพิ่มพนักงานใหม่', href: '/pages/settings/employees-new.html', icon: 'user-plus' },
+            { id: 'settings-roles', label: 'สิทธิ์การใช้งาน', href: '/pages/settings/roles.html', icon: 'key-round' },
+        ]
     }
 ];
 

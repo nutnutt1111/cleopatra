@@ -51,7 +51,11 @@ import { initRealEstateChart } from '../components/widgets/real-estate/real-esta
 // Router
 import { initRouter } from '../components/layout/router';
 import { initLogoutButtons } from './auth/session.js';
-import { initEmployeeSettings } from './auth/employee-settings.js';
+import { initProfileSettings } from './auth/profile-settings.js';
+import { initSecuritySettings } from './auth/security-settings.js';
+import { initEmployeesList } from './auth/employees-list.js';
+import { initEmployeesNew } from './auth/employees-new.js';
+import { initThemePreview } from '../components/widgets/theme-preview.js';
 
 // Expose for code transformer
 window.reinitCodeCopy = reinitCodeCopy;
@@ -62,7 +66,11 @@ function initComponents() {
     initNavbar();
     initSidebar();
     initLogoutButtons();
-    initEmployeeSettings();
+    initProfileSettings();
+    initSecuritySettings();
+    initEmployeesList();
+    initEmployeesNew();
+    initThemePreview();
     initCodeCopy();
     initAccordion();
     initCheckbox();
