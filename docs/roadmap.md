@@ -76,3 +76,11 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 1. Schema → ledger → POS/pawn payment logic
 2. Permission helpers → any export or void endpoint
 3. Seed data → regression runs
+
+## Post-merge follow-ups (PR #7)
+
+**Status:** Open — see [follow-ups-pr7.md](./follow-ups-pr7.md)
+
+- [ ] **FU-1 (P1)** Do not trust JWT role claims — reload user from DB per request
+- [ ] **FU-2 (P1)** CSRF protection for cookie-auth mutating routes
+- [ ] **FU-3 (P2)** Normalize race-conflict HTTP status codes to 409
