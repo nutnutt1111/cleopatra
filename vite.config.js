@@ -18,6 +18,11 @@ function getHtmlPages() {
     const pages = {
         // Landing page at root
         main: resolve(__dirname, 'src/index.html'),
+        // Employee auth pages (clean URLs via dev server rewrite)
+        login: resolve(__dirname, 'src/login.html'),
+        'set-pin': resolve(__dirname, 'src/set-pin.html'),
+        'enter-pin': resolve(__dirname, 'src/enter-pin.html'),
+        'forgot-password': resolve(__dirname, 'src/forgot-password.html'),
     };
 
     const pagesDir = resolve(__dirname, 'src/pages');
@@ -52,6 +57,7 @@ function getPartialDirectories() {
     const dirs = [
         resolve(__dirname, 'src/components/layout'),
         resolve(__dirname, 'src/components/widgets'),
+        resolve(__dirname, 'src/components/auth'),
         resolve(__dirname, 'src/components'),
     ];
 
@@ -136,13 +142,35 @@ export default defineConfig(({ command }) => {
                     return html.replace(/href="\/(?!\/)(pages|images)\//g, `href="${base}$1/`);
                 },
             },
+
+            // Clean auth URLs in dev/preview (e.g. /login instead of /login.html)
+            {
+                name: 'auth-route-rewrite',
+                configureServer(server) {
+                    server.middlewares.use((req, _res, next) => {
+                        const cleanRoutes = {
+                            '/login': '/login.html',
+                            '/set-pin': '/set-pin.html',
+                            '/enter-pin': '/enter-pin.html',
+                            '/forgot-password': '/forgot-password.html',
+                        };
+
+                        if (req.url && cleanRoutes[req.url.split('?')[0]]) {
+                            const [path, query = ''] = req.url.split('?');
+                            req.url = `${cleanRoutes[path]}${query ? `?${query}` : ''}`;
+                        }
+
+                        next();
+                    });
+                },
+            },
         ],
 
         root: 'src',
         publicDir: resolve(__dirname, 'public'),
 
         server: {
-            port: 8081,
+            port: 3003,
             open: false,
             https: false,
         },

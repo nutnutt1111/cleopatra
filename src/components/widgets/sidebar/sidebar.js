@@ -116,9 +116,10 @@ const menuData = [
         label: 'Authentication',
         icon: 'shield',
         children: [
-            { id: 'login', label: 'Login', href: '/pages/extra/login.html', icon: 'log-in' },
-            { id: 'register', label: 'Register', href: '/pages/extra/register.html', icon: 'user-plus' },
-            { id: 'forgot-password', label: 'Forgot Password', href: '/pages/extra/forgot-password.html', icon: 'key' }
+            { id: 'employee-login', label: 'Employee Login', href: '/login', icon: 'log-in' },
+            { id: 'forgot-password', label: 'Forgot Password', href: '/forgot-password', icon: 'key' },
+            { id: 'demo-login', label: 'Demo Login (Template)', href: '/pages/extra/login.html', icon: 'layout-template' },
+            { id: 'register', label: 'Register (Demo)', href: '/pages/extra/register.html', icon: 'user-plus' }
         ]
     },
     {
@@ -197,11 +198,26 @@ const menuData = [
         label: 'SETTINGS'
     },
     {
-        type: 'link',
-        id: 'theme',
-        label: 'Theme',
-        icon: 'palette',
-        href: '/pages/settings/theme.html'
+        type: 'menu',
+        id: 'settings-account',
+        label: 'บัญชีของฉัน',
+        icon: 'user-circle',
+        children: [
+            { id: 'settings-profile', label: 'โปรไฟล์ของฉัน', href: '/pages/settings/profile.html', icon: 'user' },
+            { id: 'settings-security', label: 'ความปลอดภัย / PIN', href: '/pages/settings/security.html', icon: 'shield' },
+            { id: 'settings-appearance', label: 'การแสดงผล', href: '/pages/settings/appearance.html', icon: 'palette' },
+        ]
+    },
+    {
+        type: 'menu',
+        id: 'settings-system',
+        label: 'จัดการระบบ',
+        icon: 'settings',
+        children: [
+            { id: 'settings-employees', label: 'พนักงานทั้งหมด', href: '/pages/settings/employees.html', icon: 'users' },
+            { id: 'settings-employees-new', label: 'เพิ่มพนักงานใหม่', href: '/pages/settings/employees-new.html', icon: 'user-plus' },
+            { id: 'settings-roles', label: 'สิทธิ์การใช้งาน', href: '/pages/settings/roles.html', icon: 'key-round' },
+        ]
     }
 ];
 

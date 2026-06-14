@@ -1,0 +1,45 @@
+{{> start pageTitle="ความปลอดภัย / PIN" pageDescription="จัดการ PIN 6 หลักสำหรับปลดล็อกอุปกรณ์" hideProfileButton=true }}
+
+<div id="security-settings-page" class="max-w-2xl space-y-6">
+    <div class="bg-card text-card-foreground rounded-xl border border-border p-6 sm:p-8">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                <i class="ri-shield-keyhole-line text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold">ความปลอดภัย / PIN</h3>
+                <p class="text-sm text-muted-foreground mt-1">PIN ใช้ปลดล็อกอุปกรณ์นี้เท่านั้น ไม่แทนการ login ด้วยอีเมล</p>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-border bg-muted/20 p-4 sm:p-5">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <label class="text-sm font-medium text-foreground">รหัส PIN 6 หลัก</label>
+                <button id="security-toggle-pin" type="button"
+                    class="hidden text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+                    แสดง PIN
+                </button>
+            </div>
+
+            <div id="security-pin-slots" class="flex items-center justify-center gap-2 sm:gap-3 mb-2"></div>
+            <p id="security-pin-status" class="text-sm text-muted-foreground text-center">PIN 6 หลัก</p>
+
+            <button id="security-change-pin-btn" type="button"
+                class="mt-4 w-full sm:w-auto px-4 py-2 text-sm font-medium border border-border rounded-xl hover:bg-muted transition-colors">
+                เปลี่ยน PIN
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-card text-card-foreground rounded-xl border border-border p-5">
+        <h4 class="text-sm font-semibold mb-2">หมายเหตุด้านความปลอดภัย</h4>
+        <ul class="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+            <li>PIN ต้องเป็นตัวเลข 6 หลักเท่านั้น</li>
+            <li>PIN ใช้ปลดล็อกอุปกรณ์นี้เท่านั้น ไม่แทนการ login ด้วยอีเมล</li>
+            <li>ระบบเก็บ PIN แบบ hash ในฐานข้อมูล — การแสดง PIN ใช้ข้อมูลบนอุปกรณ์นี้</li>
+            <li>ใส่ PIN ผิด 5 ครั้ง จะต้อง login ด้วยอีเมลอีกครั้ง</li>
+        </ul>
+    </div>
+</div>
+
+{{> end }}

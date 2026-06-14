@@ -1,0 +1,51 @@
+{{> start pageTitle="พนักงานทั้งหมด" pageDescription="จัดการรายชื่อพนักงานในระบบ" hideProfileButton=true }}
+
+<div id="employees-list-page" class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-semibold">พนักงานทั้งหมด</h2>
+            <p class="text-sm text-muted-foreground mt-1">ค้นหา กรอง และจัดการสถานะพนักงาน</p>
+        </div>
+        <a href="/pages/settings/employees-new.html"
+            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+            <i class="ri-add-line text-lg"></i>
+            เพิ่มพนักงานใหม่
+        </a>
+    </div>
+
+    <div id="employees-list-error" class="hidden rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"></div>
+
+    <div class="bg-card border border-border rounded-xl p-4 flex flex-col sm:flex-row gap-3">
+        <input id="employees-search" type="search" placeholder="ค้นหาชื่อหรือบทบาท..."
+            class="flex-1 px-4 py-2.5 bg-muted/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+        <select id="employees-status-filter"
+            class="px-4 py-2.5 bg-muted/50 border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+            <option value="">ทุกสถานะ</option>
+            <option value="active">ใช้งาน</option>
+            <option value="inactive">ปิดใช้งาน</option>
+            <option value="pending">รอดำเนินการ</option>
+        </select>
+    </div>
+
+    <div class="bg-card border border-border rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[640px]">
+                <thead class="bg-muted/30 border-b border-border">
+                    <tr class="text-left text-sm text-muted-foreground">
+                        <th class="px-4 py-3 font-medium">ชื่อ</th>
+                        <th class="px-4 py-3 font-medium">บทบาท</th>
+                        <th class="px-4 py-3 font-medium">สถานะ</th>
+                        <th class="px-4 py-3 font-medium">วันที่เพิ่ม</th>
+                        <th class="px-4 py-3 font-medium text-right">การจัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="employees-table-body"></tbody>
+            </table>
+        </div>
+        <div id="employees-empty" class="hidden px-4 py-10 text-center text-sm text-muted-foreground">
+            ไม่พบพนักงาน
+        </div>
+    </div>
+</div>
+
+{{> end }}
