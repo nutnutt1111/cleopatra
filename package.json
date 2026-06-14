@@ -18,6 +18,8 @@
     "quality:smoke": "bash scripts/quality/route-smoke.sh",
     "quality:api": "bash scripts/quality/api-smoke.sh",
     "quality:hardtest": "bash scripts/quality/hardtest.sh",
+    "quality:review": "bash scripts/quality/review-audit.sh",
+    "quality:money": "bash scripts/quality/money-audit.sh",
     "quality:seed": "bash scripts/quality/seed-verify.sh",
     "quality:ux": "bash scripts/quality/ux-patrol.sh",
     "quality:hardening": "bash scripts/quality/hardening.sh",

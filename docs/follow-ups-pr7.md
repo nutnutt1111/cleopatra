@@ -1,8 +1,8 @@
 # Follow-ups after PR #7 merge
 
-> **Status:** Open — tracked in-repo because GitHub Issues are disabled on `nutnutt1111/cleopatra`.
+> **PR #7 merged:** 2026-06-14 into `cursor/wave-4-messenger-hr-e20d` (`ab71b59`).
 >
-> **Merge decision:** PR #7 may merge once known risks are documented. These items are **post-merge** work.
+> **Follow-up status:** Open — tracked in-repo because GitHub Issues are disabled on `nutnutt1111/cleopatra`.
 
 | ID | Priority | Title | Owner hint |
 |----|----------|-------|------------|

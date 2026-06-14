@@ -29,7 +29,7 @@ Verify:
 - pawn transfer detail still works
 - inventory status still works
 - cashflow ledger still works
-- messenger delivered expense still works
+- messenger delivered fee still posts INCOME to ledger
 
 ## Commands
 
@@ -119,7 +119,7 @@ Short merge recommendation.
 | Pawn transfer detail | Transfer page loads; serial/item linkage visible |
 | Inventory status | Serialized item shows correct status badge |
 | Cashflow ledger | Ledger page loads; entries filterable |
-| Messenger delivered | Delivered job posts expense; status updated |
+| Messenger delivered | Delivered job posts INCOME (fee collected); status updated |
 | Owner actions | Void, export, unlock require Owner and succeed for Owner session |
 
 Return **BLOCK** if any core route returns 5xx or a previously passing flow regresses without documented intent.

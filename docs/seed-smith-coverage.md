@@ -25,7 +25,7 @@
 | Installment | Credit sale 3 installments + 1 partial payment |
 | Inventory serialized | Phone with 2 serials (1 sold) |
 | Inventory quantity | Cable qty 50→49 after sale |
-| Messenger delivered | 1 delivered job (fee posted to ledger) |
+| Messenger delivered | 1 delivered job (fee posted as **INCOME**) |
 | Messenger pending | 1 pending delivery job |
 | Cashflow ledger | 4+ manual entries + module postings |
 | Daily close | 1 locked close (2 days ago) |
@@ -46,4 +46,7 @@ yarn db:seed     # re-seed บน DB ปัจจุบัน
 yarn dev:api     # API :3004
 yarn dev         # Vite :3003 (for route/UX checks)
 yarn quality:seed
+yarn quality:hardening   # full gate
 ```
+
+See also [PROJECT-STATUS.md](../PROJECT-STATUS.md) for complete delivery log.

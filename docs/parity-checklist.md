@@ -47,7 +47,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` deferred p
 
 - [x] Create delivery job
 - [x] Mark delivered
-- [x] Delivery fee expense posted to ledger
+- [x] Delivery fee **INCOME** posted to ledger when job delivered (`markDeliveryDelivered`)
 
 ## Customers
 
@@ -71,10 +71,12 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done · `[!]` deferred p
 ## Regression Evidence
 
 - [x] `regress-ranger` route smoke (all main routes 200)
-- [x] `regress-ranger` API flow smoke (`yarn quality:api`)
+- [x] `regress-ranger` API flow smoke (`yarn quality:api`, cookie auth)
 - [x] `seed-smith` fixtures cover all flows (`yarn quality:seed`, `docs/seed-smith-coverage.md`)
 - [x] `ux-patrol` module pass (`yarn quality:ux`)
-- [x] Last regression run date: 2026-06-13 (Wave 5 — `yarn quality:hardening`)
+- [x] Grumpy HARDTEST (`yarn quality:hardtest`) — pawn race, credit limit=0, CORS
+- [x] Extended review (`scripts/quality/review-audit.sh`) — race + auth audit
+- [x] Last full gate: **2026-06-14** — `yarn quality:hardening` ALL PASS (post PR #7 merge)
 
 ## Deferred (post-MVP)
 

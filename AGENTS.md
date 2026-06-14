@@ -49,22 +49,35 @@ Stop merge when any agent returns:
 
 ## Shared Artifacts
 
+- `docs/PROJECT-STATUS.md` — **master delivery log** (waves 0–5, PR #7, gates)
 - `docs/parity-checklist.md` — module completion truth source
 - `docs/roadmap.md` — planned waves and dependencies
+- `docs/follow-ups-pr7.md` — post-merge security follow-ups (FU-1–3)
 - `docs/quality/README.md` — human index for this system
 
 ## Target Environment
 
-**Dev server:** [http://localhost:3003](http://localhost:3003)
+**Frontend:** [http://localhost:3003](http://localhost:3003) · **API:** [http://localhost:3004](http://localhost:3004)
 
 ```bash
-yarn dev          # starts Vite on port 3003
-yarn quality:audit   # run all 7 agents → docs/quality/reports/
-yarn quality:hardening  # Wave 5 gate (route + api + seed + ux)
-yarn quality:smoke   # route smoke only (regress-ranger)
+yarn dev              # Vite frontend :3003
+yarn dev:api          # Express API :3004
+yarn dev:all          # both servers
+
+yarn quality:hardening   # full gate: route + api + hardtest + seed + ux
+yarn quality:hardtest    # Grumpy abuse/race simulation
+yarn quality:review      # extended race + auth audit (PR #7)
+yarn quality:money       # DB money invariant scan
+yarn quality:audit       # agent report generator (route + api + seed + ux)
+yarn quality:smoke       # route smoke only
+yarn quality:api         # API flow smoke (cookie auth)
+yarn quality:seed        # seed-smith verification
+yarn quality:ux          # ux-patrol checks
 ```
 
-Config: `scripts/quality/config.sh` — override with `QUALITY_BASE_URL`.
+> `quality:audit` does **not** include hardening/hardtest — run `quality:hardening` for the merge gate.
+
+Config: `scripts/quality/config.sh` — override with `QUALITY_BASE_URL`, `QUALITY_API_URL`.
 
 ## Invoking a Subagent
 
