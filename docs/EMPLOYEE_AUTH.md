@@ -36,19 +36,28 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 VITE_AUTH_REDIRECT=/pages/index.html
 ```
 
-### 2. Run Supabase migration
+### 2. Run Supabase migrations
 
-Apply `supabase/migrations/20250614000000_employee_device_pins.sql` in Supabase SQL Editor or via CLI:
+Apply all files in `supabase/migrations/` (in order) via Supabase SQL Editor or CLI:
 
 ```bash
 supabase db push
 ```
 
-This creates:
+| Migration | Purpose |
+|-----------|---------|
+| `20250614000000_employee_device_pins.sql` | PIN table + `verify_device_pin()` RPC |
+| `20250614000001_employee_profiles.sql` | `employee_profiles` table (name) |
+| `20250614000002_employee_profiles_roles.sql` | `role`, `status` columns + manager policies |
+| `20250614000003_employee_profiles_rls_fix.sql` | Fix RLS recursion + auto profile on signup |
 
-- `employee_device_pins` table (hashed PIN per user + device)
-- RLS policies (users access own rows only)
-- `verify_device_pin()` RPC for PIN verification without exposing hashes
+After migrations, promote your first admin once:
+
+```sql
+UPDATE public.employee_profiles
+SET role = 'admin'
+WHERE user_id = '<your-supabase-auth-user-uuid>';
+```
 
 ### 3. Create employee users
 
