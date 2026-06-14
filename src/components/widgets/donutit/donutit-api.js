@@ -1,18 +1,27 @@
-const TOKEN_KEY = 'donutit_token';
+let sessionUser = null;
 
-export function getAuthToken() {
-  return localStorage.getItem(TOKEN_KEY) || '';
+export async function isLoggedIn() {
+  try {
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    if (!res.ok) {
+      sessionUser = null;
+      return false;
+    }
+    const data = await res.json();
+    sessionUser = data.user;
+    return true;
+  } catch {
+    sessionUser = null;
+    return false;
+  }
 }
 
-export function setAuthToken(token) {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
+export function getSessionUser() {
+  return sessionUser;
 }
 
 export async function apiFetch(path, options = {}) {
-  const token = getAuthToken();
   const headers = new Headers(options.headers || {});
-  if (token) headers.set('Authorization', `Bearer ${token}`);
   return fetch(path, { ...options, headers, credentials: 'include' });
 }
 
@@ -25,6 +34,14 @@ export async function login(email, password) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
-  setAuthToken(data.token);
+  sessionUser = data.user;
   return data.user;
+}
+
+export async function logout() {
+  try {
+    await apiFetch('/api/auth/logout', { method: 'POST' });
+  } finally {
+    sessionUser = null;
+  }
 }

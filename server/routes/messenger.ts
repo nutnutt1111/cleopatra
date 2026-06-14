@@ -9,6 +9,7 @@ import {
   MessengerError,
 } from '../lib/messenger.js';
 import { formatBaht } from '../lib/ledger-utils.js';
+import { parsePagination } from '../lib/pagination.js';
 import { prisma } from '../lib/prisma.js';
 import type { PaymentChannel } from '../../src/generated/prisma/client.js';
 
@@ -30,11 +31,13 @@ export function createMessengerRouter(
   router.get('/jobs', requireAuth, async (req, res) => {
     try {
       const user = (req as AuthedRequest).user;
+      const { limit, offset } = parsePagination(req.query);
       const jobs = await prisma.deliveryJob.findMany({
         where: { storeId: user.storeId },
         include: { createdBy: { select: { name: true } } },
         orderBy: { createdAt: 'desc' },
-        take: 50,
+        skip: offset,
+        take: limit,
       });
 
       res.json({
@@ -55,6 +58,8 @@ export function createMessengerRouter(
           deliveredAt: j.deliveredAt?.toISOString() ?? null,
           cancelReason: j.cancelReason,
         })),
+        limit,
+        offset,
       });
     } catch (err) {
       handleError(err, res);

@@ -16,7 +16,6 @@ export class AuthError extends Error {
 }
 
 const OWNER_ONLY_ACTIONS = new Set([
-  'pos:void',
   'pos:delete',
   'daily-close:unlock',
   'discount:approve',

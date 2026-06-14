@@ -3,7 +3,11 @@ import type { AuthUser } from './auth.js';
 import { assertRole } from './auth.js';
 import { assertDateNotLocked, postLedgerEntry } from './ledger.js';
 import { toDateOnly } from './ledger-utils.js';
-import type { PaymentChannel } from '../../src/generated/prisma/client.js';
+import { todayDocPrefix } from './date-utils.js';
+import { withUniqueRetry, nextDailySequence } from './sequence.js';
+import type { PaymentChannel, Prisma } from '../../src/generated/prisma/client.js';
+
+type Tx = Prisma.TransactionClient;
 
 export class MessengerError extends Error {
   status: number;
@@ -14,13 +18,11 @@ export class MessengerError extends Error {
   }
 }
 
-async function nextJobNumber(storeId: string): Promise<string> {
-  const today = new Date();
-  const prefix = `DLV-${today.toISOString().slice(0, 10).replace(/-/g, '')}`;
-  const count = await prisma.deliveryJob.count({
-    where: { storeId, jobNumber: { startsWith: prefix } },
-  });
-  return `${prefix}-${String(count + 1).padStart(4, '0')}`;
+async function nextJobNumber(tx: Tx, storeId: string): Promise<string> {
+  const prefix = todayDocPrefix('DLV');
+  return nextDailySequence(tx, prefix, async (t) =>
+    t.deliveryJob.count({ where: { storeId, jobNumber: { startsWith: prefix } } }),
+  );
 }
 
 export async function createDeliveryJob(
@@ -42,34 +44,38 @@ export async function createDeliveryJob(
   const deliveryFeeCents = input.deliveryFeeCents ?? 0;
   if (deliveryFeeCents < 0) throw new MessengerError('ค่าจัดส่งต้องไม่ต่ำกว่า 0');
 
-  const jobNumber = await nextJobNumber(user.storeId);
+  return withUniqueRetry(() =>
+    prisma.$transaction(async (tx) => {
+      const jobNumber = await nextJobNumber(tx, user.storeId);
 
-  const job = await prisma.deliveryJob.create({
-    data: {
-      storeId: user.storeId,
-      jobNumber,
-      customerName: input.customerName.trim(),
-      customerPhone: input.customerPhone?.trim() ?? null,
-      address: input.address.trim(),
-      description: input.description?.trim() ?? null,
-      deliveryFeeCents,
-      feeChannel: input.feeChannel ?? 'CASH',
-      createdById: user.id,
-    },
-  });
+      const job = await tx.deliveryJob.create({
+        data: {
+          storeId: user.storeId,
+          jobNumber,
+          customerName: input.customerName.trim(),
+          customerPhone: input.customerPhone?.trim() ?? null,
+          address: input.address.trim(),
+          description: input.description?.trim() ?? null,
+          deliveryFeeCents,
+          feeChannel: input.feeChannel ?? 'CASH',
+          createdById: user.id,
+        },
+      });
 
-  await prisma.auditLog.create({
-    data: {
-      storeId: user.storeId,
-      userId: user.id,
-      action: 'MESSENGER_CREATE',
-      entityType: 'DeliveryJob',
-      entityId: job.id,
-      payload: JSON.stringify({ jobNumber, deliveryFeeCents }),
-    },
-  });
+      await tx.auditLog.create({
+        data: {
+          storeId: user.storeId,
+          userId: user.id,
+          action: 'MESSENGER_CREATE',
+          entityType: 'DeliveryJob',
+          entityId: job.id,
+          payload: JSON.stringify({ jobNumber, deliveryFeeCents }),
+        },
+      });
 
-  return job;
+      return job;
+    }),
+  );
 }
 
 export async function markDeliveryInTransit(user: AuthUser, jobId: string) {
@@ -118,7 +124,7 @@ export async function markDeliveryDelivered(user: AuthUser, jobId: string) {
           storeId: user.storeId,
           userId: user.id,
           entryDate,
-          type: 'EXPENSE',
+          type: 'INCOME',
           channel: job.feeChannel,
           amountCents: job.deliveryFeeCents,
           description: `ค่าจัดส่ง ${job.jobNumber} — ${job.customerName}`,
@@ -159,25 +165,27 @@ export async function cancelDeliveryJob(user: AuthUser, jobId: string, reason: s
   if (job.status === 'DELIVERED') throw new MessengerError('ไม่สามารถยกเลิกงานที่ส่งสำเร็จแล้ว');
   if (job.status === 'CANCELLED') throw new MessengerError('งานนี้ถูกยกเลิกแล้ว');
 
-  const updated = await prisma.deliveryJob.update({
-    where: { id: job.id },
-    data: {
-      status: 'CANCELLED',
-      cancelledAt: new Date(),
-      cancelReason: reason,
-    },
-  });
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.deliveryJob.update({
+      where: { id: job.id },
+      data: {
+        status: 'CANCELLED',
+        cancelledAt: new Date(),
+        cancelReason: reason,
+      },
+    });
 
-  await prisma.auditLog.create({
-    data: {
-      storeId: user.storeId,
-      userId: user.id,
-      action: 'MESSENGER_CANCEL',
-      entityType: 'DeliveryJob',
-      entityId: job.id,
-      payload: JSON.stringify({ jobNumber: job.jobNumber, reason }),
-    },
-  });
+    await tx.auditLog.create({
+      data: {
+        storeId: user.storeId,
+        userId: user.id,
+        action: 'MESSENGER_CANCEL',
+        entityType: 'DeliveryJob',
+        entityId: job.id,
+        payload: JSON.stringify({ jobNumber: job.jobNumber, reason }),
+      },
+    });
 
-  return updated;
+    return updated;
+  });
 }

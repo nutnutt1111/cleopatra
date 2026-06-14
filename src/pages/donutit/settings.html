@@ -42,11 +42,11 @@
 </div>
 
 <script type="module">
-    import { login, setAuthToken, getAuthToken, apiFetch } from '/components/widgets/donutit/donutit-api.js';
+    import { login, logout, isLoggedIn, apiFetch } from '/components/widgets/donutit/donutit-api.js';
 
     async function refreshStatus() {
         const el = document.getElementById('login-status');
-        if (!getAuthToken()) {
+        if (!(await isLoggedIn())) {
             el.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
             return;
         }
@@ -71,8 +71,8 @@
         }
     });
 
-    document.getElementById('btn-logout')?.addEventListener('click', () => {
-        setAuthToken('');
+    document.getElementById('btn-logout')?.addEventListener('click', async () => {
+        await logout();
         refreshStatus();
     });
 

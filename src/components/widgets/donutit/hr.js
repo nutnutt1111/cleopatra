@@ -1,4 +1,5 @@
-import { apiFetch, getAuthToken } from './donutit-api.js';
+import { apiFetch, isLoggedIn } from './donutit-api.js';
+import { escapeHtml } from './escape-html.js';
 
 let hrMeta = { canManage: false, canViewPayroll: false };
 
@@ -28,10 +29,10 @@ function renderEmployees(employees) {
   el.innerHTML = employees
     .map(
       (e) => `<div class="border border-border rounded-lg p-3 mb-2">
-      <p class="font-medium text-sm">${e.name} <span class="text-xs text-muted-foreground">(${e.employeeCode})</span></p>
-      <p class="text-xs text-muted-foreground">${e.position || '—'} · ${e.phone || '—'}</p>
-      <p class="text-sm mt-1">${e.salaryBaht != null ? `เงินเดือน <strong>${e.salaryBaht}</strong> บาท` : '<span class="text-muted-foreground text-xs">เงินเดือน — ซ่อนตามสิทธิ์</span>'}</p>
-      <p class="text-xs text-muted-foreground">เริ่มงาน ${e.hireDate}</p>
+      <p class="font-medium text-sm">${escapeHtml(e.name)} <span class="text-xs text-muted-foreground">(${escapeHtml(e.employeeCode)})</span></p>
+      <p class="text-xs text-muted-foreground">${escapeHtml(e.position || '—')} · ${escapeHtml(e.phone || '—')}</p>
+      <p class="text-sm mt-1">${e.salaryBaht != null ? `เงินเดือน <strong>${escapeHtml(e.salaryBaht)}</strong> บาท` : '<span class="text-muted-foreground text-xs">เงินเดือน — ซ่อนตามสิทธิ์</span>'}</p>
+      <p class="text-xs text-muted-foreground">เริ่มงาน ${escapeHtml(e.hireDate)}</p>
     </div>`,
     )
     .join('');
@@ -51,13 +52,13 @@ function renderPayroll(runs) {
       (r) => `<div class="border border-border rounded-lg p-3 mb-2">
       <div class="flex justify-between items-start">
         <div>
-          <p class="font-medium text-sm">${r.periodLabel}</p>
-          <p class="text-xs text-muted-foreground">${r.periodStart} — ${r.periodEnd}</p>
-          <p class="text-sm mt-1">รวม <strong>${r.totalBaht}</strong> บาท · ${r.lines.length} คน</p>
+          <p class="font-medium text-sm">${escapeHtml(r.periodLabel)}</p>
+          <p class="text-xs text-muted-foreground">${escapeHtml(r.periodStart)} — ${escapeHtml(r.periodEnd)}</p>
+          <p class="text-sm mt-1">รวม <strong>${escapeHtml(r.totalBaht)}</strong> บาท · ${r.lines.length} คน</p>
           <span class="text-xs px-2 py-0.5 rounded-full ${r.status === 'PAID' ? 'bg-green-500/10 text-green-700' : 'bg-amber-500/10 text-amber-700'}">${r.status === 'PAID' ? 'จ่ายแล้ว' : 'รอจ่าย'}</span>
-          <div class="text-xs text-muted-foreground mt-2">${r.lines.map((l) => `${l.employeeName}: ${l.amountBaht}`).join(' · ')}</div>
+          <div class="text-xs text-muted-foreground mt-2">${r.lines.map((l) => `${escapeHtml(l.employeeName)}: ${escapeHtml(l.amountBaht)}`).join(' · ')}</div>
         </div>
-        ${r.status === 'DRAFT' ? `<button data-pay-payroll="${r.id}" class="text-xs px-2 py-1 bg-primary text-primary-foreground rounded shrink-0">จ่ายเงินเดือน</button>` : ''}
+        ${r.status === 'DRAFT' ? `<button data-pay-payroll="${escapeHtml(r.id)}" class="text-xs px-2 py-1 bg-primary text-primary-foreground rounded shrink-0">จ่ายเงินเดือน</button>` : ''}
       </div>
     </div>`,
     )
@@ -83,9 +84,9 @@ function applyPanels() {
   document.getElementById('hr-payroll-list-wrap')?.classList.toggle('hidden', !hrMeta.canViewPayroll);
 }
 
-export function initHr() {
+export async function initHr() {
   if (!document.querySelector('[data-donutit-module="hr"]')) return;
-  if (!getAuthToken()) {
+  if (!(await isLoggedIn())) {
     document.getElementById('hr-status')?.replaceChildren(
       document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
     );
