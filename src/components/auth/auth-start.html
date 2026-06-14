@@ -7,6 +7,20 @@
     <title>{{title}}</title>
     <link rel="icon" type="image/png" href="/images/fav.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/theme.css">
+
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('cleopatra-theme') || 'neutral';
+                var mode = localStorage.getItem('cleopatra-mode') || 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+                if (mode === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) { }
+        })();
+    </script>
 
     <style>
         * {
@@ -85,7 +99,7 @@
     </div>
 
     <div id="auth-app" class="min-h-screen flex flex-col">
-        <header class="flex items-center justify-between px-4 sm:px-6 py-4">
+        <header class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border/50">
             <a href="/pages/index.html" class="flex items-center gap-2">
                 <img src="/images/logo.png" alt="Cleopatra"
                     class="w-8 h-8 object-contain dark:invert dark:brightness-200">
@@ -96,7 +110,7 @@
                 aria-label="สลับโหมดสี">
                 <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m02.12 5.66l-.71-.71M6.34 6.34l-.71-.71m12.02 12.02l-.71-.71M17.66 6.34l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1M4.34 12h-1m2.12 5.66l-.71-.71M6.34 6.34l-.71-.71m12.02 12.02l-.71-.71M17.66 6.34l-.71-.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
                 <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -105,4 +119,4 @@
             </button>
         </header>
 
-        <main class="flex-1 flex items-center justify-center px-4 pb-10">
+        <main class="flex-1 flex items-center justify-center px-4 py-8 sm:py-10">

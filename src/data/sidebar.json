@@ -133,19 +133,24 @@
         "icon": "ri-lock-line",
         "children": [
             {
-                "id": "login",
-                "label": "Login",
-                "href": "/pages/extra/login.html"
-            },
-            {
-                "id": "register",
-                "label": "Register",
-                "href": "/pages/extra/register.html"
+                "id": "employee-login",
+                "label": "Employee Login",
+                "href": "/login"
             },
             {
                 "id": "forgot-password",
                 "label": "Forgot Password",
-                "href": "/pages/extra/forgot-password.html"
+                "href": "/forgot-password"
+            },
+            {
+                "id": "demo-login",
+                "label": "Demo Login (Template)",
+                "href": "/pages/extra/login.html"
+            },
+            {
+                "id": "register",
+                "label": "Register (Demo)",
+                "href": "/pages/extra/register.html"
             }
         ]
     },
@@ -330,7 +335,7 @@
     {
         "type": "link",
         "id": "employee-settings",
-        "label": "Employee Profile",
+        "label": "ข้อมูลพนักงาน",
         "icon": "ri-id-card-line",
         "href": "/pages/settings/employee.html"
     },

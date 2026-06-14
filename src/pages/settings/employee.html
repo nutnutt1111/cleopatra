@@ -1,4 +1,4 @@
-{{> start pageTitle="ข้อมูลพนักงาน" pageDescription="จัดการข้อมูลส่วนตัว อีเมล และรหัส PIN 6 หลัก"}}
+{{> start pageTitle="ข้อมูลพนักงาน" pageDescription="จัดการข้อมูลส่วนตัว อีเมล และรหัส PIN 6 หลัก" hideProfileButton=true }}
 
 <div id="employee-settings-page" class="max-w-2xl space-y-6">
     <div class="bg-card text-card-foreground rounded-xl border border-border p-6 sm:p-8">
@@ -37,20 +37,19 @@
             </div>
 
             <div class="rounded-xl border border-border bg-muted/20 p-4 sm:p-5">
-                <div class="flex items-center justify-between gap-3 mb-2">
-                    <label class="text-sm font-medium text-foreground">รหัส PIN</label>
+                <div class="flex items-center justify-between gap-3 mb-3">
+                    <label class="text-sm font-medium text-foreground">รหัส PIN 6 หลัก</label>
                     <button id="toggle-pin-visibility" type="button"
                         class="hidden text-xs font-medium text-primary hover:text-primary/80 transition-colors">
                         แสดง PIN
                     </button>
                 </div>
 
-                <div id="employee-pin-value"
-                    class="text-3xl font-semibold tracking-[0.35em] text-foreground font-mono mb-1">••••••</div>
-                <p id="employee-pin-status" class="text-sm text-muted-foreground">PIN 6 หลัก</p>
+                <div id="employee-pin-slots" class="flex items-center justify-center gap-2 sm:gap-3 mb-2"></div>
+                <p id="employee-pin-status" class="text-sm text-muted-foreground text-center">PIN 6 หลัก</p>
 
                 <button id="change-pin-btn" type="button"
-                    class="mt-4 px-4 py-2 text-sm font-medium border border-border rounded-xl hover:bg-muted transition-colors">
+                    class="mt-4 w-full sm:w-auto px-4 py-2 text-sm font-medium border border-border rounded-xl hover:bg-muted transition-colors">
                     เปลี่ยน PIN
                 </button>
             </div>

@@ -1,23 +1,32 @@
 {{> auth-start title="ตั้ง PIN" }}
 
-<div class="w-full max-w-sm mx-auto text-center">
-    <div class="mb-8">
-        <h1 id="set-pin-title" class="text-2xl font-semibold text-foreground mb-2">ตั้ง PIN 6 หลัก</h1>
-        <p id="set-pin-subtitle" class="text-sm text-muted-foreground">ใช้สำหรับปลดล็อกอุปกรณ์นี้อย่างรวดเร็ว</p>
+{{> auth-card-start }}
+
+<div class="text-center">
+    <div
+        class="w-14 h-14 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
     </div>
-
-    <div id="set-pin-error"
-        class="hidden mb-6 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-    </div>
-
-    <div id="set-pin-dots" class="flex items-center justify-center gap-4 mb-10 min-h-[1.5rem]"></div>
-
-    <div id="set-pin-keypad" class="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs mx-auto"></div>
-
-    <button id="skip-pin-link" type="button"
-        class="mt-8 text-sm text-muted-foreground hover:text-foreground transition-colors">
-        ข้ามไปก่อน
-    </button>
+    <h1 id="set-pin-title" class="text-2xl font-bold text-foreground mb-2">ตั้ง PIN 6 หลัก</h1>
+    <p id="set-pin-subtitle" class="text-sm text-muted-foreground">ใช้สำหรับปลดล็อกอุปกรณ์นี้อย่างรวดเร็ว</p>
 </div>
+
+<div id="set-pin-error"
+    class="hidden mt-6 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive text-center">
+</div>
+
+<div id="set-pin-dots" class="pin-dots flex items-center justify-center gap-3 sm:gap-4 mt-8 mb-8 min-h-[1.25rem]"></div>
+
+<div id="set-pin-keypad" class="pin-keypad grid grid-cols-3 gap-3 max-w-[280px] mx-auto"></div>
+
+<button id="skip-pin-link" type="button"
+    class="mt-8 w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
+    ข้ามไปก่อน
+</button>
+
+{{> auth-card-end }}
 
 {{> auth-end authScript="/js/auth/set-pin.js" }}

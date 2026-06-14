@@ -13,6 +13,7 @@ import {
   getEmployeeProfile,
   upsertEmployeeProfile,
 } from './profile-service.js';
+import { renderPinSlots } from '../../components/auth/pin-keypad.js';
 
 function showSuccess(container, message) {
   if (!container) return;
@@ -26,32 +27,38 @@ function hideSuccess(container) {
   container.classList.add('hidden');
 }
 
-function renderPinDisplay() {
-  const pinValueEl = document.getElementById('employee-pin-value');
+function renderPinDisplay(showPlain = false) {
+  const slotsContainer = document.getElementById('employee-pin-slots');
   const pinStatusEl = document.getElementById('employee-pin-status');
   const changePinBtn = document.getElementById('change-pin-btn');
   const togglePinBtn = document.getElementById('toggle-pin-visibility');
 
-  if (!pinValueEl || !pinStatusEl) return;
+  if (!slotsContainer || !pinStatusEl) return;
 
   const pin = getStoredPinDisplay();
   const hasPin = Boolean(pin);
 
   if (!hasPin) {
-    pinValueEl.textContent = '—';
+    slotsContainer.innerHTML = '';
+    for (let i = 0; i < 6; i += 1) {
+      const slot = document.createElement('span');
+      slot.className = 'inline-flex items-center justify-center w-10 h-12 sm:w-11 sm:h-14 rounded-xl border-2 border-dashed border-border text-muted-foreground text-sm';
+      slot.textContent = '–';
+      slotsContainer.appendChild(slot);
+    }
     pinStatusEl.textContent = 'ยังไม่ได้ตั้ง PIN 6 หลัก';
-    pinStatusEl.className = 'text-sm text-muted-foreground';
     if (changePinBtn) changePinBtn.textContent = 'ตั้ง PIN 6 หลัก';
     if (togglePinBtn) togglePinBtn.classList.add('hidden');
     return;
   }
 
-  pinValueEl.dataset.pin = pin;
-  pinValueEl.textContent = '••••••';
+  renderPinSlots(slotsContainer, pin, { masked: !showPlain });
   pinStatusEl.textContent = 'PIN 6 หลัก (ใช้ปลดล็อกอุปกรณ์นี้)';
-  pinStatusEl.className = 'text-sm text-muted-foreground';
   if (changePinBtn) changePinBtn.textContent = 'เปลี่ยน PIN';
-  if (togglePinBtn) togglePinBtn.classList.remove('hidden');
+  if (togglePinBtn) {
+    togglePinBtn.classList.remove('hidden');
+    togglePinBtn.textContent = showPlain ? 'ซ่อน PIN' : 'แสดง PIN';
+  }
 }
 
 export function initEmployeeSettings() {
@@ -69,7 +76,6 @@ async function bootstrapEmployeeSettings() {
   const saveBtn = document.getElementById('save-employee-btn');
   const changePinBtn = document.getElementById('change-pin-btn');
   const togglePinBtn = document.getElementById('toggle-pin-visibility');
-  const pinValueEl = document.getElementById('employee-pin-value');
 
   if (!isSupabaseConfigured()) {
     showAuthError(errorBox, 'ยังไม่ได้ตั้งค่า Supabase กรุณาตรวจสอบไฟล์ .env');
@@ -100,15 +106,13 @@ async function bootstrapEmployeeSettings() {
     console.error('Failed to load employee profile:', error);
   }
 
-  renderPinDisplay();
-
   let pinVisible = false;
-  togglePinBtn?.addEventListener('click', () => {
-    if (!pinValueEl?.dataset.pin) return;
+  renderPinDisplay(pinVisible);
 
+  togglePinBtn?.addEventListener('click', () => {
+    if (!getStoredPinDisplay()) return;
     pinVisible = !pinVisible;
-    pinValueEl.textContent = pinVisible ? pinValueEl.dataset.pin : '••••••';
-    togglePinBtn.textContent = pinVisible ? 'ซ่อน PIN' : 'แสดง PIN';
+    renderPinDisplay(pinVisible);
   });
 
   changePinBtn?.addEventListener('click', () => {

@@ -116,9 +116,10 @@ const menuData = [
         label: 'Authentication',
         icon: 'shield',
         children: [
-            { id: 'login', label: 'Login', href: '/pages/extra/login.html', icon: 'log-in' },
-            { id: 'register', label: 'Register', href: '/pages/extra/register.html', icon: 'user-plus' },
-            { id: 'forgot-password', label: 'Forgot Password', href: '/pages/extra/forgot-password.html', icon: 'key' }
+            { id: 'employee-login', label: 'Employee Login', href: '/login', icon: 'log-in' },
+            { id: 'forgot-password', label: 'Forgot Password', href: '/forgot-password', icon: 'key' },
+            { id: 'demo-login', label: 'Demo Login (Template)', href: '/pages/extra/login.html', icon: 'layout-template' },
+            { id: 'register', label: 'Register (Demo)', href: '/pages/extra/register.html', icon: 'user-plus' }
         ]
     },
     {
@@ -195,6 +196,13 @@ const menuData = [
     {
         type: 'category',
         label: 'SETTINGS'
+    },
+    {
+        type: 'link',
+        id: 'employee-settings',
+        label: 'ข้อมูลพนักงาน',
+        icon: 'id-card',
+        href: '/pages/settings/employee.html'
     },
     {
         type: 'link',
