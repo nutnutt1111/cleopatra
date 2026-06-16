@@ -5,14 +5,11 @@ import handlebars from 'vite-plugin-handlebars';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { readdirSync, readFileSync } from 'fs';
+import { readdirSync } from 'fs';
 import { donutitRoutesPlugin } from './vite.donutit-routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Load sidebar data
-const sidebarData = JSON.parse(readFileSync(resolve(__dirname, 'src/data/sidebar.json'), 'utf-8'));
 
 // Get all HTML files for multi-page setup (recursively scans subfolders)
 function getHtmlPages() {
@@ -113,7 +110,6 @@ export default defineConfig(({ command }) => {
                 partialDirectory: getPartialDirectories(),
                 context: {
                     title: 'Cleopatra - Modern Admin Dashboard',
-                    sidebarLinks: sidebarData,
                     base, // Make base path available in templates
                 },
                 helpers: {

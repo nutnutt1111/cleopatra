@@ -18,7 +18,6 @@ src/
 │   ├── layout/          # App shell (start.html, end.html)
 │   ├── widgets/         # Dashboard widgets (stats, charts, tables)
 │   ├── ui/              # UI primitives (buttons, alerts, modals)
-│   ├── charts/          # Chart components (ApexCharts, Chart.js)
 │   ├── crypto/          # Crypto dashboard specific widgets
 │   ├── ecommerce/       # E-commerce dashboard specific widgets
 │   └── mission-control/ # Mission control dashboard widgets

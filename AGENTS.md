@@ -2,6 +2,21 @@
 
 Quality subagents for the DonutiT Cleopatra store-management platform. Use them to coordinate safe, verifiable delivery across POS, Pawn, Inventory, Cashflow, Messenger, Customers, and HR.
 
+## Ponytail (lazy senior dev mode)
+
+Before writing code, stop at the first rung that holds:
+
+1. Does this need to be built at all? (YAGNI)
+2. Does the standard library already do this? Use it.
+3. Does a native platform feature cover it? Use it.
+4. Does an already-installed dependency solve it? Use it.
+5. Can this be one line? Make it one line.
+6. Only then: write the minimum code that works.
+
+Rules: no unrequested abstractions, no new deps if avoidable, deletion over addition. Mark intentional shortcuts with `ponytail:` comments. See [PONYTAIL_AUDIT.md](PONYTAIL_AUDIT.md).
+
+Not lazy about: trust-boundary validation, data-loss prevention, security, accessibility, anything explicitly requested.
+
 ## Quality Subagents
 
 | Agent | File | When to run |
@@ -54,6 +69,7 @@ Stop merge when any agent returns:
 - `docs/roadmap.md` — planned waves and dependencies
 - `docs/follow-ups-pr7.md` — post-merge security follow-ups (FU-1–3)
 - `docs/quality/README.md` — human index for this system
+- `PONYTAIL_AUDIT.md` — code simplicity audit baseline
 
 ## Target Environment
 

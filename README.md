@@ -19,6 +19,8 @@ Store-management platform for Thai retail and pawn operations — built on the [
 | **Customers** | Credit sales, installments, receivables |
 | **HR** | Employees, payroll (Owner/HR gated) |
 
+Cleopatra template also includes 4 demo dashboards (Analytics, E-commerce, Crypto, Mission Control), 47+ pages, and SPA navigation.
+
 ---
 
 ## Quick Start
@@ -67,6 +69,8 @@ prisma/
 src/
   pages/donutit/        # Module HTML pages
   components/widgets/donutit/  # JS widgets + donutit-api.js
+  components/ui/        # Buttons, cards, alerts, modals
+  components/widgets/   # Dashboard widgets, charts
 docs/
   PROJECT-STATUS.md     # ← start here for full delivery log
   parity-checklist.md   # What's done vs deferred
@@ -87,6 +91,7 @@ scripts/quality/        # Automated gates (hardening, hardtest, …)
 - [Post-merge security (FU-1–3)](docs/follow-ups-pr7.md)
 - [Quality subagents](docs/quality/README.md)
 - [Agent orchestrator](AGENTS.md)
+- [Ponytail audit](PONYTAIL_AUDIT.md) — code simplicity baseline
 
 ---
 

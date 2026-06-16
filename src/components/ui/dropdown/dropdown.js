@@ -2,6 +2,8 @@
 // Dropdown Component - Interactive Behavior
 // ============================================
 
+let documentListenersBound = false;
+
 export function initDropdown() {
     document.querySelectorAll('.dropdown').forEach(dropdown => {
         if (dropdown.hasAttribute('data-dropdown-init')) return;
@@ -34,42 +36,37 @@ export function initDropdown() {
         });
     });
 
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.dropdown')) {
-            document.querySelectorAll('.dropdown-menu.is-open').forEach(menu => {
-                menu.classList.remove('is-open');
-            });
-            document.querySelectorAll('.dropdown .menu:not(.hidden)').forEach(menu => {
-                menu.classList.add('hidden');
-            });
-        }
-    });
+    if (!documentListenersBound) {
+        documentListenersBound = true;
 
-    // Close on escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.dropdown-menu.is-open').forEach(menu => {
-                menu.classList.remove('is-open');
-            });
-            document.querySelectorAll('.dropdown .menu:not(.hidden)').forEach(menu => {
-                menu.classList.add('hidden');
-            });
-        }
-    });
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-menu.is-open').forEach(menu => {
+                    menu.classList.remove('is-open');
+                });
+                document.querySelectorAll('.dropdown .menu:not(.hidden)').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
+        // Close on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.dropdown-menu.is-open').forEach(menu => {
+                    menu.classList.remove('is-open');
+                });
+                document.querySelectorAll('.dropdown .menu:not(.hidden)').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+    }
 }
 
 export function reinitDropdown() {
     initDropdown();
-}
-
-// Auto-init
-if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initDropdown);
-    } else {
-        initDropdown();
-    }
 }
 
 // Export legacy toggle function for inline onclick

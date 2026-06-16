@@ -87,13 +87,7 @@ function reinitializeComponents() {
     });
 }
 
+// ponytail: inline await in loadPage if fade delay is ever removed
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Auto-initialize
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initRouter);
-} else {
-    initRouter();
 }
