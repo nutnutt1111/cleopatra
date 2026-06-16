@@ -29,6 +29,7 @@ Version 2.0 is a **complete rewrite** from the ground up. The entire codebase ha
 **Documentation:**
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Project structure and architecture rules
 - [COMPONENT_GUIDE.md](COMPONENT_GUIDE.md) - How to create and use components
+- [PONYTAIL_AUDIT.md](PONYTAIL_AUDIT.md) - Code simplicity audit ([Ponytail](https://github.com/nutnutt1111/ponytail) integration)
 
 ---
 
@@ -105,7 +106,7 @@ src/
 │   ├── layout/      # App shell, header, sidebar
 │   ├── ui/          # Buttons, cards, alerts, modals
 │   ├── widgets/     # Dashboard widgets, charts, stats
-│   └── charts/      # ApexCharts & Chart.js components
+│   └── widgets/     # Dashboard widgets, charts, stats
 ├── pages/           # Route files
 ├── styles/          # Global styles & Tailwind config
 └── js/              # JavaScript modules

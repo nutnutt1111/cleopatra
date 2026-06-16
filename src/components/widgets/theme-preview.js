@@ -65,10 +65,3 @@ export function initThemePreview() {
         });
     }
 }
-
-// Auto-init on DOMContentLoaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initThemePreview);
-} else {
-    initThemePreview();
-}

@@ -39,15 +39,9 @@ Atomic UI components:
 | `dropdown/` | Dropdown menus |
 | `code-block/` | Syntax highlighted code |
 
-### Charts (`components/charts/`)
+### Charts (`components/widgets/`)
 
-Data visualization:
-
-| Chart | Library | Purpose |
-|-------|---------|---------|
-| `analytics/` | ApexCharts | Analytics line charts |
-| `sales-overview/` | Chart.js | Sales bar charts |
-| `summary/` | ApexCharts | Summary donut charts |
+Data visualization lives in dashboard widgets (ApexCharts and Chart.js). See `chart-utils.js` and `chartjs-utils.js` for shared helpers.
 
 ### Dashboard-Specific Components
 

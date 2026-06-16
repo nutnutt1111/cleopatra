@@ -25,11 +25,7 @@ import { initDrawer } from '../components/ui/drawer/drawer.js';
 import { initExampleBlocks } from '../components/ui/example-block/example-block.js';
 import '../components/ui/toast/toast.js';
 import '../components/ui/alert';
-
-// Charts
-import { initAnalytics1 } from '../components/charts/analytics';
-import { initSalesOverview } from '../components/charts/sales-overview';
-import { initSummary } from '../components/charts/summary';
+import { initThemePreview } from '../components/widgets/theme-preview.js';
 
 import { initMetricsRow } from '../components/widgets/metrics-row/metrics-row.js';
 import { initRevenueChart } from '../components/widgets/revenue-chart/revenue-chart.js';
@@ -68,9 +64,7 @@ function initComponents() {
     initTabs();
     initDrawer();
     initExampleBlocks();
-    initAnalytics1();
-    initSalesOverview();
-    initSummary();
+    initThemePreview();
 
     // Dashboard widgets (ApexCharts)
     initMetricsRow();
