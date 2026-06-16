@@ -60,3 +60,18 @@
 ### Verify
 
 - `yarn build` + `yarn quality:smoke` + `yarn quality:ux`
+
+## Phase E4 — Server ponytail ✅
+
+**Branch:** `cursor/phase-4-server-ponytail-8e6d`  
+**Status:** Complete
+
+### Delivered
+
+- Extracted auth routes to `server/routes/auth.ts`
+- `error-handler.ts` consolidated domain error handling
+- Shared `AuthedRequest` type
+
+### Verify
+
+- `yarn quality:api` — 22 pass
