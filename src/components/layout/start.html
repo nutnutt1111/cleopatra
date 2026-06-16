@@ -107,6 +107,12 @@
                 <!-- Right Actions -->
                 <div class="flex items-center gap-1 sm:gap-2 ml-auto">
 
+                    <a id="navbar-header-login" href="/login"
+                        class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary border border-primary/20 rounded-lg hover:bg-primary/5 transition-colors">
+                        <i class="ri-login-box-line"></i>
+                        <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+                    </a>
+
                     <!-- Theme Switcher Dropdown -->
                     <div class="relative" id="theme-dropdown-container">
                         <button id="theme-toggle-btn"
@@ -191,8 +197,8 @@
                                     <i class="ri-login-box-line"></i>
                                     <span>เข้าสู่ระบบ</span>
                                 </a>
-                                <a href="/settings"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+                                <a href="/settings" id="navbar-settings-link"
+                                    class="hidden flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                                     <i class="ri-settings-3-line"></i>
                                     <span>บัญชีและตั้งค่า</span>
                                 </a>

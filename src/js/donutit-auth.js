@@ -15,7 +15,6 @@ const PROTECTED = new Set([
   '/cashflow-ledger',
   '/customers',
   '/hr',
-  '/settings',
 ]);
 
 function currentPath() {

@@ -22,7 +22,8 @@ export async function refreshNavbarSession() {
   const avatarEl = document.getElementById('navbar-user-avatar');
   const loginHint = document.getElementById('navbar-login-hint');
   const loginLink = document.getElementById('navbar-login-link');
-  const settingsLink = document.querySelector('#user-dropdown a[href="/settings"]');
+  const headerLogin = document.getElementById('navbar-header-login');
+  const settingsLink = document.getElementById('navbar-settings-link');
 
   if (!nameEl) return;
 
@@ -38,6 +39,7 @@ export async function refreshNavbarSession() {
     }
     if (loginHint) loginHint.classList.add('hidden');
     if (loginLink) loginLink.classList.add('hidden');
+    if (headerLogin) headerLogin.classList.add('hidden');
     if (settingsLink) settingsLink.classList.remove('hidden');
   } else {
     nameEl.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
@@ -46,6 +48,7 @@ export async function refreshNavbarSession() {
     if (avatarEl) avatarEl.textContent = '?';
     if (loginHint) loginHint.classList.remove('hidden');
     if (loginLink) loginLink.classList.remove('hidden');
+    if (headerLogin) headerLogin.classList.remove('hidden');
     if (settingsLink) settingsLink.classList.add('hidden');
   }
 }

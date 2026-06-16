@@ -2,6 +2,7 @@ import { login, logout, isLoggedIn, getSessionUser } from './donutit-api.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
 import { refreshNavbarSession } from '../navbar/navbar.js';
+import { revealSettingsAfterLogin } from './settings.js';
 import { appPath, safeNextAfterLogin, stripAppBase } from '../../../js/donutit-paths.js';
 
 async function showLoggedInState() {
@@ -63,6 +64,12 @@ export async function initLogin() {
       );
       notify(`ยินดีต้อนรับ ${user.name}`, 'success');
       await refreshNavbarSession();
+
+      if (document.getElementById('settings-account-panel')) {
+        await revealSettingsAfterLogin();
+        return;
+      }
+
       const next = safeNextAfterLogin(new URLSearchParams(location.search).get('next'));
       location.assign(appPath(next));
     } catch (err) {

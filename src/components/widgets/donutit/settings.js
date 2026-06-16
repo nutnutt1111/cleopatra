@@ -18,11 +18,6 @@ async function refreshAccount() {
   const roleEl = document.getElementById('settings-user-role');
   const avatarEl = document.getElementById('settings-avatar');
 
-  if (!(await isLoggedIn())) {
-    if (statusEl) statusEl.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
-    return;
-  }
-
   try {
     const res = await apiFetch('/api/auth/me');
     const data = await res.json();
@@ -38,15 +33,43 @@ async function refreshAccount() {
   }
 }
 
+function showLoginPanel() {
+  document.getElementById('settings-login-panel')?.classList.remove('hidden');
+  document.getElementById('settings-account-panel')?.classList.add('hidden');
+}
+
+function showAccountPanel() {
+  document.getElementById('settings-login-panel')?.classList.add('hidden');
+  document.getElementById('settings-account-panel')?.classList.remove('hidden');
+}
+
 export async function initSettings() {
-  if (!document.querySelector('[data-donutit-module="settings"]')) return;
+  const accountPanel = document.getElementById('settings-account-panel');
+  if (!accountPanel) return;
+
+  const loggedIn = await isLoggedIn();
+  if (!loggedIn) {
+    showLoginPanel();
+    return;
+  }
+
+  showAccountPanel();
 
   bindOnce(document.getElementById('btn-logout'), 'click', async () => {
     await logout();
     await refreshNavbarSession();
     notify('ออกจากระบบแล้ว', 'info');
-    location.assign(appPath('/login'));
+    showLoginPanel();
+    await refreshNavbarSession();
   });
 
   await refreshAccount();
+}
+
+/** Called after login on /settings hybrid page */
+export async function revealSettingsAfterLogin() {
+  if (!document.getElementById('settings-account-panel')) return;
+  showAccountPanel();
+  await refreshAccount();
+  await refreshNavbarSession();
 }
