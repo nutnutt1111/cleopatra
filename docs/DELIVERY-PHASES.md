@@ -23,7 +23,6 @@
 
 | Phase | Scope |
 |-------|-------|
-| E2 | Design pass — dashboard KPI, Cleopatra widget reuse |
 | E3 | Frontend ponytail cleanup |
 | E4 | Server ponytail cleanup |
 | E5 | Hardening (FU-1–3) |
@@ -40,6 +39,23 @@
 - `dashboard.js` wired via `donutit-init.js`
 - `notify.js` — toast replaces `alert()` in all DonutiT modules
 - Badge classes on pawn, messenger, inventory status
+
+### Verify
+
+- `yarn build` + `yarn quality:smoke` + `yarn quality:ux`
+
+## Phase E3 — Frontend ponytail ✅
+
+**Branch:** `cursor/phase-3-fe-ponytail-8e6d`  
+**Status:** Complete
+
+### Delivered
+
+- `dashboard-init.js` — page-scoped chart/widget registry
+- Removed eager chart inits from `main.js`
+- Migrated ApexCharts widgets to Chart.js; removed `apexcharts` dependency
+- `chart-mount.js` + `chart-theme.js` shared helpers
+- Lazy Shiki import in code-block-transformer
 
 ### Verify
 
