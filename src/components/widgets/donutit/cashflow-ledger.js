@@ -228,7 +228,7 @@ export async function initCashflowLedger() {
   });
 
   if (!(await isLoggedIn())) {
-    setStatus(document.getElementById('ledger-status'), 'เข้าสู่ระบบที่ /settings เพื่อดูข้อมูล (dev: owner@donutit.local)', true);
+    setStatus(document.getElementById('ledger-status'), 'เข้าสู่ระบบที่ /login เพื่อดูข้อมูล (dev: owner@donutit.local)', true);
     return;
   }
 

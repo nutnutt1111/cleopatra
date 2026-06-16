@@ -138,7 +138,7 @@ export async function initPos() {
   if (!document.querySelector('[data-donutit-module="pos"]')) return;
   if (!(await isLoggedIn())) {
     document.getElementById('pos-status')?.replaceChildren(
-      document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
+      document.createTextNode('เข้าสู่ระบบที่ /login ก่อน'),
     );
     return;
   }

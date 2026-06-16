@@ -84,7 +84,7 @@ export async function initCustomers() {
   if (!document.querySelector('[data-donutit-module="customers"]')) return;
   if (!(await isLoggedIn())) {
     document.getElementById('customers-status')?.replaceChildren(
-      document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
+      document.createTextNode('เข้าสู่ระบบที่ /login ก่อน'),
     );
     return;
   }

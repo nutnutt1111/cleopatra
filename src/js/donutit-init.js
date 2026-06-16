@@ -8,6 +8,7 @@ const MODULES = [
   { sel: '[data-donutit-module="cashflow-ledger"]', load: () => import('../components/widgets/donutit/cashflow-ledger.js').then((m) => m.initCashflowLedger()) },
   { sel: '[data-donutit-module="customers"]', load: () => import('../components/widgets/donutit/customers.js').then((m) => m.initCustomers()) },
   { sel: '[data-donutit-module="hr"]', load: () => import('../components/widgets/donutit/hr.js').then((m) => m.initHr()) },
+  { sel: '[data-donutit-module="login"]', load: () => import('../components/widgets/donutit/login.js').then((m) => m.initLogin()) },
   { sel: '[data-donutit-module="settings"]', load: () => import('../components/widgets/donutit/settings.js').then((m) => m.initSettings()) },
 ];
 

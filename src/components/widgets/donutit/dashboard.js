@@ -149,7 +149,7 @@ export async function initDashboard() {
   if (!document.querySelector('[data-donutit-module="dashboard"]')) return;
 
   if (!(await isLoggedIn())) {
-    setStatus('เข้าสู่ระบบที่ /settings ก่อนเพื่อดูภาพรวม', true);
+    setStatus('เข้าสู่ระบบที่ /login ก่อนเพื่อดูภาพรวม', true);
     return;
   }
 

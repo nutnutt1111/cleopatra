@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link rel="icon" type="image/png" href="/images/fav.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        #app {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: var(--background, #fff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #loading .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border, #e5e7eb);
+            border-top-color: var(--primary, #111);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loaded #app {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.2s;
+        }
+
+        .loaded #loading {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-foreground">
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <header class="h-16 bg-card border-b border-border flex items-center px-4 sm:px-6 flex-shrink-0">
+            <a href="/dashboard" class="flex items-center gap-2">
+                <img src="/images/logo.png" alt="DonutiT"
+                    class="w-8 h-8 object-contain dark:invert dark:brightness-200">
+                <span class="font-semibold text-foreground text-lg">DonutiT</span>
+            </a>
+
+            <div class="ml-auto relative" id="theme-dropdown-container">
+                <button id="theme-toggle-btn"
+                    class="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
+                    <i class="ri-palette-line text-xl"></i>
+                </button>
+
+                <div id="theme-dropdown"
+                    class="absolute right-0 top-12 w-64 bg-popover text-popover-foreground rounded-xl shadow-xl border border-border z-50 hidden overflow-hidden">
+                    <div class="p-3 border-b border-border">
+                        <h4 class="font-semibold text-sm">Theme</h4>
+                        <p class="text-xs text-muted-foreground">Customize your interface</p>
+                    </div>
+                    <div class="p-3 border-b border-border">
+                        <p class="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Color</p>
+                        <div class="grid grid-cols-5 gap-2" id="theme-colors">
+                            <button data-theme="neutral" title="Neutral"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-gray-900 ring-2 ring-offset-2 ring-transparent hover:ring-gray-400 transition-all"></button>
+                            <button data-theme="blue" title="Blue"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-blue-500 ring-2 ring-offset-2 ring-transparent hover:ring-blue-400 transition-all"></button>
+                            <button data-theme="green" title="Green"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-emerald-500 ring-2 ring-offset-2 ring-transparent hover:ring-emerald-400 transition-all"></button>
+                            <button data-theme="orange" title="Orange"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-orange-500 ring-2 ring-offset-2 ring-transparent hover:ring-orange-400 transition-all"></button>
+                            <button data-theme="yellow" title="Yellow"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-yellow-400 ring-2 ring-offset-2 ring-transparent hover:ring-yellow-400 transition-all"></button>
+                            <button data-theme="stone" title="Stone"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-stone-500 ring-2 ring-offset-2 ring-transparent hover:ring-stone-400 transition-all"></button>
+                            <button data-theme="slate" title="Slate"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-slate-500 ring-2 ring-offset-2 ring-transparent hover:ring-slate-400 transition-all"></button>
+                            <button data-theme="sky" title="Sky"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-sky-500 ring-2 ring-offset-2 ring-transparent hover:ring-sky-400 transition-all"></button>
+                            <button data-theme="azure" title="Azure"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-indigo-500 ring-2 ring-offset-2 ring-transparent hover:ring-indigo-400 transition-all"></button>
+                            <button data-theme="rose" title="Rose"
+                                class="theme-color-btn w-8 h-8 rounded-full bg-rose-500 ring-2 ring-offset-2 ring-transparent hover:ring-rose-400 transition-all"></button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Mode</p>
+                        <div class="flex gap-2" id="theme-modes">
+                            <button data-mode="light"
+                                class="theme-mode-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                                <i class="ri-sun-line"></i> Light
+                            </button>
+                            <button data-mode="dark"
+                                class="theme-mode-btn flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                                <i class="ri-moon-line"></i> Dark
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main id="content" class="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">

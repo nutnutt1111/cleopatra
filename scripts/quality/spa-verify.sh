@@ -28,7 +28,7 @@ echo "Base: $BASE"
 echo ""
 
 # 1. DonutiT routes serve real module pages (not SPA fallback shell only)
-routes=(/dashboard /pos /inventory /pawn /messenger /cashflow-ledger /customers /hr /settings)
+routes=(/login /dashboard /pos /inventory /pawn /messenger /cashflow-ledger /customers /hr /settings)
 for route in "${routes[@]}"; do
   body=$(curl -s --connect-timeout "$QUALITY_TIMEOUT" "${BASE}${route}" 2>/dev/null || echo "")
   if echo "$body" | grep -q 'data-donutit-module='; then
@@ -59,10 +59,10 @@ done
 grep -q 'DonutiT' src/components/layout/start.html && record 1 "header rebrand" "DonutiT in start.html" \
   || record 0 "header rebrand" "Cleopatra only"
 
-# 5. Registry covers 9 modules
+# 5. Registry covers 10 modules
 mods=$(grep -c 'data-donutit-module=' src/js/donutit-init.js || echo 0)
-[[ "$mods" -ge 9 ]] && record 1 "donutit-init registry" "$mods modules" \
-  || record 0 "donutit-init registry" "expected 9+, got $mods"
+[[ "$mods" -ge 10 ]] && record 1 "donutit-init registry" "$mods modules" \
+  || record 0 "donutit-init registry" "expected 10+, got $mods"
 
 # 6. Login + cookie session (settings flow prerequisite)
 jar=$(mktemp)

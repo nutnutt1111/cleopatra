@@ -1,56 +1,52 @@
-import { login, logout, isLoggedIn, apiFetch } from './donutit-api.js';
+import { logout, isLoggedIn, apiFetch } from './donutit-api.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
 import { navigate } from '../../layout/router.js';
 import { refreshNavbarSession } from '../navbar/navbar.js';
 
-function safeNext(raw) {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw === '/') return '/dashboard';
-  if (raw === '/login' || raw === '/settings') return '/dashboard';
-  return raw;
-}
+const ROLE_LABELS = {
+  OWNER: 'เจ้าของร้าน',
+  MANAGER: 'ผู้จัดการ',
+  STAFF: 'พนักงาน',
+  HR: 'HR',
+};
 
-async function refreshStatus() {
-  const el = document.getElementById('login-status');
-  if (!el) return;
+async function refreshAccount() {
+  const statusEl = document.getElementById('settings-status');
+  const nameEl = document.getElementById('settings-user-name');
+  const emailEl = document.getElementById('settings-user-email');
+  const roleEl = document.getElementById('settings-user-role');
+  const avatarEl = document.getElementById('settings-avatar');
+
   if (!(await isLoggedIn())) {
-    el.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
+    if (statusEl) statusEl.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
     return;
   }
+
   try {
     const res = await apiFetch('/api/auth/me');
     const data = await res.json();
-    el.textContent = `เข้าสู่ระบบ: ${data.user.name} (${data.user.role})`;
+    const user = data.user;
+
+    if (nameEl) nameEl.textContent = user.name;
+    if (emailEl) emailEl.textContent = user.email;
+    if (roleEl) roleEl.textContent = ROLE_LABELS[user.role] ?? user.role;
+    if (avatarEl) avatarEl.textContent = user.name.slice(0, 1).toUpperCase();
+    if (statusEl) statusEl.textContent = 'เซสชันใช้งานได้ปกติ';
   } catch {
-    el.textContent = 'เซสชันหมดอายุ';
+    if (statusEl) statusEl.textContent = 'เซสชันหมดอายุ — กรุณาเข้าสู่ระบบใหม่';
   }
 }
 
 export async function initSettings() {
   if (!document.querySelector('[data-donutit-module="settings"]')) return;
 
-  bindOnce(document.getElementById('btn-login'), 'click', async () => {
-    try {
-      const user = await login(
-        document.getElementById('login-email').value.trim(),
-        document.getElementById('login-password').value,
-      );
-      notify(`ยินดีต้อนรับ ${user.name}`, 'success');
-      await refreshNavbarSession();
-      const next = safeNext(new URLSearchParams(location.search).get('next'));
-      await navigate(next);
-    } catch (e) {
-      notify(e.message, 'error');
-      document.getElementById('login-status').textContent = e.message;
-    }
-  });
-
   bindOnce(document.getElementById('btn-logout'), 'click', async () => {
     await logout();
     await refreshNavbarSession();
-    refreshStatus();
     notify('ออกจากระบบแล้ว', 'info');
+    await navigate('/login');
   });
 
-  refreshStatus();
+  await refreshAccount();
 }

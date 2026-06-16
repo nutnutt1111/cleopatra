@@ -3,7 +3,7 @@ import { isLoggedIn } from '../components/widgets/donutit/donutit-api.js';
 import { refreshNavbarSession } from '../components/widgets/navbar/navbar.js';
 import { navigate } from '../components/layout/router.js';
 
-const AUTH_PAGES = new Set(['/login', '/settings']);
+const AUTH_PAGES = new Set(['/login']);
 
 const PROTECTED = new Set([
   '/',
@@ -15,6 +15,7 @@ const PROTECTED = new Set([
   '/cashflow-ledger',
   '/customers',
   '/hr',
+  '/settings',
 ]);
 
 function path() {

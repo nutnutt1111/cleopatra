@@ -90,7 +90,7 @@ export async function initHr() {
   if (!document.querySelector('[data-donutit-module="hr"]')) return;
   if (!(await isLoggedIn())) {
     document.getElementById('hr-status')?.replaceChildren(
-      document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
+      document.createTextNode('เข้าสู่ระบบที่ /login ก่อน'),
     );
     return;
   }

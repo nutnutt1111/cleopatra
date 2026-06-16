@@ -5,7 +5,7 @@ import { mkdirSync, copyFileSync, existsSync } from 'fs';
 export const DONUTIT_ROUTES = {
     '/': '/pages/donutit/dashboard.html',
     '/dashboard': '/pages/donutit/dashboard.html',
-    '/login': '/pages/donutit/settings.html',
+    '/login': '/pages/donutit/login.html',
     '/pos': '/pages/donutit/pos.html',
     '/inventory': '/pages/donutit/inventory.html',
     '/pawn': '/pages/donutit/pawn.html',
