@@ -1,7 +1,6 @@
 import { logout, isLoggedIn, apiFetch } from './donutit-api.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
-import { navigate } from '../../layout/router.js';
 import { refreshNavbarSession } from '../navbar/navbar.js';
 
 const ROLE_LABELS = {
@@ -45,7 +44,7 @@ export async function initSettings() {
     await logout();
     await refreshNavbarSession();
     notify('ออกจากระบบแล้ว', 'info');
-    await navigate('/login');
+    location.assign('/login');
   });
 
   await refreshAccount();

@@ -1,7 +1,6 @@
-// ponytail: redirect unauthenticated users — no module flash on protected routes
+// ponytail: redirect unauthenticated users — full page load for /login (auth layout)
 import { isLoggedIn } from '../components/widgets/donutit/donutit-api.js';
 import { refreshNavbarSession } from '../components/widgets/navbar/navbar.js';
-import { navigate } from '../components/layout/router.js';
 
 const AUTH_PAGES = new Set(['/login']);
 
@@ -39,7 +38,7 @@ export async function enforceDonutitAuth() {
     await refreshNavbarSession();
     if (onAuthPage) {
       const next = safeNext(new URLSearchParams(location.search).get('next'));
-      await navigate(next);
+      location.assign(next);
     }
     return;
   }
@@ -47,6 +46,6 @@ export async function enforceDonutitAuth() {
   await refreshNavbarSession();
   if (needsAuth) {
     const next = encodeURIComponent(p === '/' ? '/dashboard' : p);
-    await navigate(`/login?next=${next}`);
+    location.assign(`/login?next=${next}`);
   }
 }

@@ -2,6 +2,17 @@
 // SPA Router - Client-side navigation
 // ============================================
 
+const AUTH_ROUTES = new Set(['/login']);
+
+function normalizePath(pathname) {
+  const p = pathname.replace(/\/$/, '') || '/';
+  return p;
+}
+
+function isAuthLayout() {
+  return !document.getElementById('sidebar');
+}
+
 export function initRouter() {
     // Handle all internal link clicks
     document.addEventListener('click', async (e) => {
@@ -26,12 +37,24 @@ export function initRouter() {
 
 export async function navigate(url) {
     const urlObj = new URL(url, location.origin);
-    await loadPage(urlObj.pathname, true);
+    const targetPath = normalizePath(urlObj.pathname);
+    const fullUrl = `${urlObj.pathname}${urlObj.search}`;
+
+    // Auth layout uses a different shell — always full page load
+    if (AUTH_ROUTES.has(targetPath) || (isAuthLayout() && !AUTH_ROUTES.has(targetPath))) {
+        location.assign(fullUrl);
+        return;
+    }
+
+    await loadPage(fullUrl, true);
 }
 
-async function loadPage(path, pushState = true) {
+async function loadPage(url, pushState = true) {
     const content = document.getElementById('content');
     if (!content) return;
+
+    const urlObj = new URL(url, location.origin);
+    const fetchUrl = `${urlObj.pathname}${urlObj.search}`;
 
     // Fade out
     content.style.opacity = '0';
@@ -41,7 +64,7 @@ async function loadPage(path, pushState = true) {
 
     try {
         // Fetch new page
-        const response = await fetch(path);
+        const response = await fetch(fetchUrl);
         if (!response.ok) throw new Error('Page not found');
 
         const html = await response.text();
@@ -57,7 +80,7 @@ async function loadPage(path, pushState = true) {
 
         // Update URL
         if (pushState) {
-            history.pushState({}, '', path);
+            history.pushState({}, '', fetchUrl);
         }
 
         // Update title
@@ -72,7 +95,7 @@ async function loadPage(path, pushState = true) {
     } catch (error) {
         console.error('Navigation error:', error);
         // Fallback to full page load
-        location.href = path;
+        location.href = fetchUrl;
     }
 
     // Fade in

@@ -55,10 +55,20 @@
             pointer-events: none;
             transition: opacity 0.2s;
         }
+
+        /* Auth pages: show content even before JS bundle finishes */
+        body.auth-page #app {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        body.auth-page #loading {
+            display: none;
+        }
     </style>
 </head>
 
-<body class="bg-background text-foreground">
+<body class="bg-background text-foreground auth-page">
     <div id="loading">
         <div class="spinner"></div>
     </div>

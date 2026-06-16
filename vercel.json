@@ -1,0 +1,15 @@
+{
+  "rewrites": [
+    { "source": "/login", "destination": "/login/index.html" },
+    { "source": "/dashboard", "destination": "/dashboard/index.html" },
+    { "source": "/pos", "destination": "/pos/index.html" },
+    { "source": "/inventory", "destination": "/inventory/index.html" },
+    { "source": "/pawn", "destination": "/pawn/index.html" },
+    { "source": "/messenger", "destination": "/messenger/index.html" },
+    { "source": "/cashflow-ledger", "destination": "/cashflow-ledger/index.html" },
+    { "source": "/customers", "destination": "/customers/index.html" },
+    { "source": "/hr", "destination": "/hr/index.html" },
+    { "source": "/settings", "destination": "/settings/index.html" },
+    { "source": "/", "destination": "/dashboard/index.html" }
+  ]
+}

@@ -1,7 +1,6 @@
 import { login } from './donutit-api.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
-import { navigate } from '../../layout/router.js';
 import { refreshNavbarSession } from '../navbar/navbar.js';
 
 function safeNext(raw) {
@@ -33,7 +32,7 @@ export async function initLogin() {
       notify(`ยินดีต้อนรับ ${user.name}`, 'success');
       await refreshNavbarSession();
       const next = safeNext(new URLSearchParams(location.search).get('next'));
-      await navigate(next);
+      location.assign(next);
     } catch (err) {
       notify(err.message, 'error');
       if (statusEl) statusEl.textContent = err.message;
