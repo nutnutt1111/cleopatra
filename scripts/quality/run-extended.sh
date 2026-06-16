@@ -129,7 +129,7 @@ echo "### Code Inventory (map-master)"
 echo ""
 echo "| สิ่งที่ตรวจ | สถานะ |"
 echo "|------------|--------|"
-echo "| prisma/schema.prisma | $([[ -f prisma/schema.prisma ]] && echo '❌ ไม่มี' || echo '❌ ไม่มี') |"
+echo "| prisma/schema.prisma | $([[ -f prisma/schema.prisma ]] && echo '✅ มี' || echo '❌ ไม่มี') |"
 echo "| package.json (Next/API) | $(grep -q 'next' package.json 2>/dev/null && echo 'Next.js' || echo 'Vite (template)') |"
 echo "| หน้า HTML ทั้งหมด | ${total_pages} ไฟล์ |"
 echo "| widgets | $(find src/components/widgets -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ') โฟลเดอร์ |"
@@ -171,12 +171,12 @@ echo ""
 # ── Permission surface (gate-keeper) ──────────────────────────
 echo "### Permission Surface (gate-keeper)"
 echo ""
-api_routes=$(find . -path ./node_modules -prune -o \( -name 'route.ts' -o -name 'route.js' -o -path '*/api/*' \) -print 2>/dev/null | head -10)
-if [[ -z "$api_routes" ]]; then
-  echo "- ไม่พบ API routes (เป็น static template)"
-  echo "- **BLOCK** — ยังไม่มี server-side auth สำหรับ DonutiT"
+if [[ -d server ]] && [[ -f server/index.ts ]]; then
+  echo "- Express API: \`server/index.ts\` (port ${QUALITY_API_URL##*:})"
+  health=$(curl -s -o /dev/null -w "%{http_code}" "${QUALITY_API_URL}/api/health" 2>/dev/null || echo "000")
+  echo "- \`GET /api/health\` → HTTP **${health}**"
 else
-  echo "$api_routes" | while read -r f; do echo "- \`$f\`"; done
+  echo "- ไม่พบ server — static template only"
 fi
 echo ""
 
@@ -197,17 +197,20 @@ echo ""
 # ── Summary ───────────────────────────────────────────────────
 echo "### สรุปการตรวจเพิ่ม"
 echo ""
-issues=0
-[[ ! -f prisma/schema.prisma ]] && ((issues++)) || true
-[[ "$thai_in_src" -eq 0 ]] && ((issues++)) || true
-grep -q '"/pos"' src/data/sidebar.json 2>/dev/null || ((issues++)) || true
+donut_live=0
+for r in "${donut_routes[@]}"; do
+  body=$(curl -s --connect-timeout "$QUALITY_TIMEOUT" "${QUALITY_BASE_URL}${r}" 2>/dev/null || echo "")
+  echo "$body" | grep -q 'data-donutit-module=' && ((donut_live++)) || true
+done
+has_prisma=$([[ -f prisma/schema.prisma ]] && echo '✅' || echo '❌')
+has_sidebar_pos=$(grep -q '"/pos"' src/data/sidebar.json 2>/dev/null && echo '✅' || echo '❌')
+thai_status=$([[ "$thai_in_src" -gt 0 ]] && echo '⚠️ บางส่วน' || echo '⚠️ grep scan (DonutiT ใช้ partials)')
 echo "| หมวด | ผล |"
 echo "|------|-----|"
 echo "| Build | $([[ -d dist ]] && echo '✅' || echo '❌') |"
-echo "| DonutiT routes | ❌ 6/7 ยังไม่มีหน้าจริง |"
-echo "| Sidebar DonutiT | ❌ ไม่มีลิงก์ /pos /pawn ฯลฯ |"
-echo "| ภาษาไทย UI | $([[ "$thai_in_src" -gt 0 ]] && echo '⚠️ บางส่วน' || echo '❌ ไม่มี') |"
-echo "| Prisma/Auth | ❌ ยังไม่มี |"
+echo "| DonutiT live routes | ${donut_live}/${#donut_routes[@]} module pages |"
+echo "| Sidebar DonutiT links | ${has_sidebar_pos} |"
+echo "| ภาษาไทย UI (grep scan) | ${thai_status} |"
+echo "| Prisma schema | ${has_prisma} |"
 echo "| Template health | ✅ ${cleo_pass}/${#cleo_routes[@]} routes OK |"
 echo ""
-echo "**ข้อเสนอถัดไป:** เริ่ม Wave 0 — สร้าง Prisma schema, auth helpers, และเพิ่ม sidebar links สำหรับ DonutiT modules"

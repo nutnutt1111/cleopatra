@@ -18,6 +18,7 @@
 
 - `yarn build` — pass
 - `yarn quality:smoke` — pass (10 routes)
+- `yarn quality:spa` — 24/24 (SPA nav + sidebar + login; see `docs/VERIFY-PHASES.md`)
 
 ### Upcoming
 
@@ -78,6 +79,7 @@ yarn quality:money
 ### Verify
 
 - `yarn build` + `yarn quality:smoke` + `yarn quality:ux`
+- `yarn quality:audit:extended` — build 66 HTML, Cleopatra demos 7/7, crypto + code-blocks → 200
 
 ## Phase E4 — Server ponytail ✅
 
@@ -92,4 +94,6 @@ yarn quality:money
 
 ### Verify
 
-- `yarn quality:api` — 22 pass
+- `yarn quality:api` — 20 pass
+- `yarn quality:hardening` — ALL PASS
+- Ponytail + evidence: `docs/VERIFY-PHASES.md`

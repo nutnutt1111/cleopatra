@@ -18,8 +18,8 @@ Store-management platform for Thai retail + pawn: POS, inventory, pawn, messenge
 | Hardtest + security review | ✅ Complete | included in PR #7 |
 | Production hardening (FU-1–3) | ✅ Complete | Phase E5 · [follow-ups-pr7.md](./follow-ups-pr7.md) |
 
-**Integration branch:** `cursor/wave-4-messenger-hr-e20d` (contains all waves 0–5 + PR #7)  
-**Upstream template:** `main` — original Cleopatra v2 dashboard only (DonutiT work not merged to `main` yet)
+**Integration branch:** `main` — DonutiT E1–E5 (nav, dashboard, ponytail, hardening)  
+**Upstream template:** Cleopatra v2 dashboard (fork baseline)
 
 ---
 
@@ -138,6 +138,7 @@ See [seed-smith-coverage.md](./seed-smith-coverage.md) for fixture details.
 | [ledger-invariants.md](./ledger-invariants.md) | Money rules |
 | [seed-smith-coverage.md](./seed-smith-coverage.md) | Seed fixtures |
 | [follow-ups-pr7.md](./follow-ups-pr7.md) | Post-merge security work |
+| [VERIFY-PHASES.md](./VERIFY-PHASES.md) | Ponytail V evidence ledger (E1–E5) |
 | [quality/README.md](./quality/README.md) | Quality subagent system |
 | [../AGENTS.md](../AGENTS.md) | Agent orchestrator |
 
@@ -152,10 +153,6 @@ _None — FU-1, FU-2, FU-3 closed in Phase E5 (2026-06-16)._
 ## Git branch map
 
 ```
-main                          ← Cleopatra template only
-cursor/quality-subagents-e20d ← 7 agents + audit runner
-  └─ wave-0 … wave-4          ← feature stack (linear PRs #1–#6)
-       └─ wave-5-hardening    ← Wave 5 + grumpy fixes
-            └─ hardtest-fixes  ← PR #7 (FF merged into wave-5)
-                 └─ MERGED → wave-4 @ ab71b59
+main                          ← DonutiT production line (Waves 0–5 + E1–E5)
+cursor/phase-*-8e6d           ← delivery phases (merged)
 ```
