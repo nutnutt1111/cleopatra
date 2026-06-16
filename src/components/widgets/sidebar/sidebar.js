@@ -5,6 +5,7 @@
 
 import { getLucideIcon } from '../../../data/lucide-icons.js';
 import menuData from '../../../data/sidebar.json';
+import { isLoggedIn } from '../donutit/donutit-api.js';
 
 // Resolve href with Vite base path (e.g. /cleopatra/ on GitHub Pages)
 function resolveHref(path) {
@@ -52,10 +53,11 @@ export function bindSidebarChrome() {
 }
 
 // Re-render menu for active state on SPA navigation
-export function renderMenu() {
+export async function renderMenu() {
     const sidebarContainer = document.getElementById('sidebar');
     if (!sidebarContainer) return;
-    renderMenuInto(sidebarContainer);
+    const loggedIn = await isLoggedIn();
+    renderMenuInto(sidebarContainer, loggedIn);
 }
 
 export function initSidebar() {
@@ -73,10 +75,12 @@ function isUrlMatch(href) {
 }
 
 // Render Menu from Data
-function renderMenuInto(container) {
+function renderMenuInto(container, loggedIn = false) {
     let html = '<nav class="sidebar-nav py-5">';
 
     menuData.forEach(item => {
+        if (item.id === 'donutit-login' && loggedIn) return;
+        if (item.id === 'donutit-settings' && !loggedIn) return;
         if (item.type === 'category') {
             html += renderCategory(item);
         } else if (item.type === 'menu') {

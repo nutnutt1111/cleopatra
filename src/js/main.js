@@ -51,15 +51,15 @@ function initComponents() {
 }
 
 // Shell chrome binds once; menu re-renders for active state
-function initShell() {
+async function initShell() {
     bindNavbarChrome();
     bindSidebarChrome();
-    renderMenu();
+    await renderMenu();
 }
 
 // Re-initialize on SPA navigation (including code highlighting)
 document.addEventListener('page:load', async () => {
-    renderMenu();
+    await renderMenu();
     await enforceDonutitAuth();
     initComponents();
     initDonutitModules();
@@ -68,7 +68,7 @@ document.addEventListener('page:load', async () => {
 
 // Initial load
 document.addEventListener('DOMContentLoaded', async () => {
-    initShell();
+    await initShell();
     await enforceDonutitAuth();
     initComponents();
     initRouter();

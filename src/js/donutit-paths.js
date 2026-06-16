@@ -22,3 +22,21 @@ export function appPath(route) {
   if (base === '/') return r;
   return `${base.replace(/\/$/, '')}${r}`;
 }
+
+/** Post-login destination — never bounce back to auth/settings shells */
+export function safeNextAfterLogin(raw) {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw === '/') return '/dashboard';
+  const path = stripAppBase(raw);
+  if (path === '/login' || path === '/settings') return '/dashboard';
+  return path;
+}
+
+/** Login URL when a protected route requires auth */
+export function loginRedirectUrl(fromPath) {
+  const from = fromPath === '/' ? '/dashboard' : fromPath;
+  const path = stripAppBase(from);
+  if (path === '/login' || path === '/settings') {
+    return appPath('/login');
+  }
+  return `${appPath('/login')}?next=${encodeURIComponent(path)}`;
+}

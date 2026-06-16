@@ -1,7 +1,7 @@
 // ponytail: redirect unauthenticated users — full page load for /login (auth layout)
 import { isLoggedIn } from '../components/widgets/donutit/donutit-api.js';
 import { refreshNavbarSession } from '../components/widgets/navbar/navbar.js';
-import { appPath, stripAppBase } from './donutit-paths.js';
+import { loginRedirectUrl, stripAppBase } from './donutit-paths.js';
 
 const AUTH_PAGES = new Set(['/login']);
 
@@ -22,12 +22,6 @@ function currentPath() {
   return stripAppBase(location.pathname);
 }
 
-function safeNext(raw) {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw === '/') return '/dashboard';
-  if (AUTH_PAGES.has(stripAppBase(raw))) return '/dashboard';
-  return raw;
-}
-
 export async function enforceDonutitAuth() {
   const p = currentPath();
   const needsAuth = PROTECTED.has(p);
@@ -36,17 +30,12 @@ export async function enforceDonutitAuth() {
 
   await refreshNavbarSession();
 
-  // Logged-in users may stay on /login (switch account UI). Only honor ?next= redirect.
+  // Never auto-leave /login — user may want to switch account (ignore ?next= here)
   if (loggedIn && onAuthPage) {
-    const next = new URLSearchParams(location.search).get('next');
-    if (next) {
-      location.assign(appPath(safeNext(next)));
-    }
     return;
   }
 
   if (!loggedIn && needsAuth) {
-    const next = encodeURIComponent(p === '/' ? '/dashboard' : p);
-    location.assign(`${appPath('/login')}?next=${next}`);
+    location.assign(loginRedirectUrl(p));
   }
 }

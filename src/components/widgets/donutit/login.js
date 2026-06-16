@@ -2,13 +2,7 @@ import { login, logout, isLoggedIn, getSessionUser } from './donutit-api.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
 import { refreshNavbarSession } from '../navbar/navbar.js';
-import { appPath } from '../../../js/donutit-paths.js';
-
-function safeNext(raw) {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw === '/') return '/dashboard';
-  if (raw === '/login') return '/dashboard';
-  return raw;
-}
+import { appPath, safeNextAfterLogin, stripAppBase } from '../../../js/donutit-paths.js';
 
 async function showLoggedInState() {
   const formWrap = document.getElementById('login-form-wrap');
@@ -29,6 +23,13 @@ async function showLoggedInState() {
 
 export async function initLogin() {
   if (!document.querySelector('[data-donutit-module="login"]')) return;
+
+  // Drop stale ?next=/settings from older redirects
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next');
+  if (next && stripAppBase(next) === '/settings') {
+    history.replaceState({}, '', appPath('/login'));
+  }
 
   await showLoggedInState();
 
@@ -62,7 +63,7 @@ export async function initLogin() {
       );
       notify(`ยินดีต้อนรับ ${user.name}`, 'success');
       await refreshNavbarSession();
-      const next = safeNext(new URLSearchParams(location.search).get('next'));
+      const next = safeNextAfterLogin(new URLSearchParams(location.search).get('next'));
       location.assign(appPath(next));
     } catch (err) {
       notify(err.message, 'error');
