@@ -1,5 +1,10 @@
 let sessionUser = null;
 
+function getCsrfToken() {
+  const match = document.cookie.match(/(?:^|;\s*)csrf=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
 export async function isLoggedIn() {
   try {
     const res = await fetch('/api/auth/me', { credentials: 'include' });
@@ -22,6 +27,11 @@ export function getSessionUser() {
 
 export async function apiFetch(path, options = {}) {
   const headers = new Headers(options.headers || {});
+  const method = (options.method || 'GET').toUpperCase();
+  if (method !== 'GET' && method !== 'HEAD') {
+    const csrf = getCsrfToken();
+    if (csrf) headers.set('X-CSRF-Token', csrf);
+  }
   return fetch(path, { ...options, headers, credentials: 'include' });
 }
 

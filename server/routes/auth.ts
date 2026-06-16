@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma.js';
 import { assertCanExportReports, toAuthUser, type AuthUser } from '../lib/auth.js';
 import type { AuthedRequest } from '../lib/types.js';
+import { issueCsrfToken } from '../lib/csrf.js';
 
 type AuthDeps = {
   loginLimiter: RateLimitRequestHandler;
@@ -46,6 +47,7 @@ export function createAuthRouter({
         sameSite: 'lax',
         secure: isProduction,
       });
+      issueCsrfToken(res, isProduction);
       const body: { user: AuthUser; token?: string } = { user: authUser };
       if (returnLoginToken) {
         body.token = token;

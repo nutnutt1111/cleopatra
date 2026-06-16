@@ -103,9 +103,8 @@ phone_id=$(echo "$staff_products" | python3 -c "import sys,json; d=json.load(sys
 serial_id=$(echo "$staff_products" | python3 -c "import sys,json; d=json.load(sys.stdin); p=next((x for x in d['products'] if x['trackingType']=='SERIALIZED'),None); print(p['serials'][0]['id'] if p and p.get('serials') else '')")
 if [[ -n "$phone_id" && -n "$serial_id" ]]; then
   price=$(echo "$staff_products" | python3 -c "import sys,json; d=json.load(sys.stdin); p=next(x for x in d['products'] if x['id']=='$phone_id'); print(p['priceCents']/100)")
-  code=$(curl -s -o /dev/null -w "%{http_code}" -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
-    -d "{\"lines\":[{\"productId\":\"$phone_id\",\"serialItemId\":\"$serial_id\"}],\"payments\":[{\"channel\":\"CASH\",\"amount\":$price}],\"discount\":10}" \
-    "$API/api/pos/bills")
+  code=$(api_post_code "$STAFF_JAR" "$API/api/pos/bills" \
+    "{\"lines\":[{\"productId\":\"$phone_id\",\"serialItemId\":\"$serial_id\"}],\"payments\":[{\"channel\":\"CASH\",\"amount\":$price}],\"discount\":10}")
   assert_http "staff discount blocked" "403" "$code"
 fi
 
@@ -113,11 +112,8 @@ fi
 bill_id=$(curl -s -b "$OWNER_JAR" "$API/api/pos/bills" \
   | python3 -c "import sys,json; d=json.load(sys.stdin); print(next((b['id'] for b in d.get('bills',[]) if b.get('status')=='COMPLETED'),''))")
 if [[ -n "$bill_id" ]]; then
-  code=$(curl -s -o /tmp/q-void.json -w "%{http_code}" -b "$MANAGER_JAR" -X POST -H 'Content-Type: application/json' \
-    -d '{"reason":"quality smoke void"}' \
-    "$API/api/pos/bills/$bill_id/void")
-  assert_http "manager can void bill" "200" "$code"
-  assert_json "void response ok" "d.get('ok') is True" "$(cat /tmp/q-void.json)"
+  void_body=$(api_post "$MANAGER_JAR" "$API/api/pos/bills/$bill_id/void" '{"reason":"quality smoke void"}')
+  assert_json "manager can void bill" "d.get('ok') is True" "$void_body"
 else
   echo "SKIP  manager void — no completed bill in seed"
 fi

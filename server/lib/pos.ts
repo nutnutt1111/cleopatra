@@ -169,7 +169,7 @@ export async function voidPosBill(user: AuthUser, billId: string, reason: string
   });
 
   if (!bill) throw new PosError('ไม่พบบิล', 404);
-  if (bill.status === 'VOIDED') throw new PosError('บิลนี้ถูกยกเลิกแล้ว');
+  if (bill.status === 'VOIDED') throw new PosError('บิลนี้ถูกยกเลิกแล้ว', 409);
 
   await assertDateNotLocked(user.storeId, bill.createdAt);
 

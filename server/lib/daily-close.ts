@@ -111,18 +111,23 @@ export async function unlockDay(user: AuthUser, closeDateInput: string | Date) {
     throw new LedgerError('ไม่พบการปิดวันนี้', 404);
   }
   if (!existing.isLocked) {
-    throw new LedgerError('วันนี้ไม่ได้ถูกล็อกอยู่');
+    throw new LedgerError('วันนี้ไม่ได้ถูกล็อกอยู่', 409);
   }
 
   const updated = await prisma.$transaction(async (tx) => {
-    const close = await tx.dailyClose.update({
-      where: { id: existing.id },
+    const claimed = await tx.dailyClose.updateMany({
+      where: { id: existing.id, isLocked: true },
       data: {
         isLocked: false,
         unlockedAt: new Date(),
         unlockedById: user.id,
       },
     });
+    if (claimed.count === 0) {
+      throw new LedgerError('วันนี้ไม่ได้ถูกล็อกอยู่', 409);
+    }
+
+    const close = await tx.dailyClose.findUniqueOrThrow({ where: { id: existing.id } });
 
     await writeAudit(tx, {
       storeId: user.storeId,

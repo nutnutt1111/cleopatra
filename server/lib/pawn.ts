@@ -266,10 +266,13 @@ export async function redeemPawnTicket(
 
   return prisma.$transaction(async (tx) => {
     const ticket = await tx.pawnTicket.findFirst({
-      where: { id: ticketId, storeId: user.storeId, status: 'ACTIVE' },
+      where: { id: ticketId, storeId: user.storeId },
     });
     if (!ticket) {
-      throw new PawnError('ไม่พบตั๋วจำนำหรือไถ่ถอนแล้ว', 404);
+      throw new PawnError('ไม่พบตั๋วจำนำ', 404);
+    }
+    if (ticket.status !== 'ACTIVE') {
+      throw new PawnError('ตั๋วนี้ไถ่ถอนแล้วหรือถูกยกเลิก', 409);
     }
 
     await assertDateNotLocked(user.storeId, entryDate, tx);

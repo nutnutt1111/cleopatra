@@ -35,9 +35,15 @@ record() {
 
 race_pair() {
   local name="$1" jar="$2" method="$3" url="$4" body="$5"
-  curl -s -b "$jar" -X "$method" -H 'Content-Type: application/json' -d "$body" \
+  local csrf
+  csrf=$(csrf_from_jar "$jar")
+  curl -s -b "$jar" -X "$method" -H 'Content-Type: application/json' \
+    ${csrf:+-H "X-CSRF-Token: $csrf"} \
+    -d "$body" \
     "$url" -o "/tmp/ra1.json" -w '%{http_code}' > /tmp/ra1-code.txt &
-  curl -s -b "$jar" -X "$method" -H 'Content-Type: application/json' -d "$body" \
+  curl -s -b "$jar" -X "$method" -H 'Content-Type: application/json' \
+    ${csrf:+-H "X-CSRF-Token: $csrf"} \
+    -d "$body" \
     "$url" -o "/tmp/ra2.json" -w '%{http_code}' > /tmp/ra2-code.txt &
   wait
   local c1 c2
@@ -45,12 +51,10 @@ race_pair() {
   c2=$(cat /tmp/ra2-code.txt)
   if { [[ "$c1" == "200" ]] && [[ "$c2" == "409" ]]; } \
     || { [[ "$c1" == "409" ]] && [[ "$c2" == "200" ]]; } \
-    || { [[ "$c1" == "200" || "$c1" == "201" ]] && [[ "$c2" == "409" ]]; } \
     || { [[ "$c2" == "200" || "$c2" == "201" ]] && [[ "$c1" == "409" ]]; } \
-    || { [[ "$c1" == "200" ]] && [[ "$c2" == "404" ]]; } \
-    || { [[ "$c2" == "200" ]] && [[ "$c1" == "404" ]]; } \
-    || { [[ "$c1" == "200" ]] && [[ "$c2" == "400" || "$c2" == "403" ]]; } \
-    || { [[ "$c2" == "200" ]] && [[ "$c1" == "400" || "$c1" == "403" ]]; }; then
+    || { [[ "$c1" == "200" || "$c1" == "201" ]] && [[ "$c2" == "409" ]]; } \
+    || { [[ "$c1" == "200" ]] && [[ "$c2" == "403" ]]; } \
+    || { [[ "$c2" == "200" ]] && [[ "$c1" == "403" ]]; }; then
     record PASS "$name" "one success + one blocked ($c1 / $c2)"
   elif [[ "$c1" == "$c2" ]] && [[ "$c1" == "409" ]]; then
     record PASS "$name" "both 409 (idempotent reject) ($c1 / $c2)"
@@ -72,9 +76,9 @@ echo "## race-reaper"
 echo ""
 
 # 1. Pawn interest parallel (regression)
-curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"customerName":"AuditPawn","itemDescription":"race","principal":8000,"channel":"CASH"}' \
-  "$API/api/pawn/tickets" > /tmp/audit-pawn.json
+api_post "$OWNER_JAR" "$API/api/pawn/tickets" \
+  '{"customerName":"AuditPawn","itemDescription":"race","principal":8000,"channel":"CASH"}' \
+  > /tmp/audit-pawn.json
 PAWN_ID=$(python3 -c "import json; print(json.load(open('/tmp/audit-pawn.json')).get('ticket',{}).get('id',''))" 2>/dev/null || echo "")
 if [[ -n "$PAWN_ID" ]]; then
   race_pair "pawn interest parallel" "$OWNER_JAR" POST "$API/api/pawn/tickets/$PAWN_ID/interest" '{"channel":"CASH"}'
@@ -83,9 +87,9 @@ else
 fi
 
 # 2. Pawn redeem parallel
-curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"customerName":"RedeemRace","itemDescription":"redeem","principal":3000,"channel":"CASH"}' \
-  "$API/api/pawn/tickets" > /tmp/audit-redeem-pawn.json
+api_post "$OWNER_JAR" "$API/api/pawn/tickets" \
+  '{"customerName":"RedeemRace","itemDescription":"redeem","principal":3000,"channel":"CASH"}' \
+  > /tmp/audit-redeem-pawn.json
 REDEEM_ID=$(python3 -c "import json; print(json.load(open('/tmp/audit-redeem-pawn.json')).get('ticket',{}).get('id',''))" 2>/dev/null || echo "")
 if [[ -n "$REDEEM_ID" ]]; then
   race_pair "pawn redeem parallel" "$OWNER_JAR" POST "$API/api/pawn/tickets/$REDEEM_ID/redeem" '{"channel":"CASH"}'
@@ -105,37 +109,37 @@ fi
 # 4. Daily-close lock parallel
 CLOSE_DATE="2026-05-01"
 race_pair "daily-close lock parallel" "$OWNER_JAR" POST "$API/api/cashflow/daily-close" "{\"closeDate\":\"$CLOSE_DATE\"}"
-curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
-  -d "{\"closeDate\":\"$CLOSE_DATE\"}" "$API/api/cashflow/daily-close/unlock" > /dev/null || true
+api_post "$OWNER_JAR" "$API/api/cashflow/daily-close/unlock" "{\"closeDate\":\"$CLOSE_DATE\"}" > /dev/null || true
 
 # 5. Daily-close unlock parallel (lock first)
-curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"closeDate":"2026-05-02"}' "$API/api/cashflow/daily-close" > /dev/null || true
+api_post "$OWNER_JAR" "$API/api/cashflow/daily-close" '{"closeDate":"2026-05-02"}' > /dev/null || true
 race_pair "daily-close unlock parallel" "$OWNER_JAR" POST "$API/api/cashflow/daily-close/unlock" '{"closeDate":"2026-05-02"}'
-curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"closeDate":"2026-05-02"}' "$API/api/cashflow/daily-close/unlock" > /dev/null || true
+api_post "$OWNER_JAR" "$API/api/cashflow/daily-close/unlock" '{"closeDate":"2026-05-02"}' > /dev/null || true
 
 # 6. Messenger delivered double patch
-curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"customerName":"RaceShip","customerPhone":"080","address":"addr","deliveryFee":500,"feeChannel":"CASH"}' \
-  "$API/api/messenger/jobs" > /tmp/audit-job.json
+api_post "$OWNER_JAR" "$API/api/messenger/jobs" \
+  '{"customerName":"RaceShip","customerPhone":"080","address":"addr","deliveryFee":500,"feeChannel":"CASH"}' \
+  > /tmp/audit-job.json
 JOB_ID=$(python3 -c "import json; print(json.load(open('/tmp/audit-job.json')).get('job',{}).get('id',''))" 2>/dev/null || echo "")
 if [[ -n "$JOB_ID" ]]; then
-  curl -s -b "$OWNER_JAR" -X POST "$API/api/messenger/jobs/$JOB_ID/transit" > /dev/null || true
+  api_post_empty "$OWNER_JAR" "$API/api/messenger/jobs/$JOB_ID/transit" > /dev/null || true
   race_pair "messenger deliver double patch" "$OWNER_JAR" POST "$API/api/messenger/jobs/$JOB_ID/deliver" '{}'
 else
   record FAIL "messenger delivered double patch" "could not create job"
 fi
 
 # 7. Credit sale parallel over limit
-curl -s -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"name":"LimitRace","phone":"081","creditLimit":5000}' "$API/api/customers" > /tmp/audit-cust.json
+api_post "$STAFF_JAR" "$API/api/customers" \
+  '{"name":"LimitRace","phone":"081","creditLimit":5000}' > /tmp/audit-cust.json
 CUST_ID=$(python3 -c "import json; print(json.load(open('/tmp/audit-cust.json')).get('customer',{}).get('id',''))" 2>/dev/null || echo "")
 if [[ -n "$CUST_ID" ]]; then
+  csrf=$(csrf_from_jar "$STAFF_JAR")
   curl -s -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
+    ${csrf:+-H "X-CSRF-Token: $csrf"} \
     -d "{\"customerId\":\"$CUST_ID\",\"description\":\"sale A\",\"total\":4000}" \
     "$API/api/customers/credit-sales" -o /tmp/cs1.json -w '%{http_code}' > /tmp/cs1-code.txt &
   curl -s -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
+    ${csrf:+-H "X-CSRF-Token: $csrf"} \
     -d "{\"customerId\":\"$CUST_ID\",\"description\":\"sale B\",\"total\":4000}" \
     "$API/api/customers/credit-sales" -o /tmp/cs2.json -w '%{http_code}' > /tmp/cs2-code.txt &
   wait
@@ -193,25 +197,23 @@ code=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $EXPIRED
 [[ "$code" == "401" ]] && record PASS "expired JWT" "401" || record FAIL "expired JWT" "got $code"
 
 # staff owner action
-code=$(curl -s -o /dev/null -w "%{http_code}" -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"closeDate":"2026-06-01"}' "$API/api/cashflow/daily-close/unlock")
+code=$(api_post_code "$STAFF_JAR" "$API/api/cashflow/daily-close/unlock" '{"closeDate":"2026-06-01"}')
 [[ "$code" == "403" ]] && record PASS "staff unlock day" "403" || record FAIL "staff unlock day" "got $code"
 
 code=$(curl -s -o /dev/null -w "%{http_code}" -b "$STAFF_JAR" "$API/api/reports/export")
 [[ "$code" == "403" ]] && record PASS "staff export" "403" || record FAIL "staff export" "got $code"
 
-# forged role payload — sign token with STAFF id but OWNER role
+# forged identity JWT — role claims in token must not grant export
 FORGED=$(node -e "
 const jwt=require('jsonwebtoken');
 const secret=process.env.JWT_SECRET||'donutit-dev-secret';
-console.log(jwt.sign({id:'staff-id',email:'staff@donutit.local',role:'OWNER',storeId:'fake'}, secret, {expiresIn:'1h'}));
+console.log(jwt.sign({userId:'nonexistent-user-id',storeId:'fake-store'}, secret, {expiresIn:'1h'}));
 " 2>/dev/null)
 code=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $FORGED" "$API/api/reports/export")
-# forged storeId likely won't match data; export might 403 or 200 with empty - check export
-if [[ "$code" == "403" ]] || [[ "$code" == "401" ]]; then
-  record PASS "forged role JWT" "$code (rejected or no data access)"
+if [[ "$code" == "401" ]] || [[ "$code" == "403" ]]; then
+  record PASS "forged identity JWT" "$code (rejected)"
 else
-  record WARN "forged role JWT" "got $code — JWT role trusted without DB re-check on export"
+  record FAIL "forged identity JWT" "got $code — export must not trust JWT role claims"
 fi
 
 # brute force login (use low limit test — 12 bad attempts)
@@ -224,15 +226,15 @@ done
 [[ "$bf_ok" == "1" ]] && record PASS "brute force login" "429 after repeated failures" \
   || record WARN "brute force login" "no 429 in 12 attempts (LOGIN_RATE_MAX may be raised for dev)"
 
-# CSRF-ish: cross-site POST without Origin in whitelist
+# CSRF: mutating POST without token must fail
 code=$(curl -s -o /dev/null -w "%{http_code}" \
-  -H "Origin: https://evil.example" \
+  -H "Origin: http://localhost:3003" \
   -H 'Content-Type: application/json' \
   -X POST -b "$OWNER_JAR" \
-  -d '{"customerName":"csrf","itemDescription":"x","principal":100}' \
+  -d '{"customerName":"csrf","itemDescription":"x","principal":100,"channel":"CASH"}' \
   "$API/api/pawn/tickets")
-# CORS doesn't block server-side cookie use; browser would block reading response
-record WARN "CSRF cookie POST from evil origin" "HTTP $code — no CSRF token; mitigated by SameSite=Lax + CORS for XHR"
+[[ "$code" == "403" ]] && record PASS "CSRF missing token" "403" \
+  || record FAIL "CSRF missing token" "got $code"
 
 echo ""
 echo "Summary: ${pass} pass, ${fail} fail, ${warn} warn (blockers: ${blocker})"

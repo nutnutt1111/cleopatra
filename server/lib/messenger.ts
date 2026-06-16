@@ -100,7 +100,7 @@ export async function markDeliveryDelivered(user: AuthUser, jobId: string) {
     where: { id: jobId, storeId: user.storeId },
   });
   if (!job) throw new MessengerError('ไม่พบงานส่ง', 404);
-  if (job.status === 'DELIVERED') throw new MessengerError('งานนี้ส่งสำเร็จแล้ว');
+  if (job.status === 'DELIVERED') throw new MessengerError('งานนี้ส่งสำเร็จแล้ว', 409);
   if (job.status === 'CANCELLED') throw new MessengerError('งานนี้ถูกยกเลิกแล้ว');
 
   const entryDate = toDateOnly(new Date());
