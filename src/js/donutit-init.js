@@ -1,5 +1,6 @@
 // ponytail: one registry, dynamic import per module — no inline page scripts
 const MODULES = [
+  { sel: '[data-donutit-module="dashboard"]', load: () => import('../components/widgets/donutit/dashboard.js').then((m) => m.initDashboard()) },
   { sel: '[data-donutit-module="pos"]', load: () => import('../components/widgets/donutit/pos.js').then((m) => m.initPos()) },
   { sel: '[data-donutit-module="inventory"]', load: () => import('../components/widgets/donutit/inventory.js').then((m) => m.initInventory()) },
   { sel: '[data-donutit-module="pawn"]', load: () => import('../components/widgets/donutit/pawn.js').then((m) => m.initPawn()) },

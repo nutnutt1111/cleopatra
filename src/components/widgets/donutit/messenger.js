@@ -1,6 +1,15 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
+import { notify } from './notify.js';
+
+function jobStatusBadge(status, label) {
+  const text = escapeHtml(label);
+  if (status === 'DELIVERED') return `<span class="badge badge-soft-success">${text}</span>`;
+  if (status === 'CANCELLED') return `<span class="badge badge-soft-destructive">${text}</span>`;
+  if (status === 'IN_TRANSIT') return `<span class="badge badge-soft-info">${text}</span>`;
+  return `<span class="badge badge-soft-warning">${text}</span>`;
+}
 
 async function loadJobs() {
   const res = await apiFetch('/api/messenger/jobs');
@@ -27,7 +36,7 @@ function renderJobs(jobs) {
           <p class="text-sm mt-1">${escapeHtml(j.address)}</p>
           ${j.description ? `<p class="text-xs text-muted-foreground">${escapeHtml(j.description)}</p>` : ''}
           <p class="text-sm mt-1">ค่าส่ง <strong>${escapeHtml(j.deliveryFeeBaht)}</strong> บาท (${escapeHtml(j.feeChannel)})</p>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-muted">${escapeHtml(j.statusLabel)}</span>
+          ${jobStatusBadge(j.status, j.statusLabel)}
           ${j.cancelReason ? `<p class="text-xs text-destructive mt-1">ยกเลิก: ${escapeHtml(j.cancelReason)}</p>` : ''}
         </div>
         ${
@@ -47,7 +56,7 @@ function renderJobs(jobs) {
   el.querySelectorAll('[data-transit]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const res = await apiFetch(`/api/messenger/jobs/${btn.getAttribute('data-transit')}/transit`, { method: 'POST' });
-      if (!res.ok) alert((await res.json()).error);
+      if (!res.ok) notify((await res.json()).error, 'error');
       else renderJobs(await loadJobs());
     });
   });
@@ -56,10 +65,10 @@ function renderJobs(jobs) {
     btn.addEventListener('click', async () => {
       if (!confirm('ยืนยันส่งสำเร็จ? ค่าจัดส่งจะบันทึกเป็นรายรับ')) return;
       const res = await apiFetch(`/api/messenger/jobs/${btn.getAttribute('data-deliver')}/deliver`, { method: 'POST' });
-      if (!res.ok) alert((await res.json()).error);
+      if (!res.ok) notify((await res.json()).error, 'error');
       else {
         const data = await res.json();
-        alert(`ส่งสำเร็จ ${data.jobNumber}${data.deliveryFeeBaht !== '0.00' ? ` — ค่าส่ง ${data.deliveryFeeBaht} บาท` : ''}`);
+        notify(`ส่งสำเร็จ ${data.jobNumber}${data.deliveryFeeBaht !== '0.00' ? ` — ค่าส่ง ${data.deliveryFeeBaht} บาท` : ''}`, 'success');
         renderJobs(await loadJobs());
       }
     });
@@ -74,7 +83,7 @@ function renderJobs(jobs) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason }),
       });
-      if (!res.ok) alert((await res.json()).error);
+      if (!res.ok) notify((await res.json()).error, 'error');
       else renderJobs(await loadJobs());
     });
   });
@@ -98,7 +107,7 @@ export async function initMessenger() {
   bindOnce(document.getElementById('btn-create-job'), 'click', async () => {
     const customerName = document.getElementById('msg-customer-name')?.value?.trim();
     const address = document.getElementById('msg-address')?.value?.trim();
-    if (!customerName || !address) return alert('กรอกชื่อลูกค้าและที่อยู่');
+    if (!customerName || !address) return notify('กรอกชื่อลูกค้าและที่อยู่', 'warning');
 
     try {
       const res = await apiFetch('/api/messenger/jobs', {
@@ -115,14 +124,14 @@ export async function initMessenger() {
       });
       if (!res.ok) throw new Error((await res.json()).error);
       const data = await res.json();
-      alert(`สร้างงาน ${data.job.jobNumber} สำเร็จ`);
+      notify(`สร้างงาน ${data.job.jobNumber} สำเร็จ`, 'success');
       ['msg-customer-name', 'msg-customer-phone', 'msg-address', 'msg-description', 'msg-fee'].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
       renderJobs(await loadJobs());
     } catch (e) {
-      alert(e.message);
+      notify(e.message, 'error');
     }
   });
 }

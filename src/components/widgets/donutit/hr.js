@@ -1,6 +1,7 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
+import { notify } from './notify.js';
 
 let hrMeta = { canManage: false, canViewPayroll: false };
 
@@ -69,10 +70,10 @@ function renderPayroll(runs) {
     btn.addEventListener('click', async () => {
       if (!confirm('ยืนยันจ่ายเงินเดือน? จะบันทึกเป็นรายจ่ายใน ledger')) return;
       const res = await apiFetch(`/api/hr/payroll/${btn.getAttribute('data-pay-payroll')}/pay`, { method: 'POST' });
-      if (!res.ok) alert((await res.json()).error);
+      if (!res.ok) notify((await res.json()).error, 'error');
       else {
         const data = await res.json();
-        alert(`จ่ายเงินเดือน ${data.periodLabel} — ${data.totalBaht} บาทสำเร็จ`);
+        notify(`จ่ายเงินเดือน ${data.periodLabel} — ${data.totalBaht} บาทสำเร็จ`, 'success');
         renderPayroll(await loadPayroll());
       }
     });
@@ -113,7 +114,7 @@ export async function initHr() {
   bindOnce(document.getElementById('btn-add-employee'), 'click', async () => {
     const name = document.getElementById('hr-emp-name')?.value?.trim();
     const salary = parseFloat(document.getElementById('hr-emp-salary')?.value || '0');
-    if (!name) return alert('กรอกชื่อพนักงาน');
+    if (!name) return notify('กรอกชื่อพนักงาน', 'warning');
 
     try {
       const res = await apiFetch('/api/hr/employees', {
@@ -133,7 +134,7 @@ export async function initHr() {
       });
       renderEmployees(await loadEmployees());
     } catch (e) {
-      alert(e.message);
+      notify(e.message, 'error');
     }
   });
 
@@ -141,7 +142,7 @@ export async function initHr() {
     const periodLabel = document.getElementById('hr-period-label')?.value?.trim();
     const periodStart = document.getElementById('hr-period-start')?.value;
     const periodEnd = document.getElementById('hr-period-end')?.value;
-    if (!periodLabel) return alert('กรอกชื่อรอบเงินเดือน');
+    if (!periodLabel) return notify('กรอกชื่อรอบเงินเดือน', 'warning');
 
     try {
       const res = await apiFetch('/api/hr/payroll', {
@@ -151,11 +152,11 @@ export async function initHr() {
       });
       if (!res.ok) throw new Error((await res.json()).error);
       const data = await res.json();
-      alert(`สร้างรอบ ${data.run.periodLabel} — ${data.run.totalBaht} บาท (${data.run.employeeCount} คน)`);
+      notify(`สร้างรอบ ${data.run.periodLabel} — ${data.run.totalBaht} บาท (${data.run.employeeCount} คน)`, 'success');
       document.getElementById('hr-period-label').value = '';
       renderPayroll(await loadPayroll());
     } catch (e) {
-      alert(e.message);
+      notify(e.message, 'error');
     }
   });
 }

@@ -1,6 +1,7 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
+import { notify } from './notify.js';
 
 let productsCache = [];
 
@@ -123,7 +124,7 @@ async function loadBills() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason }),
       });
-      if (!res.ok) alert((await res.json()).error);
+      if (!res.ok) notify((await res.json()).error, 'error');
       else {
         await loadBills();
         await loadProducts();
@@ -157,13 +158,13 @@ export async function initPos() {
   bindOnce(document.getElementById('btn-add-line'), 'click', () => {
     const sel = document.getElementById('pos-product');
     const opt = sel?.selectedOptions[0];
-    if (!opt?.value) return alert('เลือกสินค้า');
+    if (!opt?.value) return notify('เลือกสินค้า', 'warning');
     const product = productsCache.find((p) => p.id === opt.value);
     const qty = parseInt(document.getElementById('pos-qty')?.value || '1', 10);
     let serialItemId, serial;
     if (product.trackingType === 'SERIALIZED') {
       serialItemId = document.getElementById('pos-serial')?.value;
-      if (!serialItemId) return alert('เลือก Serial');
+      if (!serialItemId) return notify('เลือก Serial', 'warning');
       serial = product.serials.find((s) => s.id === serialItemId)?.serialNumber;
     }
     cart.push({
@@ -178,7 +179,7 @@ export async function initPos() {
   });
 
   bindOnce(document.getElementById('btn-checkout'), 'click', async () => {
-    if (!cart.length) return alert('เพิ่มสินค้าก่อน');
+    if (!cart.length) return notify('เพิ่มสินค้าก่อน', 'warning');
     const subtotal = cart.reduce((s, c) => s + c.lineTotalCents, 0);
     const discount = Math.round(parseFloat(document.getElementById('pos-discount')?.value || '0') * 100);
     const total = subtotal - discount;
@@ -189,7 +190,7 @@ export async function initPos() {
     if (cash > 0) payments.push({ channel: 'CASH', amount: cash / 100 });
     if (transfer > 0) payments.push({ channel: 'TRANSFER', amount: transfer / 100 });
     if (cash + transfer !== total) {
-      return alert(`ยอดชำระ ${((cash + transfer) / 100).toFixed(2)} ไม่ตรงยอดรวม ${(total / 100).toFixed(2)}`);
+      return notify(`ยอดชำระ ${((cash + transfer) / 100).toFixed(2)} ไม่ตรงยอดรวม ${(total / 100).toFixed(2)}`, 'warning');
     }
 
     try {
@@ -208,7 +209,7 @@ export async function initPos() {
       });
       if (!res.ok) throw new Error((await res.json()).error);
       const data = await res.json();
-      alert(`บิล ${data.bill.billNumber} สำเร็จ — ${data.bill.totalBaht} บาท`);
+      notify(`บิล ${data.bill.billNumber} สำเร็จ — ${data.bill.totalBaht} บาท`, 'success');
       cart.length = 0;
       renderCart();
       document.getElementById('pos-pay-cash').value = '';
@@ -217,7 +218,7 @@ export async function initPos() {
       await loadProducts();
       renderProductSelect();
     } catch (e) {
-      alert(e.message);
+      notify(e.message, 'error');
     }
   });
 }

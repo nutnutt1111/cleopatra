@@ -1,6 +1,7 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
+import { notify } from './notify.js';
 
 let customersCache = [];
 
@@ -101,7 +102,7 @@ export async function initCustomers() {
 
   bindOnce(document.getElementById('btn-add-customer'), 'click', async () => {
     const name = document.getElementById('cust-name')?.value?.trim();
-    if (!name) return alert('กรอกชื่อลูกค้า');
+    if (!name) return notify('กรอกชื่อลูกค้า', 'warning');
 
     try {
       const res = await apiFetch('/api/customers', {
@@ -121,7 +122,7 @@ export async function initCustomers() {
       renderSelects();
       renderList();
     } catch (e) {
-      alert(e.message);
+      notify(e.message, 'error');
     }
   });
 
@@ -131,7 +132,7 @@ export async function initCustomers() {
     const total = parseFloat(document.getElementById('cust-sale-total')?.value || '0');
     const installmentCount = parseInt(document.getElementById('cust-sale-installments')?.value || '0', 10);
 
-    if (!customerId || !description || total <= 0) return alert('เลือกลูกค้า กรอกรายละเอียดและยอด');
+    if (!customerId || !description || total <= 0) return notify('เลือกลูกค้า กรอกรายละเอียดและยอด', 'warning');
 
     try {
       const res = await apiFetch('/api/customers/credit-sales', {
@@ -141,14 +142,14 @@ export async function initCustomers() {
       });
       if (!res.ok) throw new Error((await res.json()).error);
       const data = await res.json();
-      alert(`ขายเครดิต ${data.sale.saleNumber} — ${data.sale.totalBaht} บาท`);
+      notify(`ขายเครดิต ${data.sale.saleNumber} — ${data.sale.totalBaht} บาท`, 'success');
       document.getElementById('cust-sale-desc').value = '';
       document.getElementById('cust-sale-total').value = '';
       await loadCustomers();
       renderSelects();
       renderList();
     } catch (e) {
-      alert(e.message);
+      notify(e.message, 'error');
     }
   });
 
@@ -159,7 +160,7 @@ export async function initCustomers() {
     const creditSaleId = document.getElementById('cust-pay-sale')?.value || undefined;
     const transferDetail = document.getElementById('cust-pay-transfer')?.value?.trim();
 
-    if (!customerId || amount <= 0) return alert('เลือกลูกค้าและจำนวนเงิน');
+    if (!customerId || amount <= 0) return notify('เลือกลูกค้าและจำนวนเงิน', 'warning');
 
     try {
       const res = await apiFetch('/api/customers/payments', {
@@ -175,14 +176,14 @@ export async function initCustomers() {
       });
       if (!res.ok) throw new Error((await res.json()).error);
       const data = await res.json();
-      alert(`รับชำระ ${data.payment.amountBaht} บาทสำเร็จ`);
+      notify(`รับชำระ ${data.payment.amountBaht} บาทสำเร็จ`, 'success');
       document.getElementById('cust-pay-amount').value = '';
       await loadCustomers();
       renderSelects();
       onPayCustomerChange();
       renderList();
     } catch (e) {
-      alert(e.message);
+      notify(e.message, 'error');
     }
   });
 }
