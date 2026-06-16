@@ -1,5 +1,6 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
+import { bindOnce } from './bind-once.js';
 
 let hrMeta = { canManage: false, canViewPayroll: false };
 
@@ -109,7 +110,7 @@ export async function initHr() {
       document.getElementById('hr-status')?.replaceChildren(document.createTextNode(e.message));
     });
 
-  document.getElementById('btn-add-employee')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-add-employee'), 'click', async () => {
     const name = document.getElementById('hr-emp-name')?.value?.trim();
     const salary = parseFloat(document.getElementById('hr-emp-salary')?.value || '0');
     if (!name) return alert('กรอกชื่อพนักงาน');
@@ -136,7 +137,7 @@ export async function initHr() {
     }
   });
 
-  document.getElementById('btn-create-payroll')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-create-payroll'), 'click', async () => {
     const periodLabel = document.getElementById('hr-period-label')?.value?.trim();
     const periodStart = document.getElementById('hr-period-start')?.value;
     const periodEnd = document.getElementById('hr-period-end')?.value;

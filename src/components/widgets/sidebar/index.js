@@ -1,1 +1,1 @@
-export { initSidebar } from './sidebar.js';
+export { bindSidebarChrome, renderMenu, initSidebar } from './sidebar.js';

@@ -4,6 +4,7 @@
 // ============================================
 
 import { getLucideIcon } from '../../../data/lucide-icons.js';
+import menuData from '../../../data/sidebar.json';
 
 // Resolve href with Vite base path (e.g. /cleopatra/ on GitHub Pages)
 function resolveHref(path) {
@@ -13,231 +14,53 @@ function resolveHref(path) {
     return base + cleanPath;
 }
 
-// Menu Data Structure with Lucide icon names
-const menuData = [
-    {
-        type: 'menu',
-        id: 'dashboards',
-        label: 'Dashboards',
-        icon: 'layout-dashboard',
-        children: [
-            { id: 'analytics-dashboard', label: 'Analytics Dashboard', href: '/pages/', icon: 'bar-chart-3' },
-            { id: 'mission-control', label: 'Mission Control', href: '/pages/index-mission-control.html', icon: 'gauge' },
-            { id: 'index-e-commerce', label: 'eCommerce', href: '/pages/index-e-commerce.html', icon: 'shopping-cart' },
-            { id: 'index-crypto', label: 'Crypto Dashboard', href: '/pages/index-crypto.html', icon: 'bitcoin' },
-        ]
-    },
-    {
-        type: 'category',
-        label: 'APPS'
-    },
-    {
-        type: 'link',
-        id: 'email',
-        label: 'Email',
-        icon: 'mail',
-        href: '/pages/apps/email.html'
-    },
-    {
-        type: 'link',
-        id: 'calendar',
-        label: 'Calendar',
-        icon: 'calendar',
-        href: '/pages/apps/calendar.html'
-    },
-    {
-        type: 'link',
-        id: 'ai-chat',
-        label: 'AI Chat',
-        icon: 'bot',
-        href: '/pages/apps/ai-chat.html'
-    },
-    {
-        type: 'link',
-        id: 'user-management',
-        label: 'User Management',
-        icon: 'users',
-        href: '/pages/apps/user-management.html'
-    },
-    {
-        type: 'link',
-        id: 'todo',
-        label: 'Todo',
-        icon: 'check-square',
-        href: '/pages/apps/todo.html'
-    },
-    {
-        type: 'link',
-        id: 'retail-store',
-        label: 'Retail Store',
-        icon: 'store',
-        href: '/pages/apps/retail-store.html'
-    },
-    {
-        type: 'link',
-        id: 'crm',
-        label: 'CRM',
-        icon: 'contact',
-        href: '/pages/apps/crm.html'
-    },
-    {
-        type: 'link',
-        id: 'inventory',
-        label: 'Inventory',
-        icon: 'package',
-        href: '/pages/apps/inventory.html'
-    },
-    {
-        type: 'link',
-        id: 'real-estate',
-        label: 'Real Estate',
-        icon: 'home',
-        href: '/pages/apps/real-estate.html'
-    },
-    {
-        type: 'category',
-        label: 'EXTRA'
-    },
-    {
-        type: 'menu',
-        id: 'error-pages',
-        label: 'Error Pages',
-        icon: 'alert-triangle',
-        children: [
-            { id: 'error-404', label: '404 - Not Found', href: '/pages/extra/404.html', icon: 'file-x' },
-            { id: 'error-500', label: '500 - Server Error', href: '/pages/extra/500.html', icon: 'server-crash' },
-            { id: 'error-403', label: '403 - Forbidden', href: '/pages/extra/403.html', icon: 'lock' },
-            { id: 'maintenance', label: 'Maintenance', href: '/pages/extra/maintenance.html', icon: 'wrench' }
-        ]
-    },
-    {
-        type: 'menu',
-        id: 'auth-pages',
-        label: 'Authentication',
-        icon: 'shield',
-        children: [
-            { id: 'login', label: 'Login', href: '/pages/extra/login.html', icon: 'log-in' },
-            { id: 'register', label: 'Register', href: '/pages/extra/register.html', icon: 'user-plus' },
-            { id: 'forgot-password', label: 'Forgot Password', href: '/pages/extra/forgot-password.html', icon: 'key' }
-        ]
-    },
-    {
-        type: 'menu',
-        id: 'utility-pages',
-        label: 'Utility Pages',
-        icon: 'file-text',
-        children: [
-            { id: 'blank-page', label: 'Blank Page', href: '/pages/extra/blank.html', icon: 'file' },
-            { id: 'coming-soon', label: 'Coming Soon', href: '/pages/extra/coming-soon.html', icon: 'clock' },
-            { id: 'empty-state', label: 'Empty State', href: '/pages/extra/empty.html', icon: 'inbox' },
-            { id: 'success', label: 'Success', href: '/pages/extra/success.html', icon: 'check-circle' }
-        ]
-    },
-    {
-        type: 'category',
-        label: 'UI ELEMENTS'
-    },
-    {
-        type: 'menu',
-        id: 'components',
-        label: 'Components',
-        icon: 'layers',
-        children: [
-            { id: 'accordion', label: 'Accordion', href: '/pages/components/accordion.html', icon: 'chevrons-up-down' },
-            { id: 'alerts', label: 'Alerts', href: '/pages/components/alert.html', icon: 'alert-triangle' },
-            { id: 'avatar', label: 'Avatar', href: '/pages/components/avatar.html', icon: 'user' },
-            { id: 'badges', label: 'Badges', href: '/pages/components/badges.html', icon: 'badge' },
-            { id: 'breadcrumb', label: 'Breadcrumb', href: '/pages/components/breadcrumb.html', icon: 'navigation' },
-            { id: 'buttons', label: 'Buttons', href: '/pages/components/buttons.html', icon: 'mouse-pointer-click' },
-            { id: 'cards', label: 'Cards', href: '/pages/components/cards.html', icon: 'credit-card' },
-            { id: 'checkbox', label: 'Checkbox', href: '/pages/components/checkbox.html', icon: 'check-square' },
-            { id: 'collapse', label: 'Collapse', href: '/pages/components/collapse.html', icon: 'panel-top-close' },
-            { id: 'dropdowns', label: 'Dropdowns', href: '/pages/components/dropdowns.html', icon: 'list' },
-            { id: 'pagination', label: 'Pagination', href: '/pages/components/pagination.html', icon: 'skip-forward' },
-            { id: 'progress', label: 'Progress', href: '/pages/components/progress.html', icon: 'loader' },
-            { id: 'skeleton', label: 'Skeleton', href: '/pages/components/skeleton.html', icon: 'loader' },
-            { id: 'tabs', label: 'Tabs', href: '/pages/components/tabs.html', icon: 'square-stack' },
-            { id: 'toast', label: 'Toast', href: '/pages/components/toast.html', icon: 'message-circle' }
-        ]
-    },
-    {
-        type: 'menu',
-        id: 'forms',
-        label: 'Forms',
-        icon: 'file-text',
-        children: [
-            { id: 'form-elements', label: 'Form Elements', href: '/pages/forms/forms.html', icon: 'text-cursor-input' },
-            { id: 'form-validation', label: 'Validation', href: '/pages/forms/validation.html', icon: 'shield-check' }
-        ]
-    },
-    {
-        type: 'menu',
-        id: 'content',
-        label: 'Content',
-        icon: 'type',
-        children: [
-            { id: 'typography', label: 'Typography', href: '/pages/content/typography.html', icon: 'heading' },
-            { id: 'tables', label: 'Tables', href: '/pages/content/tables.html', icon: 'table' },
-            { id: 'code-blocks', label: 'Code Blocks', href: '/pages/content/code-blocks.html', icon: 'code' }
-        ]
-    },
-    {
-        type: 'menu',
-        id: 'overlays',
-        label: 'Overlays',
-        icon: 'app-window',
-        children: [
-            { id: 'modal', label: 'Modal', href: '/pages/overlays/modal.html', icon: 'square-stack' },
-            { id: 'tooltip', label: 'Tooltip', href: '/pages/overlays/tooltip.html', icon: 'info' }
-        ]
-    },
-
-    {
-        type: 'category',
-        label: 'SETTINGS'
-    },
-    {
-        type: 'link',
-        id: 'theme',
-        label: 'Theme',
-        icon: 'palette',
-        href: '/pages/settings/theme.html'
+function renderIcon(icon, className = 'w-5 h-5 flex-shrink-0') {
+    if (!icon) return '';
+    if (icon.startsWith('ri-')) {
+        return `<i class="${icon} ${className}"></i>`;
     }
-];
+    return getLucideIcon(icon, className);
+}
 
 // Sidebar State
 let isCollapsed = false;
 let isMobileOpen = false;
+let sidebarChromeBound = false;
 
-// Initialize Sidebar
-export function initSidebar() {
-    const sidebarContainer = document.getElementById('sidebar');
+// Bind sidebar chrome once (toggle, overlay, resize)
+export function bindSidebarChrome() {
+    if (sidebarChromeBound) return;
+    sidebarChromeBound = true;
+
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const mobileToggle = document.getElementById('mobile-menu-toggle');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-    if (!sidebarContainer) return;
-
-    // Render menu
-    renderMenu(sidebarContainer);
-
-    // Desktop toggle
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', toggleSidebarCollapse);
     }
 
-    // Mobile toggle
     if (mobileToggle) {
         mobileToggle.addEventListener('click', toggleMobileSidebar);
     }
 
-    // Overlay click
     if (sidebarOverlay) {
         sidebarOverlay.addEventListener('click', closeMobileSidebar);
     }
 
-    // Handle resize
     window.addEventListener('resize', handleResize);
+}
+
+// Re-render menu for active state on SPA navigation
+export function renderMenu() {
+    const sidebarContainer = document.getElementById('sidebar');
+    if (!sidebarContainer) return;
+    renderMenuInto(sidebarContainer);
+}
+
+export function initSidebar() {
+    bindSidebarChrome();
+    renderMenu();
 }
 
 // Check if URL matches href
@@ -250,7 +73,7 @@ function isUrlMatch(href) {
 }
 
 // Render Menu from Data
-function renderMenu(container) {
+function renderMenuInto(container) {
     let html = '<nav class="sidebar-nav py-5">';
 
     menuData.forEach(item => {
@@ -288,7 +111,7 @@ function renderMenuItem(item) {
     if (item.children) {
         childrenHtml = item.children.map(child => {
             const isActive = isUrlMatch(child.href);
-            const childIcon = child.icon ? getLucideIcon(child.icon, 'w-4 h-4 flex-shrink-0') : '';
+            const childIcon = child.icon ? renderIcon(child.icon, 'w-4 h-4 flex-shrink-0') : '';
             return `
                 <a href="${resolveHref(child.href)}" 
                    data-id="${child.id}"
@@ -303,7 +126,7 @@ function renderMenuItem(item) {
 
     // Popover links for hover - THEME-AWARE
     const popoverLinks = item.children?.map(child => {
-        const childIcon = child.icon ? getLucideIcon(child.icon, 'w-4 h-4 flex-shrink-0') : '';
+        const childIcon = child.icon ? renderIcon(child.icon, 'w-4 h-4 flex-shrink-0') : '';
         return `
             <a href="${resolveHref(child.href)}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-popover-foreground/70 hover:bg-muted hover:text-popover-foreground transition-colors">
                 ${childIcon}
@@ -312,7 +135,7 @@ function renderMenuItem(item) {
         `;
     }).join('') || '';
 
-    const menuIcon = getLucideIcon(item.icon, 'w-5 h-5 flex-shrink-0 text-sidebar-foreground/50 group-hover:text-sidebar-foreground transition-colors');
+    const menuIcon = renderIcon(item.icon, 'w-5 h-5 flex-shrink-0 text-sidebar-foreground/50 group-hover:text-sidebar-foreground transition-colors');
     const arrowIcon = getLucideIcon('plus', `menu-arrow w-4 h-4 text-sidebar-foreground/50 transition-transform duration-300 ${hasActiveChild ? 'rotate-45' : ''}`);
 
     return `
@@ -341,7 +164,7 @@ function renderLink(item) {
     const isActive = isUrlMatch(item.href);
     const isDisabled = item.disabled;
 
-    const linkIcon = getLucideIcon(item.icon, `w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-primary' : isDisabled ? 'text-sidebar-foreground/20' : 'text-sidebar-foreground/50 group-hover:text-sidebar-foreground'}`);
+    const linkIcon = renderIcon(item.icon, `w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-primary' : isDisabled ? 'text-sidebar-foreground/20' : 'text-sidebar-foreground/50 group-hover:text-sidebar-foreground'}`);
 
     return `
         <div class="menu-link relative" data-id="${item.id}">
@@ -487,11 +310,3 @@ function handleResize() {
     }
 }
 
-// Auto-init
-if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSidebar);
-    } else {
-        initSidebar();
-    }
-}

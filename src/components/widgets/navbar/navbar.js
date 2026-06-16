@@ -2,9 +2,18 @@
 // Navbar Component
 // ============================================
 
-export function initNavbar() {
+let navbarChromeBound = false;
+
+export function bindNavbarChrome() {
+    if (navbarChromeBound) return;
+    navbarChromeBound = true;
+
     initUserDropdown();
     initThemeSwitcher();
+}
+
+export function initNavbar() {
+    bindNavbarChrome();
 }
 
 // User Avatar Dropdown
@@ -14,13 +23,11 @@ function initUserDropdown() {
 
     if (!avatarBtn || !dropdown) return;
 
-    // Toggle dropdown on click
     avatarBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         dropdown.classList.toggle('hidden');
     });
 
-    // Close on click outside
     document.addEventListener('click', (e) => {
         const container = document.getElementById('user-dropdown-container');
         if (container && !container.contains(e.target)) {
@@ -28,7 +35,6 @@ function initUserDropdown() {
         }
     });
 
-    // Close on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             dropdown.classList.add('hidden');
@@ -45,19 +51,15 @@ function initThemeSwitcher() {
 
     if (!toggleBtn || !dropdown) return;
 
-    // Load saved theme on init
     loadSavedTheme();
 
-    // Toggle dropdown
     toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         dropdown.classList.toggle('hidden');
-        // Close user dropdown if open
         const userDropdown = document.getElementById('user-dropdown');
         if (userDropdown) userDropdown.classList.add('hidden');
     });
 
-    // Close on click outside
     document.addEventListener('click', (e) => {
         const container = document.getElementById('theme-dropdown-container');
         if (container && !container.contains(e.target)) {
@@ -65,14 +67,12 @@ function initThemeSwitcher() {
         }
     });
 
-    // Close on Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             dropdown.classList.add('hidden');
         }
     });
 
-    // Color theme buttons
     colorBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const theme = btn.dataset.theme;
@@ -81,7 +81,6 @@ function initThemeSwitcher() {
         });
     });
 
-    // Mode buttons (light/dark)
     modeBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const mode = btn.dataset.mode;

@@ -65,7 +65,10 @@ async function refresh() {
 }
 
 export async function initInventory() {
-  if (!document.querySelector('[data-donutit-module="inventory"]')) return;
+  const root = document.querySelector('[data-donutit-module="inventory"]');
+  if (!root) return;
+  if (root.hasAttribute('data-donutit-inited')) return;
+  root.setAttribute('data-donutit-inited', '');
   if (!(await isLoggedIn())) {
     document.getElementById('inv-status')?.replaceChildren(
       document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),

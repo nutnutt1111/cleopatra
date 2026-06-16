@@ -1,5 +1,6 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
+import { bindOnce } from './bind-once.js';
 
 let productsCache = [];
 
@@ -150,10 +151,10 @@ export async function initPos() {
       document.getElementById('pos-status')?.replaceChildren(document.createTextNode(e.message));
     });
 
-  document.getElementById('pos-product')?.addEventListener('change', onProductChange);
-  document.getElementById('pos-discount')?.addEventListener('input', updateTotals);
+  document.getElementById('pos-product') && bindOnce(document.getElementById('pos-product'), 'change', onProductChange);
+  document.getElementById('pos-discount') && bindOnce(document.getElementById('pos-discount'), 'input', updateTotals);
 
-  document.getElementById('btn-add-line')?.addEventListener('click', () => {
+  bindOnce(document.getElementById('btn-add-line'), 'click', () => {
     const sel = document.getElementById('pos-product');
     const opt = sel?.selectedOptions[0];
     if (!opt?.value) return alert('เลือกสินค้า');
@@ -176,7 +177,7 @@ export async function initPos() {
     renderCart();
   });
 
-  document.getElementById('btn-checkout')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-checkout'), 'click', async () => {
     if (!cart.length) return alert('เพิ่มสินค้าก่อน');
     const subtotal = cart.reduce((s, c) => s + c.lineTotalCents, 0);
     const discount = Math.round(parseFloat(document.getElementById('pos-discount')?.value || '0') * 100);

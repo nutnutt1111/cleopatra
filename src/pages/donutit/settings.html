@@ -40,43 +40,4 @@
         </div>
     </div>
 </div>
-
-<script type="module">
-    import { login, logout, isLoggedIn, apiFetch } from '/components/widgets/donutit/donutit-api.js';
-
-    async function refreshStatus() {
-        const el = document.getElementById('login-status');
-        if (!(await isLoggedIn())) {
-            el.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
-            return;
-        }
-        try {
-            const res = await apiFetch('/api/auth/me');
-            const data = await res.json();
-            el.textContent = `เข้าสู่ระบบ: ${data.user.name} (${data.user.role})`;
-        } catch {
-            el.textContent = 'เซสชันหมดอายุ';
-        }
-    }
-
-    document.getElementById('btn-login')?.addEventListener('click', async () => {
-        try {
-            const user = await login(
-                document.getElementById('login-email').value,
-                document.getElementById('login-password').value,
-            );
-            document.getElementById('login-status').textContent = `สำเร็จ: ${user.name} (${user.role})`;
-        } catch (e) {
-            document.getElementById('login-status').textContent = e.message;
-        }
-    });
-
-    document.getElementById('btn-logout')?.addEventListener('click', async () => {
-        await logout();
-        refreshStatus();
-    });
-
-    refreshStatus();
-</script>
-
 {{> end }}

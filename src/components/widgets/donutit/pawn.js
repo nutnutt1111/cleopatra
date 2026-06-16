@@ -1,5 +1,6 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
+import { bindOnce } from './bind-once.js';
 
 const STATUS_LABELS = {
   ACTIVE: 'ใช้งาน',
@@ -126,7 +127,7 @@ export async function initPawn() {
       document.getElementById('pawn-status')?.replaceChildren(document.createTextNode(e.message));
     });
 
-  document.getElementById('btn-create-ticket')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-create-ticket'), 'click', async () => {
     const customerName = document.getElementById('pawn-customer-name')?.value?.trim();
     const itemDescription = document.getElementById('pawn-item')?.value?.trim();
     const principal = parseFloat(document.getElementById('pawn-principal')?.value || '0');
