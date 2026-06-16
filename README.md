@@ -84,6 +84,7 @@ scripts/quality/        # Automated gates (hardening, hardtest, …)
 ## Documentation
 
 - [Project status & wave log](docs/PROJECT-STATUS.md)
+- [Delivery phases (Plan → Execute → Verify → Deliver)](docs/DELIVERY-PHASES.md)
 - [Parity checklist](docs/parity-checklist.md)
 - [Roadmap & follow-ups](docs/roadmap.md)
 - [Ledger invariants](docs/ledger-invariants.md)
