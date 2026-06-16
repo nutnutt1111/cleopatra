@@ -61,6 +61,13 @@
     },
     {
         "type": "link",
+        "id": "donutit-login",
+        "label": "เข้าสู่ระบบ",
+        "icon": "ri-login-box-line",
+        "href": "/login"
+    },
+    {
+        "type": "link",
         "id": "donutit-settings",
         "label": "บัญชี",
         "icon": "ri-user-settings-line",

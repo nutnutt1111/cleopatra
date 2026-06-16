@@ -2,11 +2,12 @@
 // SPA Router - Client-side navigation
 // ============================================
 
+import { appPath, stripAppBase } from '../../js/donutit-paths.js';
+
 const AUTH_ROUTES = new Set(['/login']);
 
 function normalizePath(pathname) {
-  const p = pathname.replace(/\/$/, '') || '/';
-  return p;
+  return stripAppBase(pathname);
 }
 
 function isAuthLayout() {
@@ -42,7 +43,7 @@ export async function navigate(url) {
 
     // Auth layout uses a different shell — always full page load
     if (AUTH_ROUTES.has(targetPath) || (isAuthLayout() && !AUTH_ROUTES.has(targetPath))) {
-        location.assign(fullUrl);
+        location.assign(appPath(targetPath) + urlObj.search);
         return;
     }
 

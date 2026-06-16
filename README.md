@@ -33,7 +33,7 @@ yarn db:reset               # migrate + seed dev data
 yarn dev:all                # API :3004 + frontend :3003
 ```
 
-Open [http://localhost:3003](http://localhost:3003) — login via **Settings** with `owner@donutit.local` / `donutit-dev`.
+Open [http://localhost:3003/login](http://localhost:3003/login) — sign in with `owner@donutit.local` / `donutit-dev`.
 
 ### Quality gate (before release)
 

@@ -14,7 +14,23 @@
             <p class="text-sm text-muted-foreground">เข้าสู่ระบบ DonutiT Store Management</p>
         </div>
 
-        <form id="login-form" class="space-y-4 relative z-10" autocomplete="on">
+        <div id="login-already" class="hidden relative z-10 text-center space-y-4">
+            <div class="rounded-xl bg-muted/50 border border-border p-4">
+                <p class="text-sm text-muted-foreground">เข้าสู่ระบบอยู่แล้ว</p>
+                <p id="login-user-name" class="font-medium mt-1"></p>
+            </div>
+            <button id="btn-go-dashboard" type="button"
+                class="w-full px-6 py-3 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-all">
+                ไปแดชบอร์ด
+            </button>
+            <button id="btn-switch-account" type="button"
+                class="w-full px-6 py-2.5 text-sm font-medium border border-border rounded-xl hover:bg-muted">
+                ออกจากระบบ / เปลี่ยนบัญชี
+            </button>
+        </div>
+
+        <div id="login-form-wrap" class="relative z-10">
+        <form id="login-form" class="space-y-4" autocomplete="on">
             <div>
                 <label class="block text-sm font-medium text-foreground mb-1.5" for="login-email">อีเมล</label>
                 <input id="login-email" type="email" autocomplete="username" placeholder="name@example.com"
@@ -31,6 +47,7 @@
             </button>
             <p id="login-status" class="text-sm text-muted-foreground text-center min-h-[1.25rem]"></p>
         </form>
+        </div>
 
         <details class="mt-6 text-sm text-muted-foreground relative z-10">
             <summary class="cursor-pointer hover:text-foreground text-center">บัญชีทดสอบ (dev)</summary>

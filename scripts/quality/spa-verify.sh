@@ -50,7 +50,7 @@ fi
 # 3. Sidebar JSON — DONUTIT block + all module hrefs
 grep -q '"label": "DONUTIT"' src/data/sidebar.json && record 1 "sidebar DONUTIT block" "label present" \
   || record 0 "sidebar DONUTIT block" "missing"
-for href in /pos /inventory /pawn /messenger /cashflow-ledger /customers /hr /settings; do
+for href in /login /pos /inventory /pawn /messenger /cashflow-ledger /customers /hr /settings; do
   grep -q "\"href\": \"${href}\"" src/data/sidebar.json && record 1 "sidebar $href" "linked" \
     || record 0 "sidebar $href" "missing"
 done

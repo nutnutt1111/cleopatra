@@ -1,7 +1,8 @@
-import { login } from './donutit-api.js';
+import { login, logout, isLoggedIn, getSessionUser } from './donutit-api.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
 import { refreshNavbarSession } from '../navbar/navbar.js';
+import { appPath } from '../../../js/donutit-paths.js';
 
 function safeNext(raw) {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw === '/') return '/dashboard';
@@ -9,8 +10,38 @@ function safeNext(raw) {
   return raw;
 }
 
+async function showLoggedInState() {
+  const formWrap = document.getElementById('login-form-wrap');
+  const already = document.getElementById('login-already');
+  const nameEl = document.getElementById('login-user-name');
+
+  if (!(await isLoggedIn())) {
+    if (formWrap) formWrap.classList.remove('hidden');
+    if (already) already.classList.add('hidden');
+    return;
+  }
+
+  const user = getSessionUser();
+  if (nameEl && user) nameEl.textContent = `${user.name} (${user.email})`;
+  if (formWrap) formWrap.classList.add('hidden');
+  if (already) already.classList.remove('hidden');
+}
+
 export async function initLogin() {
   if (!document.querySelector('[data-donutit-module="login"]')) return;
+
+  await showLoggedInState();
+
+  bindOnce(document.getElementById('btn-go-dashboard'), 'click', () => {
+    location.assign(appPath('/dashboard'));
+  });
+
+  bindOnce(document.getElementById('btn-switch-account'), 'click', async () => {
+    await logout();
+    await refreshNavbarSession();
+    notify('ออกจากระบบแล้ว — เข้าบัญชีอื่นได้', 'info');
+    location.assign(appPath('/login'));
+  });
 
   const form = document.getElementById('login-form');
   const statusEl = document.getElementById('login-status');
@@ -32,7 +63,7 @@ export async function initLogin() {
       notify(`ยินดีต้อนรับ ${user.name}`, 'success');
       await refreshNavbarSession();
       const next = safeNext(new URLSearchParams(location.search).get('next'));
-      location.assign(next);
+      location.assign(appPath(next));
     } catch (err) {
       notify(err.message, 'error');
       if (statusEl) statusEl.textContent = err.message;

@@ -21,10 +21,16 @@ export const DONUTIT_ROUTE_SLUGS = Object.keys(DONUTIT_ROUTES)
   .map((r) => r.slice(1));
 
 function rewriteRequest(req) {
-    const path = req.url?.split('?')[0];
+    const raw = req.url?.split('?')[0] ?? '';
+    const qs = req.url?.includes('?') ? '?' + req.url.split('?')[1] : '';
+    const base = process.env.GITHUB_ACTIONS ? '/cleopatra' : '';
+    let path = raw;
+    if (base && path.startsWith(base)) {
+        path = path.slice(base.length) || '/';
+    }
     const target = DONUTIT_ROUTES[path];
     if (target) {
-        req.url = target + (req.url?.includes('?') ? '?' + req.url.split('?')[1] : '');
+        req.url = target + qs;
     }
 }
 

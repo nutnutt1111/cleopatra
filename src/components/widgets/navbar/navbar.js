@@ -3,6 +3,7 @@
 // ============================================
 
 import { getSessionUser, isLoggedIn, logout } from '../donutit/donutit-api.js';
+import { appPath } from '../../../js/donutit-paths.js';
 
 let navbarChromeBound = false;
 let logoutBound = false;
@@ -66,7 +67,7 @@ function bindNavbarLogout() {
     btn.addEventListener('click', async () => {
         await logout();
         await refreshNavbarSession();
-        location.assign('/login');
+        location.assign(appPath('/login'));
     });
 }
 
@@ -81,8 +82,13 @@ function initUserDropdown() {
 
     if (!avatarBtn || !dropdown) return;
 
-    avatarBtn.addEventListener('click', (e) => {
+    avatarBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
+        const loggedIn = await isLoggedIn();
+        if (!loggedIn) {
+            location.assign(appPath('/login'));
+            return;
+        }
         dropdown.classList.toggle('hidden');
     });
 
