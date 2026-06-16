@@ -1,12 +1,17 @@
 /**
  * Code Block Transformer
- * Automatically transforms <script type="text/plain"> elements into 
- * Stripe-style code blocks with Shiki syntax highlighting
+ * Lazy-loads Shiki only when code blocks are present on the page.
  */
 
-import { codeToHtml } from 'shiki';
-
 let codeBlockCounter = 0;
+let shikiModule = null;
+
+async function getShiki() {
+  if (!shikiModule) {
+    shikiModule = await import('shiki');
+  }
+  return shikiModule;
+}
 
 // Shiki theme configuration - Always dark mode for code blocks
 const SHIKI_THEME = 'github-dark-default';
@@ -56,8 +61,8 @@ const LANGUAGE_MAP = {
 };
 
 export async function initCodeBlockTransformer() {
-    // Find all script tags used for code display
     const codeScripts = document.querySelectorAll('script[type="text/plain"]');
+    if (!codeScripts.length) return;
 
     // Process all code blocks in parallel
     const transformPromises = Array.from(codeScripts).map(async (script) => {
@@ -100,7 +105,7 @@ export async function initCodeBlockTransformer() {
  * Create a Stripe-style code block element with Shiki highlighting
  */
 async function createCodeBlock(id, displayLang, shikiLang, code) {
-    // Get highlighted HTML from Shiki
+    const { codeToHtml } = await getShiki();
     let highlightedCode;
     try {
         highlightedCode = await codeToHtml(code, {
@@ -223,9 +228,3 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// Auto-init if DOM is ready, or wait
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCodeBlockTransformer);
-} else {
-    initCodeBlockTransformer();
-}

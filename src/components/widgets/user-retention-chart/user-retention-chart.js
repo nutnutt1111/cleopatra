@@ -1,104 +1,95 @@
 /**
- * User Retention Chart Widget
- * Dual-line chart showing signups vs deactivations over 24h
+ * User Retention Chart Widget (Chart.js)
  */
 
-import ApexCharts from 'apexcharts';
-import { initChartDeferred, setupThemeObserver, getThemeColors } from '../chart-utils.js';
+import {
+  Chart,
+  ensureCanvas,
+  getChartJsColors,
+  getDefaultScales,
+  initChartJsDeferred,
+  observeThemeChanges,
+  createGradient,
+  lineDrawingAnimation,
+} from '../chart-mount.js';
 import { ceoDashboardData } from '../../../data/ceo-dashboard.js';
 
 let chartInstance = null;
 let themeObserver = null;
 
-function getChartOptions(width) {
-    const colors = getThemeColors();
-    const data = ceoDashboardData.retentionData;
+function createRetentionChart(container) {
+  const canvas = ensureCanvas(container);
+  const colors = getChartJsColors();
+  const scales = getDefaultScales(colors);
+  const data = ceoDashboardData.retentionData;
+  const ctx = canvas.getContext('2d');
+  let fill;
+  try {
+    fill = createGradient(ctx, `${colors.primary}33`, `${colors.primary}00`);
+  } catch {
+    fill = `${colors.primary}22`;
+  }
 
-    return {
-        chart: {
-            type: 'area',
-            height: 200,
-            width: width || '100%',
-            toolbar: { show: false },
-            fontFamily: 'Inter, system-ui, sans-serif',
-            animations: { enabled: true, easing: 'easeinout', speed: 600 },
-            redrawOnParentResize: true,
+  return new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: data.hours,
+      datasets: [
+        {
+          label: 'Signups',
+          data: data.signups,
+          borderColor: colors.primary,
+          backgroundColor: fill,
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+          pointRadius: 0,
         },
-        series: [
-            { name: 'Signups', data: data.signups },
-            { name: 'Deactivations', data: data.deactivations }
-        ],
-        colors: [colors.primary, '#ef4444'], // Primary for signups, red for deactivations
-        stroke: { width: 2, curve: 'smooth' },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 0,
-                opacityFrom: 0.2,
-                opacityTo: 0,
-                stops: [0, 100]
-            }
+        {
+          label: 'Deactivations',
+          data: data.deactivations,
+          borderColor: colors.danger,
+          backgroundColor: `${colors.danger}22`,
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+          pointRadius: 0,
         },
-        dataLabels: { enabled: false },
-        xaxis: {
-            categories: data.hours,
-            axisBorder: { show: false },
-            axisTicks: { show: false },
-            labels: {
-                style: { colors: colors.text, fontSize: '10px' },
-                rotate: 0,
-            }
-        },
-        yaxis: {
-            labels: {
-                style: { colors: colors.text, fontSize: '10px' },
-                formatter: (val) => (val / 1000).toFixed(0) + 'K'
-            }
-        },
-        grid: {
-            borderColor: colors.grid,
-            strokeDashArray: 4,
-            xaxis: { lines: { show: false } }
-        },
-        legend: { show: false },
-        tooltip: {
-            theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
-            y: { formatter: (val) => val.toLocaleString() + ' users' }
-        },
-    };
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales,
+      ...lineDrawingAnimation,
+    },
+  });
 }
 
 function updateChartColors() {
-    if (!chartInstance) return;
-    const colors = getThemeColors();
-    chartInstance.updateOptions({
-        colors: [colors.primary, '#ef4444'],
-        xaxis: { labels: { style: { colors: colors.text } } },
-        yaxis: { labels: { style: { colors: colors.text } } },
-        grid: { borderColor: colors.grid },
-        tooltip: { theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light' }
-    }, false, false);
+  if (!chartInstance) return;
+  const colors = getChartJsColors();
+  chartInstance.options.scales = getDefaultScales(colors);
+  chartInstance.data.datasets[0].borderColor = colors.primary;
+  chartInstance.data.datasets[1].borderColor = colors.danger;
+  chartInstance.update('none');
 }
 
 export function initUserRetentionChart() {
-    if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-    }
-    if (themeObserver) {
-        themeObserver.disconnect();
-        themeObserver = null;
-    }
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
+  if (themeObserver) {
+    themeObserver.disconnect();
+    themeObserver = null;
+  }
 
-    initChartDeferred('retention-chart', (container, width) => {
-        const chart = new ApexCharts(container, getChartOptions(width));
-        chart.render();
-        chartInstance = chart;
-        return chart;
-    }, {
-        delay: 150,
-        observeVisibility: true,
-    });
+  initChartJsDeferred('retention-chart', (container) => {
+    chartInstance = createRetentionChart(container);
+    return chartInstance;
+  }, { delay: 150, observeVisibility: true });
 
-    themeObserver = setupThemeObserver(updateChartColors);
+  themeObserver = observeThemeChanges(updateChartColors);
 }

@@ -26,6 +26,15 @@ Audit using [ponytail](https://github.com/nutnutt1111/ponytail) principles. Rank
 | `shrink` | Inline `menuData` in `sidebar.js` (~190 lines) | Import from JSON if nav becomes data-driven |
 | `shrink` | Shiki loaded on every page | Lazy-load on docs/code-block routes only |
 
+## Applied in Phase E3
+
+| Tag | Finding | Action |
+|-----|---------|--------|
+| `yagni` | `main.js` inits every chart widget on every page | `dashboard-init.js` page-scoped registry |
+| `delete` | ApexCharts + Chart.js both shipped | Migrated Apex widgets to Chart.js; removed `apexcharts` dep |
+| `shrink` | Duplicate chart init utils | `chart-mount.js` + `chart-theme.js` barrel |
+| `shrink` | Shiki eager import | Dynamic `import('shiki')` in code-block-transformer |
+
 ## Commands (Cursor / compatible agents)
 
 - `/ponytail-review` — review current diff for over-engineering
