@@ -1,5 +1,6 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
+import { bindOnce } from './bind-once.js';
 
 let customersCache = [];
 
@@ -96,9 +97,9 @@ export async function initCustomers() {
       document.getElementById('customers-status')?.replaceChildren(document.createTextNode(e.message));
     });
 
-  document.getElementById('cust-pay-customer')?.addEventListener('change', onPayCustomerChange);
+  bindOnce(document.getElementById('cust-pay-customer'), 'change', onPayCustomerChange);
 
-  document.getElementById('btn-add-customer')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-add-customer'), 'click', async () => {
     const name = document.getElementById('cust-name')?.value?.trim();
     if (!name) return alert('กรอกชื่อลูกค้า');
 
@@ -124,7 +125,7 @@ export async function initCustomers() {
     }
   });
 
-  document.getElementById('btn-credit-sale')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-credit-sale'), 'click', async () => {
     const customerId = document.getElementById('cust-sale-customer')?.value;
     const description = document.getElementById('cust-sale-desc')?.value?.trim();
     const total = parseFloat(document.getElementById('cust-sale-total')?.value || '0');
@@ -151,7 +152,7 @@ export async function initCustomers() {
     }
   });
 
-  document.getElementById('btn-customer-pay')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-customer-pay'), 'click', async () => {
     const customerId = document.getElementById('cust-pay-customer')?.value;
     const amount = parseFloat(document.getElementById('cust-pay-amount')?.value || '0');
     const channel = document.getElementById('cust-pay-channel')?.value || 'CASH';

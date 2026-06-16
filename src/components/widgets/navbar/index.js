@@ -1,1 +1,1 @@
-export { initNavbar } from './navbar.js';
+export { bindNavbarChrome, initNavbar } from './navbar.js';

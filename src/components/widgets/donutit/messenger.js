@@ -1,5 +1,6 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
+import { bindOnce } from './bind-once.js';
 
 async function loadJobs() {
   const res = await apiFetch('/api/messenger/jobs');
@@ -94,7 +95,7 @@ export async function initMessenger() {
       document.getElementById('messenger-status')?.replaceChildren(document.createTextNode(e.message));
     });
 
-  document.getElementById('btn-create-job')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-create-job'), 'click', async () => {
     const customerName = document.getElementById('msg-customer-name')?.value?.trim();
     const address = document.getElementById('msg-address')?.value?.trim();
     if (!customerName || !address) return alert('กรอกชื่อลูกค้าและที่อยู่');

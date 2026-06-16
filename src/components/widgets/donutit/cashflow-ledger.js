@@ -1,5 +1,6 @@
 import { isLoggedIn, apiFetch } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
+import { bindOnce } from './bind-once.js';
 
 const TYPE_LABELS = {
   INCOME: 'รายรับ',
@@ -159,9 +160,9 @@ export async function initCashflowLedger() {
   if (fromInput && !fromInput.value) fromInput.value = daysAgoStr(7);
   if (toInput && !toInput.value) toInput.value = todayStr();
 
-  document.getElementById('btn-filter')?.addEventListener('click', refreshAll);
+  bindOnce(document.getElementById('btn-filter'), 'click', refreshAll);
 
-  document.getElementById('btn-add-entry')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-add-entry'), 'click', async () => {
     const status = document.getElementById('form-status');
     const body = {
       entryDate: document.getElementById('entry-date')?.value || todayStr(),
@@ -187,7 +188,7 @@ export async function initCashflowLedger() {
     }
   });
 
-  document.getElementById('btn-daily-close')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-daily-close'), 'click', async () => {
     const date = document.getElementById('close-date')?.value;
     if (!date) return alert('เลือกวันที่ปิด');
     if (!confirm(`ยืนยันปิดวัน ${date}?`)) return;
@@ -206,7 +207,7 @@ export async function initCashflowLedger() {
     }
   });
 
-  document.getElementById('btn-unlock')?.addEventListener('click', async () => {
+  bindOnce(document.getElementById('btn-unlock'), 'click', async () => {
     const date = document.getElementById('close-date')?.value;
     if (!date) return alert('เลือกวันที่');
     if (!confirm(`Owner: ปลดล็อกวัน ${date}?`)) return;

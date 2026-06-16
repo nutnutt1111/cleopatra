@@ -9,8 +9,8 @@ import '../styles/global.scss';
 // Syntax highlighting is now handled by Shiki in code-block-transformer.js
 
 // Widgets
-import { initNavbar } from '../components/widgets/navbar';
-import { initSidebar } from '../components/widgets/sidebar';
+import { bindNavbarChrome } from '../components/widgets/navbar';
+import { bindSidebarChrome, renderMenu } from '../components/widgets/sidebar';
 
 // UI Components
 import { initCodeCopy, reinitCodeCopy } from '../components/ui/code-block';
@@ -33,6 +33,7 @@ import { initMonthlyGoal } from '../components/widgets/monthly-goal/monthly-goal
 import { initUserRetentionChart } from '../components/widgets/user-retention-chart/user-retention-chart.js';
 import { initCryptoCharts } from '../components/widgets/crypto';
 import { initEcommerceCharts } from './ecommerce-charts.js';
+import { initDonutitModules } from './donutit-init.js';
 
 // Dashboard Widgets (Chart.js)
 import { initTrafficChart } from '../components/widgets/traffic-chart/traffic-chart.js';
@@ -51,10 +52,8 @@ import { initRouter } from '../components/layout/router';
 window.reinitCodeCopy = reinitCodeCopy;
 
 
-// Initialize components
+// Initialize page components (safe to re-run on SPA navigation)
 function initComponents() {
-    initNavbar();
-    initSidebar();
     initCodeCopy();
     initAccordion();
     initCheckbox();
@@ -87,19 +86,27 @@ function initComponents() {
     initEcommerceCharts();
 }
 
+// Shell chrome binds once; menu re-renders for active state
+function initShell() {
+    bindNavbarChrome();
+    bindSidebarChrome();
+    renderMenu();
+}
+
 // Re-initialize on SPA navigation (including code highlighting)
 document.addEventListener('page:load', () => {
+    renderMenu();
     initComponents();
-    // Re-run code block transformer for new content
+    initDonutitModules();
     initCodeBlockTransformer();
-
 });
 
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
+    initShell();
     initComponents();
     initRouter();
-    // Transform code blocks and apply Prism highlighting on initial load
+    initDonutitModules();
     initCodeBlockTransformer();
 
     // Show app after CSS/JS fully loaded
