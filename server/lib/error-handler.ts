@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import type { AuthUser } from './auth.js';
+import { toAuthUser } from './auth.js';
 import { AuthError } from './auth.js';
 import { LedgerError } from './ledger.js';
 import { PosError } from './pos.js';
@@ -10,8 +11,11 @@ import { CustomerError } from './customers.js';
 import { MessengerError } from './messenger.js';
 import { HrError } from './hr.js';
 import { DomainError } from './domain-error.js';
+import { prisma } from './prisma.js';
 
 type ErrorResponse = { status: (code: number) => { json: (body: unknown) => void } };
+
+type JwtIdentity = { userId: string; storeId?: string };
 
 const DOMAIN_ERRORS = [
   AuthError,
@@ -42,10 +46,11 @@ export function handleApiError(err: unknown, res: ErrorResponse): void {
 
 export function createAuthMiddleware(jwtSecret: string) {
   function signToken(user: AuthUser): string {
-    return jwt.sign(user, jwtSecret, { expiresIn: '12h' });
+    const payload: JwtIdentity = { userId: user.id, storeId: user.storeId };
+    return jwt.sign(payload, jwtSecret, { expiresIn: '12h' });
   }
 
-  function getUserFromRequest(req: Request): AuthUser | null {
+  function getTokenPayload(req: Request): JwtIdentity | null {
     const header = req.headers.authorization;
     const token =
       (header?.startsWith('Bearer ') ? header.slice(7) : null) ||
@@ -54,21 +59,30 @@ export function createAuthMiddleware(jwtSecret: string) {
     if (!token) return null;
 
     try {
-      return jwt.verify(token, jwtSecret) as AuthUser;
+      const decoded = jwt.verify(token, jwtSecret);
+      if (!decoded || typeof decoded !== 'object' || !('userId' in decoded)) return null;
+      return decoded as JwtIdentity;
     } catch {
       return null;
     }
   }
 
-  function requireAuth(req: Request, res: Response, next: NextFunction) {
-    const user = getUserFromRequest(req);
-    if (!user) {
+  async function requireAuth(req: Request, res: Response, next: NextFunction) {
+    const payload = getTokenPayload(req);
+    if (!payload?.userId) {
       res.status(401).json({ error: 'กรุณาเข้าสู่ระบบ' });
       return;
     }
-    (req as Request & { user: AuthUser }).user = user;
+
+    const dbUser = await prisma.user.findUnique({ where: { id: payload.userId } });
+    if (!dbUser) {
+      res.status(401).json({ error: 'เซสชันหมดอายุ' });
+      return;
+    }
+
+    (req as Request & { user: AuthUser }).user = toAuthUser(dbUser);
     next();
   }
 
-  return { signToken, getUserFromRequest, requireAuth };
+  return { signToken, getTokenPayload, requireAuth };
 }

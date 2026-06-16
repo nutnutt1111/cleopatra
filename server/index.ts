@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import 'dotenv/config';
 import { auditContextFromRequest, runWithAuditContext } from './lib/audit-context.js';
 import { createAuthMiddleware, handleApiError } from './lib/error-handler.js';
+import { createCsrfMiddleware } from './lib/csrf.js';
 import { createCashflowRouter } from './routes/cashflow.js';
 import { createPosRouter } from './routes/pos.js';
 import { createInventoryRouter } from './routes/inventory.js';
@@ -33,6 +34,7 @@ if (IS_PRODUCTION && JWT_SECRET === DEV_JWT_SECRET) {
 
 const { signToken, requireAuth } = createAuthMiddleware(JWT_SECRET);
 const handleError = handleApiError;
+const csrfProtect = createCsrfMiddleware(IS_PRODUCTION, corsOrigins);
 
 app.use(
   helmet(
@@ -70,6 +72,8 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'ลองเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่' },
 });
+
+app.use(csrfProtect);
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, service: 'donutit-cleopatra-api', wave: 5 });

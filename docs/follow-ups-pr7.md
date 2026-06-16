@@ -2,15 +2,15 @@
 
 > **PR #7 merged:** 2026-06-14 into `cursor/wave-4-messenger-hr-e20d` (`ab71b59`).
 >
-> **Follow-up status:** Open — tracked in-repo because GitHub Issues are disabled on `nutnutt1111/cleopatra`.
+> **Follow-up status:** ✅ **Complete** — closed in Phase E5 (`cursor/phase-5-hardening-8e6d`, 2026-06-16).
 
-| ID | Priority | Title | Owner hint |
-|----|----------|-------|------------|
-| [FU-1](#fu-1-p1--do-not-trust-jwt-role-claims) | **P1** | Do not trust JWT role claims | `server/index.ts`, `server/lib/auth.ts` |
-| [FU-2](#fu-2-p1--csrf-protection-for-cookie-auth) | **P1** | CSRF protection for mutating routes | `server/index.ts`, `donutit-api.js` |
-| [FU-3](#fu-3-p2--normalize-race-conflict-status-codes) | **P2** | Normalize race conflict → 409 | `pawn.ts`, `pos.ts`, `messenger.ts` |
+| ID | Priority | Title | Status |
+|----|----------|-------|--------|
+| [FU-1](#fu-1-p1--do-not-trust-jwt-role-claims) | **P1** | Do not trust JWT role claims | ✅ Done |
+| [FU-2](#fu-2-p1--csrf-protection-for-cookie-auth) | **P1** | CSRF protection for mutating routes | ✅ Done |
+| [FU-3](#fu-3-p2--normalize-race-conflict-status-codes) | **P2** | Normalize race conflict → 409 | ✅ Done |
 
-**Evidence:** `scripts/quality/review-audit.sh` (2026-06-14), PR #7 security review.
+**Evidence:** `scripts/quality/review-audit.sh`, `yarn quality:hardening` — 2026-06-16.
 
 ---
 
@@ -28,10 +28,10 @@ Forged JWT with `role: OWNER` (invalid `userId` / `storeId`) → `GET /api/repor
 
 ### Acceptance criteria
 
-- [ ] Forged OWNER JWT with wrong `userId` → **401** or **403** on export, unlock, audit, etc.
-- [ ] DB role change effective on next request without re-login.
-- [ ] `review-audit.sh` forged-role test expects block (not 200).
-- [ ] `yarn quality:hardening` passes.
+- [x] Forged OWNER JWT with wrong `userId` → **401** or **403** on export, unlock, audit, etc.
+- [x] DB role change effective on next request without re-login.
+- [x] `review-audit.sh` forged-role test expects block (not 200).
+- [x] `yarn quality:hardening` passes.
 
 ### Out of scope
 
@@ -47,7 +47,7 @@ Mutating POST with valid session cookie succeeds without CSRF token. `SameSite=L
 
 ### Fix (choose or combine)
 
-**Option A — Double-submit CSRF**
+**Option A — Double-submit CSRF** ✅ implemented
 
 - Issue `csrf` cookie (JS-readable) on login or first GET.
 - Require matching `X-CSRF-Token` on `POST`/`PATCH`/`DELETE`.
@@ -62,10 +62,10 @@ Update `src/components/widgets/donutit/donutit-api.js` to send token/header on m
 
 ### Acceptance criteria
 
-- [ ] Valid `token` cookie + missing CSRF / bad Origin → **403**.
-- [ ] Normal UI mutations still work after login.
-- [ ] `review-audit.sh` CSRF scenario updated.
-- [ ] `.env.example` documents `CSRF_ENFORCE` or similar if gated.
+- [x] Valid `token` cookie + missing CSRF / bad Origin → **403**.
+- [x] Normal UI mutations still work after login.
+- [x] `review-audit.sh` CSRF scenario updated.
+- [x] `.env.example` documents `CSRF_ENFORCE` or similar if gated.
 
 ### Out of scope
 
@@ -97,9 +97,9 @@ Money-safe, but inconsistent second-response codes on parallel/idempotent retrie
 
 ### Acceptance criteria
 
-- [ ] `review-audit.sh` parallel scenarios expect `200+409` (not `404`/`400`).
-- [ ] No ledger/money semantic change.
-- [ ] `yarn quality:hardening` passes.
+- [x] `review-audit.sh` parallel scenarios expect `200+409` (not `404`/`400`).
+- [x] No ledger/money semantic change.
+- [x] `yarn quality:hardening` passes.
 
 ### Out of scope
 
@@ -116,4 +116,4 @@ yarn quality:hardening
 bash scripts/quality/review-audit.sh
 ```
 
-When FU-1/FU-2/FU-3 are done, check off acceptance criteria above and note completion date in this file.
+**Completed:** 2026-06-16 — Phase E5 merged to `main`.

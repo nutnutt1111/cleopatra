@@ -21,11 +21,29 @@
 
 ### Upcoming
 
-| Phase | Scope |
-|-------|-------|
-| E3 | Frontend ponytail cleanup |
-| E4 | Server ponytail cleanup |
-| E5 | Hardening (FU-1–3) |
+_All delivery phases E1–E5 complete._
+
+## Phase E5 — Security hardening ✅
+
+**Branch:** `cursor/phase-5-hardening-8e6d`  
+**Status:** Complete
+
+### Delivered
+
+- **FU-3:** Race conflicts return HTTP 409 (pawn redeem, POS void, messenger deliver, daily-close unlock)
+- **FU-1:** JWT carries identity only (`userId`, `storeId`); role loaded from DB on each request
+- **FU-2:** Double-submit CSRF cookie + `X-CSRF-Token` on mutations; `donutit-api.js` sends token
+- Quality scripts updated with `api_post` helpers + CSRF cookie parsing
+- `.env.example` documents `CSRF_ENFORCE`
+
+### Verify
+
+```bash
+yarn db:seed
+yarn quality:hardening
+yarn quality:review
+yarn quality:money
+```
 
 ## Phase E2 — Design pass ✅
 

@@ -1,6 +1,6 @@
 # DonutiT Cleopatra — Project Status
 
-> Last updated: **2026-06-14** after [PR #7](https://github.com/nutnutt1111/cleopatra/pull/7) merge into `cursor/wave-4-messenger-hr-e20d`.
+> Last updated: **2026-06-16** after Phase E5 (FU-1–3) on `main`.
 
 ## Summary
 
@@ -16,7 +16,7 @@ Store-management platform for Thai retail + pawn: POS, inventory, pawn, messenge
 | Wave 4 — Messenger + HR | ✅ Complete | PR #6 |
 | Wave 5 — Hardening | ✅ Complete | PR #7 (merged) |
 | Hardtest + security review | ✅ Complete | included in PR #7 |
-| Production hardening (FU-1–3) | ⏳ Open | [follow-ups-pr7.md](./follow-ups-pr7.md) |
+| Production hardening (FU-1–3) | ✅ Complete | Phase E5 · [follow-ups-pr7.md](./follow-ups-pr7.md) |
 
 **Integration branch:** `cursor/wave-4-messenger-hr-e20d` (contains all waves 0–5 + PR #7)  
 **Upstream template:** `main` — original Cleopatra v2 dashboard only (DonutiT work not merged to `main` yet)
@@ -87,7 +87,7 @@ Store-management platform for Thai retail + pawn: POS, inventory, pawn, messenge
 - **Bangkok doc prefixes** — `server/lib/date-utils.ts`
 - **Audit metadata** — IP + userAgent in payload
 - **Scripts** — `hardtest.sh`, `review-audit.sh`, `money-audit.sh`
-- **Follow-ups** — FU-1 JWT, FU-2 CSRF, FU-3 race status codes (open)
+- **Follow-ups** — FU-1 JWT, FU-2 CSRF, FU-3 race status codes ✅ closed in Phase E5 (2026-06-16)
 
 ---
 
@@ -112,7 +112,7 @@ yarn quality:audit         # agent report (route + api + seed + ux)
 4. Seed verify — seed-smith fixtures
 5. UX patrol — Thai labels, responsive, confirmations
 
-Last verified: **2026-06-14** — ALL PASS (after `yarn db:seed`)
+Last verified: **2026-06-16** — ALL PASS (`yarn quality:hardening`, `yarn quality:review`, `yarn quality:money`)
 
 ---
 
@@ -145,11 +145,7 @@ See [seed-smith-coverage.md](./seed-smith-coverage.md) for fixture details.
 
 ## Known open items (post-merge)
 
-| ID | Priority | Item |
-|----|----------|------|
-| FU-1 | P1 | Reload user/role from DB — do not trust JWT claims |
-| FU-2 | P1 | CSRF protection for mutating routes |
-| FU-3 | P2 | Normalize race conflicts → HTTP 409 |
+_None — FU-1, FU-2, FU-3 closed in Phase E5 (2026-06-16)._
 
 ---
 

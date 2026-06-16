@@ -67,30 +67,26 @@ code=$(curl -s -o /dev/null -w "%{http_code}" -b "$OWNER_JAR" "$API/api/pos/bill
 assert_ok "cookie auth owner" "200" "$code"
 
 # Privilege escalation
-code=$(curl -s -o /dev/null -w "%{http_code}" -b "$STAFF_JAR" -X POST \
-  -H 'Content-Type: application/json' -d '{"closeDate":"2026-06-13"}' "$API/api/cashflow/daily-close")
+code=$(api_post_code "$STAFF_JAR" "$API/api/cashflow/daily-close" '{"closeDate":"2026-06-13"}')
 assert_block "staff daily-close" "403" "$code"
 
-code=$(curl -s -o /dev/null -w "%{http_code}" -b "$MANAGER_JAR" -X POST \
-  -H 'Content-Type: application/json' -d '{"closeDate":"2026-06-13"}' "$API/api/cashflow/daily-close/unlock")
+code=$(api_post_code "$MANAGER_JAR" "$API/api/cashflow/daily-close/unlock" '{"closeDate":"2026-06-13"}')
 assert_block "manager unlock day" "403" "$code"
 
 code=$(curl -s -o /dev/null -w "%{http_code}" -b "$STAFF_JAR" "$API/api/cashflow/audit")
 assert_block "staff audit logs" "403" "$code"
 
 # Input abuse
-code=$(curl -s -o /dev/null -w "%{http_code}" -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"customerName":"x","itemDescription":"x","principal":-100}' "$API/api/pawn/tickets")
+code=$(api_post_code "$STAFF_JAR" "$API/api/pawn/tickets" \
+  '{"customerName":"x","itemDescription":"x","principal":-100}')
 assert_block "negative pawn principal" "400" "$code"
 
 # Credit limit zero — no credit sales
-curl -s -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"name":"ZeroLimit","creditLimit":0}' "$API/api/customers" > /tmp/ht-zero-cust.json
+api_post "$STAFF_JAR" "$API/api/customers" '{"name":"ZeroLimit","creditLimit":0}' > /tmp/ht-zero-cust.json
 zero_cid=$(python3 -c "import json; print(json.load(open('/tmp/ht-zero-cust.json')).get('customer',{}).get('id',''))" 2>/dev/null || echo "")
 if [[ -n "$zero_cid" ]]; then
-  code=$(curl -s -o /dev/null -w "%{http_code}" -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
-    -d "{\"customerId\":\"$zero_cid\",\"description\":\"เกินวงเงิน\",\"total\":1000}" \
-    "$API/api/customers/credit-sales")
+  code=$(api_post_code "$STAFF_JAR" "$API/api/customers/credit-sales" \
+    "{\"customerId\":\"$zero_cid\",\"description\":\"เกินวงเงิน\",\"total\":1000}")
   assert_block "credit sale with limit=0" "400" "$code"
 else
   echo "FAIL  [BLOCKER] could not create zero-limit customer"
@@ -99,15 +95,20 @@ else
 fi
 
 # Parallel pawn interest race — exactly one must succeed
-curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
-  -d '{"customerName":"RacePawn","itemDescription":"test","principal":5000,"channel":"CASH"}' \
-  "$API/api/pawn/tickets" > /tmp/ht-race-pawn.json
+api_post "$OWNER_JAR" "$API/api/pawn/tickets" \
+  '{"customerName":"RacePawn","itemDescription":"test","principal":5000,"channel":"CASH"}' \
+  > /tmp/ht-race-pawn.json
 race_tid=$(python3 -c "import json; print(json.load(open('/tmp/ht-race-pawn.json')).get('ticket',{}).get('id',''))" 2>/dev/null || echo "")
 if [[ -n "$race_tid" ]]; then
-  curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' -d '{"channel":"CASH"}' \
-    "$API/api/pawn/tickets/$race_tid/interest" -o /tmp/ht-int1.json -w "%{http_code}" > /tmp/ht-int1-code.txt &
-  curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' -d '{"channel":"CASH"}' \
-    "$API/api/pawn/tickets/$race_tid/interest" -o /tmp/ht-int2.json -w "%{http_code}" > /tmp/ht-int2-code.txt &
+  csrf=$(csrf_from_jar "$OWNER_JAR")
+  curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
+    ${csrf:+-H "X-CSRF-Token: $csrf"} \
+    -d '{"channel":"CASH"}' \
+    "$API/api/pawn/tickets/$race_tid/interest" -o /tmp/ht-int1.json -w '%{http_code}' > /tmp/ht-int1-code.txt &
+  curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
+    ${csrf:+-H "X-CSRF-Token: $csrf"} \
+    -d '{"channel":"CASH"}' \
+    "$API/api/pawn/tickets/$race_tid/interest" -o /tmp/ht-int2.json -w '%{http_code}' > /tmp/ht-int2-code.txt &
   wait
   c1=$(cat /tmp/ht-int1-code.txt)
   c2=$(cat /tmp/ht-int2-code.txt)
@@ -129,21 +130,17 @@ fi
 bills=$(curl -s -b "$OWNER_JAR" "$API/api/pos/bills")
 bill_id=$(echo "$bills" | python3 -c "import sys,json; d=json.load(sys.stdin); print(next((b['id'] for b in d.get('bills',[]) if b.get('status')=='COMPLETED'),''))")
 if [[ -n "$bill_id" ]]; then
-  code=$(curl -s -o /dev/null -w "%{http_code}" -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
-    -d '{"reason":"hack"}' "$API/api/pos/bills/$bill_id/void")
+  code=$(api_post_code "$STAFF_JAR" "$API/api/pos/bills/$bill_id/void" '{"reason":"hack"}')
   assert_block "staff void bill" "403" "$code"
 fi
 
 # Locked day blocks ledger post
 TODAY=$(date -u +%Y-%m-%d)
-curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
-  -d "{\"closeDate\":\"$TODAY\"}" "$API/api/cashflow/daily-close" > /dev/null || true
-code=$(curl -s -o /dev/null -w "%{http_code}" -b "$STAFF_JAR" -X POST -H 'Content-Type: application/json' \
-  -d "{\"entryDate\":\"$TODAY\",\"type\":\"INCOME\",\"channel\":\"CASH\",\"amount\":100,\"description\":\"after close\"}" \
-  "$API/api/cashflow/ledger")
+api_post "$OWNER_JAR" "$API/api/cashflow/daily-close" "{\"closeDate\":\"$TODAY\"}" > /dev/null || true
+code=$(api_post_code "$STAFF_JAR" "$API/api/cashflow/ledger" \
+  "{\"entryDate\":\"$TODAY\",\"type\":\"INCOME\",\"channel\":\"CASH\",\"amount\":100,\"description\":\"after close\"}")
 assert_block "ledger on locked day" "423" "$code"
-curl -s -b "$OWNER_JAR" -X POST -H 'Content-Type: application/json' \
-  -d "{\"closeDate\":\"$TODAY\"}" "$API/api/cashflow/daily-close/unlock" > /dev/null || true
+api_post "$OWNER_JAR" "$API/api/cashflow/daily-close/unlock" "{\"closeDate\":\"$TODAY\"}" > /dev/null || true
 
 # CORS rejects evil origin
 cors_code=$(curl -s -o /dev/null -w "%{http_code}" \
