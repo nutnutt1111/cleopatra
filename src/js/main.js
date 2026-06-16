@@ -26,6 +26,7 @@ import '../components/ui/alert';
 import { initThemePreview } from '../components/widgets/theme-preview.js';
 import { initDonutitModules } from './donutit-init.js';
 import { initDashboardWidgets } from './dashboard-init.js';
+import { enforceDonutitAuth } from './donutit-auth.js';
 
 // Router
 import { initRouter } from '../components/layout/router';
@@ -57,16 +58,18 @@ function initShell() {
 }
 
 // Re-initialize on SPA navigation (including code highlighting)
-document.addEventListener('page:load', () => {
+document.addEventListener('page:load', async () => {
     renderMenu();
+    await enforceDonutitAuth();
     initComponents();
     initDonutitModules();
     initCodeBlockTransformer();
 });
 
 // Initial load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initShell();
+    await enforceDonutitAuth();
     initComponents();
     initRouter();
     initDonutitModules();

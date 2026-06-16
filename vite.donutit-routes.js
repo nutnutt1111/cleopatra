@@ -3,6 +3,7 @@ import { mkdirSync, copyFileSync, existsSync } from 'fs';
 
 /** DonutiT clean URL routes → HTML pages */
 export const DONUTIT_ROUTES = {
+    '/': '/pages/donutit/dashboard.html',
     '/dashboard': '/pages/donutit/dashboard.html',
     '/login': '/pages/donutit/settings.html',
     '/pos': '/pages/donutit/pos.html',
@@ -15,7 +16,9 @@ export const DONUTIT_ROUTES = {
     '/hr': '/pages/donutit/hr.html',
 };
 
-export const DONUTIT_ROUTE_SLUGS = Object.keys(DONUTIT_ROUTES).map((r) => r.slice(1));
+export const DONUTIT_ROUTE_SLUGS = Object.keys(DONUTIT_ROUTES)
+  .filter((r) => r !== '/')
+  .map((r) => r.slice(1));
 
 function rewriteRequest(req) {
     const path = req.url?.split('?')[0];

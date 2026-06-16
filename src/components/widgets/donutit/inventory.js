@@ -1,5 +1,13 @@
-import { apiFetch, isLoggedIn } from './donutit-api.js';
+import { apiFetch, isLoggedIn, getSessionUser } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
+import { bindOnce } from './bind-once.js';
+import { notify } from './notify.js';
+
+function toggleTypeFields() {
+  const type = document.getElementById('inv-type')?.value;
+  document.getElementById('inv-qty-wrap')?.classList.toggle('hidden', type === 'SERIALIZED');
+  document.getElementById('inv-serial-wrap')?.classList.toggle('hidden', type !== 'SERIALIZED');
+}
 
 async function refresh() {
   const [prodRes, moveRes] = await Promise.all([
@@ -12,14 +20,15 @@ async function refresh() {
 
   const tbody = document.getElementById('inv-tbody');
   if (tbody) {
-    tbody.innerHTML = products
-      .map((p) => {
-        const stock =
-          p.trackingType === 'QUANTITY'
-            ? `${p.qtyOnHand} ชิ้น`
-            : `${p.serials.length} serial พร้อมขาย`;
-        const cost = p.costBaht ? `${escapeHtml(p.costBaht)} บาท` : '—';
-        return `<tr class="border-b border-border">
+    tbody.innerHTML = products.length
+      ? products
+          .map((p) => {
+            const stock =
+              p.trackingType === 'QUANTITY'
+                ? `${p.qtyOnHand} ชิ้น`
+                : `${p.serials.length} serial พร้อมขาย`;
+            const cost = p.costBaht ? `${escapeHtml(p.costBaht)} บาท` : '—';
+            return `<tr class="border-b border-border">
         <td class="px-4 py-3 text-sm">${escapeHtml(p.sku)}</td>
         <td class="px-4 py-3 text-sm">${escapeHtml(p.name)}</td>
         <td class="px-4 py-3 text-sm">${p.trackingType === 'SERIALIZED' ? 'มี Serial' : 'นับจำนวน'}</td>
@@ -27,8 +36,9 @@ async function refresh() {
         <td class="px-4 py-3 text-sm text-right">${escapeHtml(p.priceBaht)}</td>
         <td class="px-4 py-3 text-sm text-right cost-cell">${cost}</td>
       </tr>`;
-      })
-      .join('');
+          })
+          .join('')
+      : '<tr><td colspan="6" class="px-4 py-8 text-center text-muted-foreground">ยังไม่มีสินค้า — เพิ่มรายการด้านบน</td></tr>';
   }
 
   const serialEl = document.getElementById('inv-serials');
@@ -69,13 +79,53 @@ export async function initInventory() {
   if (!root) return;
   if (root.hasAttribute('data-donutit-inited')) return;
   root.setAttribute('data-donutit-inited', '');
-  if (!(await isLoggedIn())) {
-    document.getElementById('inv-status')?.replaceChildren(
-      document.createTextNode('เข้าสู่ระบบที่ /settings ก่อน'),
-    );
-    return;
+
+  if (!(await isLoggedIn())) return;
+
+  const user = getSessionUser();
+  const canAdd = user && (user.role === 'OWNER' || user.role === 'MANAGER');
+  const panel = document.getElementById('inv-add-panel');
+  if (canAdd && panel) panel.classList.remove('hidden');
+
+  const typeSel = document.getElementById('inv-type');
+  if (typeSel) {
+    typeSel.addEventListener('change', toggleTypeFields);
+    toggleTypeFields();
   }
-  refresh().catch((e) => {
-    document.getElementById('inv-status')?.replaceChildren(document.createTextNode(e.message));
+
+  bindOnce(document.getElementById('inv-btn-add'), 'click', async () => {
+    const trackingType = document.getElementById('inv-type').value;
+    const body = {
+      sku: document.getElementById('inv-sku').value.trim(),
+      name: document.getElementById('inv-name').value.trim(),
+      trackingType,
+      price: Number(document.getElementById('inv-price').value),
+      cost: Number(document.getElementById('inv-cost').value) || 0,
+    };
+    if (trackingType === 'SERIALIZED') {
+      body.serialNumbers = document
+        .getElementById('inv-serials-input')
+        .value.split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    } else {
+      body.qtyOnHand = Number(document.getElementById('inv-qty').value) || 0;
+    }
+    const res = await apiFetch('/api/inventory/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      notify(data.error || 'เพิ่มสินค้าไม่สำเร็จ', 'error');
+      return;
+    }
+    notify(`เพิ่มสินค้า ${data.product.name} แล้ว`, 'success');
+    document.getElementById('inv-sku').value = '';
+    document.getElementById('inv-name').value = '';
+    await refresh();
   });
+
+  refresh().catch((e) => notify(e.message, 'error'));
 }

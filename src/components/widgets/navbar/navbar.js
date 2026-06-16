@@ -2,7 +2,47 @@
 // Navbar Component
 // ============================================
 
+import { getSessionUser, isLoggedIn, logout } from '../donutit/donutit-api.js';
+import { navigate } from '../../layout/router.js';
+
 let navbarChromeBound = false;
+let logoutBound = false;
+
+const ROLE_LABELS = {
+  OWNER: 'เจ้าของร้าน',
+  MANAGER: 'ผู้จัดการ',
+  STAFF: 'พนักงาน',
+  HR: 'HR',
+};
+
+export async function refreshNavbarSession() {
+  const nameEl = document.getElementById('navbar-user-name');
+  const emailEl = document.getElementById('navbar-user-email');
+  const roleEl = document.getElementById('navbar-user-role');
+  const avatarEl = document.getElementById('navbar-user-avatar');
+  const loginHint = document.getElementById('navbar-login-hint');
+
+  if (!nameEl) return;
+
+  const loggedIn = await isLoggedIn();
+  const user = getSessionUser();
+
+  if (loggedIn && user) {
+    nameEl.textContent = user.name;
+    if (emailEl) emailEl.textContent = user.email;
+    if (roleEl) roleEl.textContent = ROLE_LABELS[user.role] ?? user.role;
+    if (avatarEl) {
+      avatarEl.textContent = user.name.slice(0, 1).toUpperCase();
+    }
+    if (loginHint) loginHint.classList.add('hidden');
+  } else {
+    nameEl.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
+    if (emailEl) emailEl.textContent = 'กดเพื่อเข้าสู่ระบบ';
+    if (roleEl) roleEl.textContent = '';
+    if (avatarEl) avatarEl.textContent = '?';
+    if (loginHint) loginHint.classList.remove('hidden');
+  }
+}
 
 export function bindNavbarChrome() {
     if (navbarChromeBound) return;
@@ -10,6 +50,19 @@ export function bindNavbarChrome() {
 
     initUserDropdown();
     initThemeSwitcher();
+    bindNavbarLogout();
+}
+
+function bindNavbarLogout() {
+    if (logoutBound) return;
+    const btn = document.getElementById('btn-navbar-logout');
+    if (!btn) return;
+    logoutBound = true;
+    btn.addEventListener('click', async () => {
+        await logout();
+        await refreshNavbarSession();
+        await navigate('/login');
+    });
 }
 
 export function initNavbar() {

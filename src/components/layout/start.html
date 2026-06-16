@@ -106,19 +106,6 @@
 
                 <!-- Right Actions -->
                 <div class="flex items-center gap-1 sm:gap-2 ml-auto">
-                    <button
-                        class="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
-                        <i class="ri-search-line text-xl"></i>
-                    </button>
-                    <button
-                        class="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors relative">
-                        <i class="ri-notification-3-line text-xl"></i>
-                        <span class="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full"></span>
-                    </button>
-                    <button
-                        class="hidden sm:flex w-10 h-10 items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
-                        <i class="ri-apps-2-line text-xl"></i>
-                    </button>
 
                     <!-- Theme Switcher Dropdown -->
                     <div class="relative" id="theme-dropdown-container">
@@ -185,86 +172,30 @@
                     <!-- User Avatar Dropdown -->
                     <div class="relative ml-1 sm:ml-2" id="user-dropdown-container">
                         <button id="user-avatar-btn"
-                            class="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 cursor-pointer ring-2 ring-background overflow-hidden">
-                            <img src="/images/user1.jpg" alt="User" class="w-full h-full object-cover">
+                            class="w-9 h-9 rounded-full bg-primary text-primary-foreground font-semibold text-sm cursor-pointer ring-2 ring-background flex items-center justify-center"
+                            type="button">
+                            <span id="navbar-user-avatar">?</span>
                         </button>
 
-                        <!-- Dropdown Menu -->
                         <div id="user-dropdown"
-                            class="absolute right-0 top-12 w-72 bg-popover text-popover-foreground rounded-xl shadow-xl border border-border z-50 hidden overflow-hidden">
-                            <!-- Header -->
+                            class="absolute right-0 top-12 w-64 bg-popover text-popover-foreground rounded-xl shadow-xl border border-border z-50 hidden overflow-hidden">
                             <div class="p-4 border-b border-border">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-full overflow-hidden ring-2 ring-border">
-                                        <img src="/images/user1.jpg" alt="Cody Fisher"
-                                            class="w-full h-full object-cover">
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2">
-                                            <h3 class="font-semibold truncate">Cody Fisher</h3>
-                                            <span
-                                                class="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-medium">Pro</span>
-                                        </div>
-                                        <p class="text-sm text-muted-foreground truncate">c.fisher@gmail.com</p>
-                                    </div>
-                                </div>
+                                <h3 id="navbar-user-name" class="font-semibold truncate">—</h3>
+                                <p id="navbar-user-email" class="text-sm text-muted-foreground truncate">—</p>
+                                <p id="navbar-user-role" class="text-xs text-primary mt-1"></p>
+                                <p id="navbar-login-hint" class="text-xs text-muted-foreground mt-2 hidden">ไปที่หน้าเข้าสู่ระบบเพื่อใช้งาน</p>
                             </div>
-
-                            <!-- Menu Items -->
                             <div class="py-2">
-                                <a href="#"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-                                    <i class="ri-user-line"></i>
-                                    <span>Public Profile</span>
-                                </a>
-                                <a href="#"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-                                    <i class="ri-user-settings-line"></i>
-                                    <span>My Profile</span>
-                                </a>
-                                <a href="#"
+                                <a href="/settings"
                                     class="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                                     <i class="ri-settings-3-line"></i>
-                                    <span>My Account</span>
-                                    <i class="ri-arrow-right-s-line ml-auto"></i>
-                                </a>
-                                <a href="#"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-                                    <i class="ri-code-s-slash-line"></i>
-                                    <span>Dev Forum</span>
+                                    <span>บัญชีและตั้งค่า</span>
                                 </a>
                             </div>
-
-                            <!-- Settings -->
-                            <div class="border-t border-border py-2">
-                                <div class="flex items-center justify-between px-4 py-2.5">
-                                    <div class="flex items-center gap-3">
-                                        <i class="ri-global-line text-muted-foreground"></i>
-                                        <span class="text-sm">Language</span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5 text-xs bg-muted px-2 py-1 rounded">
-                                        <span>🇺🇸</span>
-                                        <span class="text-muted-foreground">English</span>
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-between px-4 py-2.5">
-                                    <div class="flex items-center gap-3">
-                                        <i class="ri-moon-line text-muted-foreground"></i>
-                                        <span class="text-sm">Dark Mode</span>
-                                    </div>
-                                    <button class="w-10 h-5 bg-muted rounded-full relative transition-colors"
-                                        id="dark-mode-toggle">
-                                        <span
-                                            class="absolute left-0.5 top-0.5 w-4 h-4 bg-background rounded-full shadow transition-transform"></span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Logout -->
                             <div class="border-t border-border p-3">
-                                <button
+                                <button id="btn-navbar-logout" type="button"
                                     class="w-full px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-muted hover:text-foreground transition-colors">
-                                    Log out
+                                    ออกจากระบบ
                                 </button>
                             </div>
                         </div>

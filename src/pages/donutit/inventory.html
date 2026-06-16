@@ -1,45 +1,50 @@
 {{> start title="สินค้าคงคลัง — DonutiT" hidePageHeader=true }}
 
 <div class="p-4 lg:p-6" data-donutit-module="inventory">
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-semibold">สินค้าคงคลัง</h1>
-            <p class="text-sm text-muted-foreground">สินค้ามี serial / ไม่มี serial · สต็อก movement</p>
-        </div>
-        <span class="text-xs px-3 py-1 rounded-full bg-green-500/10 text-green-700">Wave 2</span>
+    <div class="mb-6">
+        <h1 class="text-xl font-semibold">สินค้าคงคลัง</h1>
+        <p class="text-sm text-muted-foreground">เพิ่มสินค้า · ดู serial · ประวัติ movement</p>
     </div>
     <p id="inv-status" class="text-sm text-muted-foreground mb-4"></p>
 
-    <div class="rounded-xl border bg-card overflow-hidden mb-6">
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[700px]">
-                <thead class="bg-muted/50">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">SKU</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">ชื่อ</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">ประเภท</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground">สต็อก</th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground">ราคาขาย</th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground">ต้นทุน</th>
-                    </tr>
-                </thead>
-                <tbody id="inv-tbody">
-                    <tr><td colspan="6" class="px-4 py-8 text-center text-muted-foreground">กำลังโหลด...</td></tr>
-                </tbody>
-            </table>
+    <div id="inv-add-panel" class="rounded-xl border bg-card p-4 mb-6 hidden">
+        <h2 class="font-medium mb-3">เพิ่มสินค้าใหม่</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div>
+                <label class="text-xs text-muted-foreground">SKU</label>
+                <input id="inv-sku" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" placeholder="PHONE-001" />
+            </div>
+            <div>
+                <label class="text-xs text-muted-foreground">ชื่อสินค้า</label>
+                <input id="inv-name" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" placeholder="iPhone 15" />
+            </div>
+            <div>
+                <label class="text-xs text-muted-foreground">ประเภท</label>
+                <select id="inv-type" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm">
+                    <option value="QUANTITY">นับจำนวน</option>
+                    <option value="SERIALIZED">มี Serial</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs text-muted-foreground">ราคาขาย (บาท)</label>
+                <input id="inv-price" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+            </div>
+            <div>
+                <label class="text-xs text-muted-foreground">ต้นทุน (บาท)</label>
+                <input id="inv-cost" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+            </div>
+            <div id="inv-qty-wrap">
+                <label class="text-xs text-muted-foreground">จำนวนเริ่มต้น</label>
+                <input id="inv-qty" type="number" min="0" step="1" value="0" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+            </div>
+            <div id="inv-serial-wrap" class="sm:col-span-2 lg:col-span-3 hidden">
+                <label class="text-xs text-muted-foreground">หมายเลข Serial (คั่นด้วย comma)</label>
+                <input id="inv-serials-input" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" placeholder="SN001, SN002" />
+            </div>
         </div>
-        <p class="text-xs text-muted-foreground px-4 py-2">ต้นทุนแสดงเฉพาะ Owner/Manager</p>
+        <button id="inv-btn-add" type="button" class="mt-4 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
+            บันทึกสินค้า
+        </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="rounded-xl border bg-card p-4">
-            <h2 class="font-medium mb-3">Serial Numbers</h2>
-            <div id="inv-serials"></div>
-        </div>
-        <div class="rounded-xl border bg-card p-4">
-            <h2 class="font-medium mb-3">Stock Movement ล่าสุด</h2>
-            <div id="inv-moves" class="max-h-64 overflow-y-auto"></div>
-        </div>
-    </div>
-</div>
-{{> end }}
+    <div class="rounded-xl border bg-card overflow-hidden mb-6">

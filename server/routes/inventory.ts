@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type { AuthUser } from '../lib/auth.js';
-import { canViewCost, InventoryError } from '../lib/inventory.js';
+import { canViewCost, createProduct, InventoryError } from '../lib/inventory.js';
 import { formatBaht } from '../lib/ledger-utils.js';
 import { prisma } from '../lib/prisma.js';
 
@@ -49,6 +49,33 @@ export function createInventoryRouter(
           })),
         })),
       });
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  router.post('/products', requireAuth, async (req, res) => {
+    try {
+      const user = (req as AuthedRequest).user;
+      const body = req.body as {
+        sku?: string;
+        name?: string;
+        trackingType?: 'SERIALIZED' | 'QUANTITY';
+        price?: number;
+        cost?: number;
+        qtyOnHand?: number;
+        serialNumbers?: string[];
+      };
+      const product = await createProduct(user, {
+        sku: body.sku ?? '',
+        name: body.name ?? '',
+        trackingType: body.trackingType ?? 'QUANTITY',
+        price: Number(body.price ?? 0),
+        cost: body.cost != null ? Number(body.cost) : undefined,
+        qtyOnHand: body.qtyOnHand != null ? Number(body.qtyOnHand) : undefined,
+        serialNumbers: body.serialNumbers,
+      });
+      res.status(201).json({ ok: true, product: { id: product.id, sku: product.sku, name: product.name } });
     } catch (err) {
       handleError(err, res);
     }

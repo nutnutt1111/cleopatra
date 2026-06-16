@@ -109,7 +109,7 @@ export default defineConfig(({ command }) => {
             handlebars({
                 partialDirectory: getPartialDirectories(),
                 context: {
-                    title: 'Cleopatra - Modern Admin Dashboard',
+                    title: 'DonutiT — Store Management',
                     base, // Make base path available in templates
                 },
                 helpers: {

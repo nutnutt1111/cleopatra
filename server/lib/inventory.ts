@@ -1,7 +1,9 @@
 import type { Prisma } from '../../src/generated/prisma/client.js';
 import { prisma } from './prisma.js';
 import type { AuthUser } from './auth.js';
+import { assertRole } from './auth.js';
 import type { StockMoveReason } from '../../src/generated/prisma/client.js';
+import { parseBahtToCents } from './ledger-utils.js';
 
 type Tx = Prisma.TransactionClient;
 
@@ -174,4 +176,85 @@ export async function restoreStockOnVoid(
 
 export function canViewCost(role: AuthUser['role']): boolean {
   return role === 'OWNER' || role === 'MANAGER';
+}
+
+export async function createProduct(
+  user: AuthUser,
+  input: {
+    sku: string;
+    name: string;
+    trackingType: 'SERIALIZED' | 'QUANTITY';
+    price: number;
+    cost?: number;
+    qtyOnHand?: number;
+    serialNumbers?: string[];
+  },
+) {
+  assertRole(user, 'OWNER', 'MANAGER');
+
+  const sku = input.sku.trim();
+  const name = input.name.trim();
+  if (!sku || !name) throw new InventoryError('กรุณากรอก SKU และชื่อสินค้า');
+
+  const priceCents = parseBahtToCents(input.price);
+  const costCents = input.cost != null ? parseBahtToCents(input.cost) : 0;
+  if (priceCents <= 0) throw new InventoryError('ราคาขายต้องมากกว่า 0');
+
+  return prisma.$transaction(async (tx) => {
+    const dup = await tx.product.findUnique({
+      where: { storeId_sku: { storeId: user.storeId, sku } },
+    });
+    if (dup) throw new InventoryError('SKU นี้มีแล้ว', 409);
+
+    const qty = input.trackingType === 'QUANTITY' ? Math.max(0, input.qtyOnHand ?? 0) : 0;
+
+    const product = await tx.product.create({
+      data: {
+        storeId: user.storeId,
+        sku,
+        name,
+        trackingType: input.trackingType,
+        priceCents,
+        costCents,
+        qtyOnHand: qty,
+      },
+    });
+
+    if (input.trackingType === 'SERIALIZED') {
+      const serials = (input.serialNumbers ?? []).map((s) => s.trim()).filter(Boolean);
+      if (!serials.length) throw new InventoryError('สินค้า Serial ต้องระบุหมายเลขอย่างน้อย 1 รายการ');
+      for (const serialNumber of serials) {
+        const serial = await tx.serialItem.create({
+          data: {
+            storeId: user.storeId,
+            productId: product.id,
+            serialNumber,
+            status: 'AVAILABLE',
+          },
+        });
+        await recordStockMove(tx, {
+          storeId: user.storeId,
+          userId: user.id,
+          productId: product.id,
+          serialItemId: serial.id,
+          qtyDelta: 1,
+          reason: 'RECEIVE',
+          referenceType: 'INVENTORY',
+          referenceId: product.id,
+        });
+      }
+    } else if (qty > 0) {
+      await recordStockMove(tx, {
+        storeId: user.storeId,
+        userId: user.id,
+        productId: product.id,
+        qtyDelta: qty,
+        reason: 'RECEIVE',
+        referenceType: 'INVENTORY',
+        referenceId: product.id,
+      });
+    }
+
+    return product;
+  });
 }

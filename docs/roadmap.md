@@ -83,8 +83,8 @@ Store-management platform for Thai retail + pawn operations: POS, inventory, paw
 
 **PR #7 merged:** 2026-06-14 → `cursor/wave-4-messenger-hr-e20d` @ `ab71b59`
 
-**Follow-up work:** Open — see [follow-ups-pr7.md](./follow-ups-pr7.md)
+**Follow-up work:** ✅ Complete — Phase E5 (2026-06-16). See [follow-ups-pr7.md](./follow-ups-pr7.md).
 
-- [ ] **FU-1 (P1)** Do not trust JWT role claims — reload user from DB per request
-- [ ] **FU-2 (P1)** CSRF protection for cookie-auth mutating routes
-- [ ] **FU-3 (P2)** Normalize race-conflict HTTP status codes to 409
+- [x] **FU-1 (P1)** Do not trust JWT role claims — reload user from DB per request
+- [x] **FU-2 (P1)** CSRF protection for cookie-auth mutating routes
+- [x] **FU-3 (P2)** Normalize race-conflict HTTP status codes to 409

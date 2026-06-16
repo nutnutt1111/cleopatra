@@ -1,5 +1,14 @@
 import { login, logout, isLoggedIn, apiFetch } from './donutit-api.js';
 import { bindOnce } from './bind-once.js';
+import { notify } from './notify.js';
+import { navigate } from '../../layout/router.js';
+import { refreshNavbarSession } from '../navbar/navbar.js';
+
+function safeNext(raw) {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw === '/') return '/dashboard';
+  if (raw === '/login' || raw === '/settings') return '/dashboard';
+  return raw;
+}
 
 async function refreshStatus() {
   const el = document.getElementById('login-status');
@@ -23,18 +32,24 @@ export async function initSettings() {
   bindOnce(document.getElementById('btn-login'), 'click', async () => {
     try {
       const user = await login(
-        document.getElementById('login-email').value,
+        document.getElementById('login-email').value.trim(),
         document.getElementById('login-password').value,
       );
-      document.getElementById('login-status').textContent = `สำเร็จ: ${user.name} (${user.role})`;
+      notify(`ยินดีต้อนรับ ${user.name}`, 'success');
+      await refreshNavbarSession();
+      const next = safeNext(new URLSearchParams(location.search).get('next'));
+      await navigate(next);
     } catch (e) {
+      notify(e.message, 'error');
       document.getElementById('login-status').textContent = e.message;
     }
   });
 
   bindOnce(document.getElementById('btn-logout'), 'click', async () => {
     await logout();
+    await refreshNavbarSession();
     refreshStatus();
+    notify('ออกจากระบบแล้ว', 'info');
   });
 
   refreshStatus();
