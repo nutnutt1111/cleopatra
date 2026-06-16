@@ -41,7 +41,7 @@ async function refresh() {
           .map(
             (s) => `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs border border-border mr-2 mb-2">
             ${escapeHtml(s.serialNumber)} · ${escapeHtml(s.productName)}
-            <span class="ml-1 ${s.status === 'AVAILABLE' ? 'text-green-600' : 'text-muted-foreground'}">${escapeHtml(s.statusLabel)}</span>
+            <span class="ml-1 badge ${s.status === 'AVAILABLE' ? 'badge-soft-success' : 'badge-soft-secondary'}">${escapeHtml(s.statusLabel)}</span>
           </span>`,
           )
           .join('')

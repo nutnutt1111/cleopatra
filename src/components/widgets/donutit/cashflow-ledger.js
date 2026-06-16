@@ -1,6 +1,7 @@
 import { isLoggedIn, apiFetch } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
+import { notify } from './notify.js';
 
 const TYPE_LABELS = {
   INCOME: 'รายรับ',
@@ -96,7 +97,7 @@ function renderLedgerTable(entries) {
         if (!res.ok) throw new Error((await res.json()).error);
         await refreshAll();
       } catch (err) {
-        alert(err.message || 'ยกเลิกไม่สำเร็จ');
+        notify(err.message || 'ยกเลิกไม่สำเร็จ', 'error');
       }
     });
   });
@@ -190,7 +191,7 @@ export async function initCashflowLedger() {
 
   bindOnce(document.getElementById('btn-daily-close'), 'click', async () => {
     const date = document.getElementById('close-date')?.value;
-    if (!date) return alert('เลือกวันที่ปิด');
+    if (!date) return notify('เลือกวันที่ปิด', 'warning');
     if (!confirm(`ยืนยันปิดวัน ${date}?`)) return;
 
     try {
@@ -200,16 +201,16 @@ export async function initCashflowLedger() {
         body: JSON.stringify({ closeDate: date }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
-      alert('ปิดวันสำเร็จ');
+      notify('ปิดวันสำเร็จ', 'success');
       await refreshAll();
     } catch (err) {
-      alert(err.message || 'ปิดวันไม่สำเร็จ');
+      notify(err.message || 'ปิดวันไม่สำเร็จ', 'error');
     }
   });
 
   bindOnce(document.getElementById('btn-unlock'), 'click', async () => {
     const date = document.getElementById('close-date')?.value;
-    if (!date) return alert('เลือกวันที่');
+    if (!date) return notify('เลือกวันที่', 'warning');
     if (!confirm(`Owner: ปลดล็อกวัน ${date}?`)) return;
 
     try {
@@ -219,10 +220,10 @@ export async function initCashflowLedger() {
         body: JSON.stringify({ closeDate: date }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
-      alert('ปลดล็อกสำเร็จ');
+      notify('ปลดล็อกสำเร็จ', 'success');
       await refreshAll();
     } catch (err) {
-      alert(err.message || 'ปลดล็อกไม่สำเร็จ');
+      notify(err.message || 'ปลดล็อกไม่สำเร็จ', 'error');
     }
   });
 

@@ -1,12 +1,20 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
+import { notify } from './notify.js';
 
 const STATUS_LABELS = {
   ACTIVE: 'ใช้งาน',
   REDEEMED: 'ไถ่ถอนแล้ว',
   VOIDED: 'ยกเลิก',
 };
+
+function pawnStatusBadge(status) {
+  const label = STATUS_LABELS[status] || status;
+  if (status === 'ACTIVE') return `<span class="badge badge-soft-success">${escapeHtml(label)}</span>`;
+  if (status === 'VOIDED') return `<span class="badge badge-soft-destructive">${escapeHtml(label)}</span>`;
+  return `<span class="badge badge-soft-secondary">${escapeHtml(label)}</span>`;
+}
 
 async function loadTickets() {
   const res = await apiFetch('/api/pawn/tickets');
@@ -33,7 +41,7 @@ function renderTickets(tickets) {
           <p class="text-sm mt-1">${escapeHtml(t.itemDescription)}</p>
           <p class="text-sm">เงินต้น <strong>${escapeHtml(t.principalBaht)}</strong> บาท · ดอกเบี้ย ${escapeHtml(t.interestPerPeriodBaht)} บาท/งวด (${escapeHtml(t.interestRatePercent)}%)</p>
           <p class="text-xs text-muted-foreground">ครบดอกถัดไป: ${new Date(t.nextInterestDueAt).toLocaleDateString('th-TH')}</p>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-muted">${escapeHtml(STATUS_LABELS[t.status] || t.status)}</span>
+          ${pawnStatusBadge(t.status)}
           ${t.transferDetail ? `<p class="text-xs mt-1 text-primary">โอน: ${escapeHtml(t.transferDetail)}</p>` : ''}
           ${t.payments.length ? `<p class="text-xs mt-1 text-muted-foreground">ชำระแล้ว ${t.payments.length} ครั้ง</p>` : ''}
           ${t.status === 'VOIDED' ? `<p class="text-xs text-destructive">ยกเลิก: ${escapeHtml(t.voidReason)}</p>` : ''}
@@ -65,10 +73,10 @@ function renderTickets(tickets) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel: channel.toUpperCase(), transferDetail }),
       });
-      if (!res.ok) alert((await res.json()).error);
+      if (!res.ok) notify((await res.json()).error, 'error');
       else {
         const data = await res.json();
-        alert(`รับดอกเบี้ย ${data.amountBaht} บาทสำเร็จ`);
+        notify(`รับดอกเบี้ย ${data.amountBaht} บาทสำเร็จ`, 'success');
         renderTickets(await loadTickets());
       }
     });
@@ -88,10 +96,10 @@ function renderTickets(tickets) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel: channel.toUpperCase(), transferDetail }),
       });
-      if (!res.ok) alert((await res.json()).error);
+      if (!res.ok) notify((await res.json()).error, 'error');
       else {
         const data = await res.json();
-        alert(`ไถ่ถอนสำเร็จ ${data.amountBaht} บาท`);
+        notify(`ไถ่ถอนสำเร็จ ${data.amountBaht} บาท`, 'success');
         renderTickets(await loadTickets());
       }
     });
@@ -106,7 +114,7 @@ function renderTickets(tickets) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason }),
       });
-      if (!res.ok) alert((await res.json()).error);
+      if (!res.ok) notify((await res.json()).error, 'error');
       else renderTickets(await loadTickets());
     });
   });
@@ -136,7 +144,7 @@ export async function initPawn() {
     const transferDetail = document.getElementById('pawn-transfer-detail')?.value?.trim();
 
     if (!customerName || !itemDescription || principal <= 0) {
-      return alert('กรอกชื่อลูกค้า รายละเอียด และเงินต้น');
+      return notify('กรอกชื่อลูกค้า รายละเอียด และเงินต้น', 'warning');
     }
 
     try {
@@ -155,14 +163,14 @@ export async function initPawn() {
       });
       if (!res.ok) throw new Error((await res.json()).error);
       const data = await res.json();
-      alert(`เปิดตั๋ว ${data.ticket.ticketNumber} สำเร็จ — เงินต้น ${data.ticket.principalBaht} บาท`);
+      notify(`เปิดตั๋ว ${data.ticket.ticketNumber} สำเร็จ — เงินต้น ${data.ticket.principalBaht} บาท`, 'success');
       document.getElementById('pawn-customer-name').value = '';
       document.getElementById('pawn-customer-phone').value = '';
       document.getElementById('pawn-item').value = '';
       document.getElementById('pawn-principal').value = '';
       renderTickets(await loadTickets());
     } catch (e) {
-      alert(e.message);
+      notify(e.message, 'error');
     }
   });
 }

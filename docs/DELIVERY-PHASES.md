@@ -27,3 +27,20 @@
 | E3 | Frontend ponytail cleanup |
 | E4 | Server ponytail cleanup |
 | E5 | Hardening (FU-1–3) |
+
+## Phase E2 — Design pass ✅
+
+**Branch:** `cursor/phase-2-design-8e6d`  
+**Status:** Complete
+
+### Delivered
+
+- Real dashboard KPIs (client aggregate from existing APIs)
+- Recent bills + ledger activity tables
+- `dashboard.js` wired via `donutit-init.js`
+- `notify.js` — toast replaces `alert()` in all DonutiT modules
+- Badge classes on pawn, messenger, inventory status
+
+### Verify
+
+- `yarn build` + `yarn quality:smoke` + `yarn quality:ux`
