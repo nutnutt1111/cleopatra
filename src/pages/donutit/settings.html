@@ -1,44 +1,32 @@
 {{> start title="บัญชี — DonutiT" hidePageHeader=true }}
 
-<div class="p-4 lg:p-6 max-w-md mx-auto">
-    <div id="settings-login-panel" data-donutit-module="login">
-        {{> login-card }}
+<div class="p-4 lg:p-6 max-w-lg mx-auto" data-donutit-module="settings">
+    <div class="mb-6">
+        <h1 class="text-xl font-semibold">บัญชี</h1>
+        <p class="text-sm text-muted-foreground mt-1">ข้อมูลผู้ใช้ปัจจุบัน</p>
     </div>
 
-    <div id="settings-account-panel" class="hidden max-w-lg mx-auto" data-donutit-module="settings">
-        <div class="mb-6">
-            <h1 class="text-xl font-semibold">บัญชีและตั้งค่า</h1>
-            <p class="text-sm text-muted-foreground mt-1">ข้อมูลผู้ใช้และการจัดการเซสชัน</p>
-        </div>
-
-        <div class="rounded-xl border bg-card p-6 space-y-5">
-            <div class="flex items-center gap-4">
-                <div id="settings-avatar"
-                    class="w-14 h-14 rounded-full bg-primary text-primary-foreground font-semibold text-xl flex items-center justify-center flex-shrink-0">
-                    ?
-                </div>
-                <div class="min-w-0">
-                    <p id="settings-user-name" class="font-semibold truncate">—</p>
-                    <p id="settings-user-email" class="text-sm text-muted-foreground truncate">—</p>
-                    <p id="settings-user-role" class="text-xs text-primary mt-0.5"></p>
-                </div>
+    <div class="rounded-xl border bg-card p-6 space-y-5">
+        <div class="flex items-center gap-4">
+            <div id="settings-avatar"
+                class="w-14 h-14 rounded-full bg-primary text-primary-foreground font-semibold text-xl flex items-center justify-center flex-shrink-0">
+                ?
             </div>
-
-            <div class="border-t border-border pt-4">
-                <p id="settings-status" class="text-sm text-muted-foreground"></p>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-3">
-                <a href="/dashboard"
-                    class="flex-1 px-4 py-2.5 text-sm font-medium text-center border border-border rounded-lg hover:bg-muted transition-colors">
-                    กลับแดชบอร์ด
-                </a>
-                <button id="btn-logout" type="button"
-                    class="flex-1 px-4 py-2.5 text-sm font-medium bg-destructive/10 text-destructive border border-destructive/20 rounded-lg hover:bg-destructive/15 transition-colors">
-                    ออกจากระบบ
-                </button>
+            <div class="min-w-0">
+                <p id="settings-user-name" class="font-semibold truncate">—</p>
+                <p id="settings-user-email" class="text-sm text-muted-foreground truncate">—</p>
+                <p id="settings-user-role" class="text-xs text-primary mt-0.5"></p>
             </div>
         </div>
+
+        <div class="border-t border-border pt-4">
+            <p id="settings-status" class="text-sm text-muted-foreground"></p>
+        </div>
+
+        <a href="/dashboard"
+            class="block w-full px-4 py-2.5 text-sm font-medium text-center border border-border rounded-lg hover:bg-muted transition-colors">
+            กลับแดชบอร์ด
+        </a>
     </div>
 </div>
 {{> end }}

@@ -107,12 +107,6 @@
                 <!-- Right Actions -->
                 <div class="flex items-center gap-1 sm:gap-2 ml-auto">
 
-                    <a id="navbar-header-login" href="/login"
-                        class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary border border-primary/20 rounded-lg hover:bg-primary/5 transition-colors">
-                        <i class="ri-login-box-line"></i>
-                        <span class="hidden sm:inline">เข้าสู่ระบบ</span>
-                    </a>
-
                     <!-- Theme Switcher Dropdown -->
                     <div class="relative" id="theme-dropdown-container">
                         <button id="theme-toggle-btn"
@@ -189,23 +183,17 @@
                                 <h3 id="navbar-user-name" class="font-semibold truncate">—</h3>
                                 <p id="navbar-user-email" class="text-sm text-muted-foreground truncate">—</p>
                                 <p id="navbar-user-role" class="text-xs text-primary mt-1"></p>
-                                <p id="navbar-login-hint" class="text-xs text-muted-foreground mt-2 hidden">ไปที่หน้าเข้าสู่ระบบเพื่อใช้งาน</p>
                             </div>
                             <div class="py-2">
-                                <a href="/login" id="navbar-login-link"
-                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-primary hover:bg-muted transition-colors">
-                                    <i class="ri-login-box-line"></i>
-                                    <span>เข้าสู่ระบบ</span>
-                                </a>
                                 <a href="/settings" id="navbar-settings-link"
                                     class="hidden flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-                                    <i class="ri-settings-3-line"></i>
-                                    <span>บัญชีและตั้งค่า</span>
+                                    <i class="ri-user-settings-line"></i>
+                                    <span>บัญชี</span>
                                 </a>
                             </div>
                             <div class="border-t border-border p-3">
                                 <button id="btn-navbar-logout" type="button"
-                                    class="w-full px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-muted hover:text-foreground transition-colors">
+                                    class="hidden w-full px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-muted hover:text-foreground transition-colors">
                                     ออกจากระบบ
                                 </button>
                             </div>

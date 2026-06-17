@@ -15,6 +15,7 @@ const PROTECTED = new Set([
   '/cashflow-ledger',
   '/customers',
   '/hr',
+  '/settings',
 ]);
 
 function currentPath() {
@@ -29,8 +30,9 @@ export async function enforceDonutitAuth() {
 
   await refreshNavbarSession();
 
-  // Never auto-leave /login — user may want to switch account (ignore ?next= here)
+  // ponytail: one entry — logged-in users skip /login
   if (loggedIn && onAuthPage) {
+    location.assign(appPath('/dashboard'));
     return;
   }
 

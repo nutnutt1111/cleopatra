@@ -20,10 +20,8 @@ export async function refreshNavbarSession() {
   const emailEl = document.getElementById('navbar-user-email');
   const roleEl = document.getElementById('navbar-user-role');
   const avatarEl = document.getElementById('navbar-user-avatar');
-  const loginHint = document.getElementById('navbar-login-hint');
-  const loginLink = document.getElementById('navbar-login-link');
-  const headerLogin = document.getElementById('navbar-header-login');
   const settingsLink = document.getElementById('navbar-settings-link');
+  const logoutBtn = document.getElementById('btn-navbar-logout');
 
   if (!nameEl) return;
 
@@ -34,22 +32,16 @@ export async function refreshNavbarSession() {
     nameEl.textContent = user.name;
     if (emailEl) emailEl.textContent = user.email;
     if (roleEl) roleEl.textContent = ROLE_LABELS[user.role] ?? user.role;
-    if (avatarEl) {
-      avatarEl.textContent = user.name.slice(0, 1).toUpperCase();
-    }
-    if (loginHint) loginHint.classList.add('hidden');
-    if (loginLink) loginLink.classList.add('hidden');
-    if (headerLogin) headerLogin.classList.add('hidden');
+    if (avatarEl) avatarEl.textContent = user.name.slice(0, 1).toUpperCase();
     if (settingsLink) settingsLink.classList.remove('hidden');
+    if (logoutBtn) logoutBtn.classList.remove('hidden');
   } else {
-    nameEl.textContent = 'ยังไม่ได้เข้าสู่ระบบ';
-    if (emailEl) emailEl.textContent = 'กดเพื่อเข้าสู่ระบบ';
+    nameEl.textContent = 'เข้าสู่ระบบ';
+    if (emailEl) emailEl.textContent = 'กดเพื่อ login';
     if (roleEl) roleEl.textContent = '';
     if (avatarEl) avatarEl.textContent = '?';
-    if (loginHint) loginHint.classList.remove('hidden');
-    if (loginLink) loginLink.classList.remove('hidden');
-    if (headerLogin) headerLogin.classList.remove('hidden');
     if (settingsLink) settingsLink.classList.add('hidden');
+    if (logoutBtn) logoutBtn.classList.add('hidden');
   }
 }
 
@@ -78,7 +70,6 @@ export function initNavbar() {
     bindNavbarChrome();
 }
 
-// User Avatar Dropdown
 function initUserDropdown() {
     const avatarBtn = document.getElementById('user-avatar-btn');
     const dropdown = document.getElementById('user-dropdown');

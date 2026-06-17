@@ -16,6 +16,16 @@ Audit using [ponytail](https://github.com/nutnutt1111/ponytail) principles. Rank
 | `yagni` | Dropdown document listeners re-bound every SPA navigation | Guarded with one-time bind |
 | `shrink` | Dead chart inits in `main.js` | Removed |
 
+## Applied in auth dedupe (2026-06)
+
+| Tag | Finding | Action |
+|-----|---------|--------|
+| `delete` | Login form duplicated on `/login` + `/settings` hybrid | `/login` only; `/settings` account-only + auth guard |
+| `delete` | 3 navbar login entry points (header btn, dropdown link, hint) | Avatar → `/login` when logged out; sidebar link only |
+| `delete` | Logout on settings page + login "switch account" panel | Navbar logout only |
+| `delete` | `login-already` panel duplicated settings account UI | Logged-in `/login` → redirect `/dashboard` |
+| `shrink` | `login.js` hybrid settings hooks (`revealSettingsAfterLogin`) | Removed |
+
 ## Deferred (medium risk, high payoff)
 
 | Tag | Finding | Upgrade path |
