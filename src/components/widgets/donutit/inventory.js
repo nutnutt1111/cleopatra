@@ -2,6 +2,7 @@ import { apiFetch, isLoggedIn, getSessionUser } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
+import { showLoginRequired } from './donutit-ui.js';
 
 function toggleTypeFields() {
   const type = document.getElementById('inv-type')?.value;
@@ -77,21 +78,19 @@ async function refresh() {
 export async function initInventory() {
   const root = document.querySelector('[data-donutit-module="inventory"]');
   if (!root) return;
-  if (root.hasAttribute('data-donutit-inited')) return;
-  root.setAttribute('data-donutit-inited', '');
 
-  if (!(await isLoggedIn())) return;
+  if (!(await isLoggedIn())) {
+    showLoginRequired(document.getElementById('inv-status'));
+    return;
+  }
 
   const user = getSessionUser();
   const canAdd = user && (user.role === 'OWNER' || user.role === 'MANAGER');
   const panel = document.getElementById('inv-add-panel');
   if (canAdd && panel) panel.classList.remove('hidden');
 
-  const typeSel = document.getElementById('inv-type');
-  if (typeSel) {
-    typeSel.addEventListener('change', toggleTypeFields);
-    toggleTypeFields();
-  }
+  bindOnce(document.getElementById('inv-type'), 'change', toggleTypeFields);
+  toggleTypeFields();
 
   bindOnce(document.getElementById('inv-btn-add'), 'click', async () => {
     const trackingType = document.getElementById('inv-type').value;

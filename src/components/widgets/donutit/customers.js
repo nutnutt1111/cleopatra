@@ -2,6 +2,7 @@ import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
+import { showLoginRequired } from './donutit-ui.js';
 
 let customersCache = [];
 
@@ -11,6 +12,13 @@ async function loadCustomers() {
   const data = await res.json();
   customersCache = data.customers;
   return customersCache;
+}
+
+async function refreshUi() {
+  await loadCustomers();
+  renderSelects();
+  onPayCustomerChange();
+  renderList();
 }
 
 function renderSelects() {
@@ -83,20 +91,13 @@ function renderList() {
 export async function initCustomers() {
   if (!document.querySelector('[data-donutit-module="customers"]')) return;
   if (!(await isLoggedIn())) {
-    document.getElementById('customers-status')?.replaceChildren(
-      document.createTextNode('เข้าสู่ระบบที่ /login ก่อน'),
-    );
+    showLoginRequired(document.getElementById('customers-status'));
     return;
   }
 
-  loadCustomers()
-    .then(() => {
-      renderSelects();
-      renderList();
-    })
-    .catch((e) => {
-      document.getElementById('customers-status')?.replaceChildren(document.createTextNode(e.message));
-    });
+  refreshUi().catch((e) => {
+    document.getElementById('customers-status')?.replaceChildren(document.createTextNode(e.message));
+  });
 
   bindOnce(document.getElementById('cust-pay-customer'), 'change', onPayCustomerChange);
 
@@ -118,9 +119,7 @@ export async function initCustomers() {
       document.getElementById('cust-name').value = '';
       document.getElementById('cust-phone').value = '';
       document.getElementById('cust-limit').value = '';
-      await loadCustomers();
-      renderSelects();
-      renderList();
+      await refreshUi();
     } catch (e) {
       notify(e.message, 'error');
     }
@@ -145,9 +144,7 @@ export async function initCustomers() {
       notify(`ขายเครดิต ${data.sale.saleNumber} — ${data.sale.totalBaht} บาท`, 'success');
       document.getElementById('cust-sale-desc').value = '';
       document.getElementById('cust-sale-total').value = '';
-      await loadCustomers();
-      renderSelects();
-      renderList();
+      await refreshUi();
     } catch (e) {
       notify(e.message, 'error');
     }
@@ -178,10 +175,7 @@ export async function initCustomers() {
       const data = await res.json();
       notify(`รับชำระ ${data.payment.amountBaht} บาทสำเร็จ`, 'success');
       document.getElementById('cust-pay-amount').value = '';
-      await loadCustomers();
-      renderSelects();
-      onPayCustomerChange();
-      renderList();
+      await refreshUi();
     } catch (e) {
       notify(e.message, 'error');
     }

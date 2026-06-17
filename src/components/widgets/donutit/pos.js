@@ -2,6 +2,7 @@ import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
+import { showLoginRequired } from './donutit-ui.js';
 
 let productsCache = [];
 
@@ -45,6 +46,13 @@ function onProductChange() {
 
 const cart = [];
 
+function calcTotals() {
+  const subtotal = cart.reduce((s, c) => s + c.lineTotalCents, 0);
+  const discount = Math.round(parseFloat(document.getElementById('pos-discount')?.value || '0') * 100);
+  const total = Math.max(0, subtotal - discount);
+  return { subtotal, discount, total };
+}
+
 function renderCart() {
   const el = document.getElementById('pos-cart');
   if (!el) return;
@@ -62,21 +70,12 @@ function renderCart() {
     </div>`,
     )
     .join('');
-
-  el.querySelectorAll('[data-remove]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      cart.splice(Number(btn.getAttribute('data-remove')), 1);
-      renderCart();
-    });
-  });
   updateTotals();
 }
 
 function updateTotals() {
-  const subtotal = cart.reduce((s, c) => s + c.lineTotalCents, 0);
+  const { subtotal, total } = calcTotals();
   document.getElementById('pos-subtotal')?.replaceChildren(document.createTextNode((subtotal / 100).toFixed(2)));
-  const discount = parseFloat(document.getElementById('pos-discount')?.value || '0') * 100;
-  const total = Math.max(0, subtotal - discount);
   document.getElementById('pos-total')?.replaceChildren(document.createTextNode((total / 100).toFixed(2)));
 }
 
@@ -107,41 +106,50 @@ async function loadBills() {
         </div>
         ${
           b.status === 'COMPLETED'
-            ? `<button data-void-bill="${escapeHtml(b.id)}" class="text-xs text-destructive hover:underline">void</button>`
-            : '<span class="text-xs text-muted-foreground">voided</span>'
+            ? `<button data-void-bill="${escapeHtml(b.id)}" class="text-xs text-destructive hover:underline">ยกเลิก</button>`
+            : '<span class="text-xs text-muted-foreground">ยกเลิกแล้ว</span>'
         }
       </div>
     </div>`,
     )
     .join('');
+}
 
-  el.querySelectorAll('[data-void-bill]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const reason = prompt('เหตุผลยกเลิกบิล:');
-      if (!reason) return;
-      const res = await apiFetch(`/api/pos/bills/${btn.getAttribute('data-void-bill')}/void`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
-      if (!res.ok) notify((await res.json()).error, 'error');
-      else {
-        await loadBills();
-        await loadProducts();
-        renderProductSelect();
-      }
-    });
+async function handleBillAction(e) {
+  const voidBtn = e.target.closest('[data-void-bill]');
+  if (!voidBtn) return;
+
+  const reason = prompt('เหตุผลยกเลิกบิล:');
+  if (!reason) return;
+  const res = await apiFetch(`/api/pos/bills/${voidBtn.getAttribute('data-void-bill')}/void`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason }),
   });
+  if (!res.ok) notify((await res.json()).error, 'error');
+  else {
+    await loadBills();
+    await loadProducts();
+    renderProductSelect();
+  }
+}
+
+async function handleCartAction(e) {
+  const removeBtn = e.target.closest('[data-remove]');
+  if (!removeBtn) return;
+  cart.splice(Number(removeBtn.getAttribute('data-remove')), 1);
+  renderCart();
 }
 
 export async function initPos() {
   if (!document.querySelector('[data-donutit-module="pos"]')) return;
   if (!(await isLoggedIn())) {
-    document.getElementById('pos-status')?.replaceChildren(
-      document.createTextNode('เข้าสู่ระบบที่ /login ก่อน'),
-    );
+    showLoginRequired(document.getElementById('pos-status'));
     return;
   }
+
+  bindOnce(document.getElementById('pos-bills'), 'click', handleBillAction);
+  bindOnce(document.getElementById('pos-cart'), 'click', handleCartAction);
 
   loadProducts()
     .then(() => {
@@ -180,9 +188,7 @@ export async function initPos() {
 
   bindOnce(document.getElementById('btn-checkout'), 'click', async () => {
     if (!cart.length) return notify('เพิ่มสินค้าก่อน', 'warning');
-    const subtotal = cart.reduce((s, c) => s + c.lineTotalCents, 0);
-    const discount = Math.round(parseFloat(document.getElementById('pos-discount')?.value || '0') * 100);
-    const total = subtotal - discount;
+    const { total } = calcTotals();
     const cash = Math.round(parseFloat(document.getElementById('pos-pay-cash')?.value || '0') * 100);
     const transfer = Math.round(parseFloat(document.getElementById('pos-pay-transfer')?.value || '0') * 100);
 
@@ -204,7 +210,7 @@ export async function initPos() {
             qty: c.qty,
           })),
           payments,
-          discount: discount / 100,
+          discount: calcTotals().discount / 100,
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error);

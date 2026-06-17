@@ -26,6 +26,22 @@ Audit using [ponytail](https://github.com/nutnutt1111/ponytail) principles. Rank
 | `delete` | `login-already` panel duplicated settings account UI | Logged-in `/login` → redirect `/dashboard` |
 | `shrink` | `login.js` hybrid settings hooks (`revealSettingsAfterLogin`) | Removed |
 
+## Applied in module dedupe (2026-06)
+
+| Tag | Finding | Action |
+|-----|---------|--------|
+| `delete` | HR payroll: แยกปุ่มสร้างรอบ + จ่าย + จ่ายทีละแถว | ปุ่มเดียว `คำนวณและจ่ายเงินเดือน` (create + pay chain) |
+| `delete` | Messenger: ปุ่ม "กำลังส่ง" ก่อน "ส่งสำเร็จ" | ลบ transit — deliver จาก PENDING ได้โดยตรง |
+| `delete` | Cashflow: ปุ่มปิดวัน + ปลดล็อกแยกกัน | ปุ่มเดียวสลับตามสถานะวันที่เลือก |
+| `delete` | Settings: ลิงก์ "กลับแดชบอร์ด" | ลบ — sidebar มีอยู่แล้ว |
+| `delete` | Login: error ซ้ำใน `#login-status` + toast | toast เท่านั้น |
+| `shrink` | `todayStr` / `daysAgoStr` / login gate ซ้ำทุกโมดูล | `donutit-ui.js` shared helpers |
+| `shrink` | Pawn interest/redeem: prompt ช่องทางทุกครั้ง | default CASH (ฟอร์มเปิดตั๋วมี TRANSFER อยู่แล้ว) |
+| `shrink` | Per-row `addEventListener` ใน list render | event delegation บน container |
+| `shrink` | Customers: boilerplate หลัง mutation | `refreshUi()` helper |
+| `shrink` | POS: คำนวณยอดซ้ำ checkout + updateTotals | `calcTotals()` |
+| `shrink` | inventory `data-donutit-inited` guard | ลบ — `bindOnce` จัดการแล้ว |
+
 ## Deferred (medium risk, high payoff)
 
 | Tag | Finding | Upgrade path |

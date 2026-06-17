@@ -1,11 +1,9 @@
 {{> start title="บุคลากร — DonutiT" hidePageHeader=true }}
 
 <div class="p-4 lg:p-6" data-donutit-module="hr">
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-semibold">บุคลากร (HR)</h1>
-            <p class="text-sm text-muted-foreground">พนักงาน · เงินเดือน — เฉพาะ Owner/HR</p>
-        </div>
+    <div class="mb-6">
+        <h1 class="text-xl font-semibold">บุคลากร (HR)</h1>
+        <p class="text-sm text-muted-foreground">พนักงาน · เงินเดือน — เฉพาะ Owner/HR</p>
     </div>
     <p id="hr-status" class="text-sm text-muted-foreground mb-4"></p>
 
@@ -24,30 +22,28 @@
                 </div>
             </div>
 
-            <div id="hr-payroll-panel" class="rounded-xl border bg-card p-4 hidden">
-                <h2 class="font-medium mb-3">สร้างรอบเงินเดือน</h2>
+            <div id="hr-payroll-section" class="rounded-xl border bg-card p-4 hidden">
+                <h2 class="font-medium mb-3">เงินเดือน</h2>
                 <div class="space-y-3">
                     <input id="hr-period-label" placeholder="ชื่อรอบ เช่น มิ.ย. 2026" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm" />
                     <div class="grid grid-cols-2 gap-3">
                         <input id="hr-period-start" type="date" class="w-full px-3 py-2 rounded-lg border border-border text-sm" />
                         <input id="hr-period-end" type="date" class="w-full px-3 py-2 rounded-lg border border-border text-sm" />
                     </div>
-                    <button id="btn-create-payroll" class="w-full px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
-                        สร้างรอบเงินเดือน
+                    <button id="btn-run-payroll" class="w-full px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
+                        คำนวณและจ่ายเงินเดือน
                     </button>
+                </div>
+                <div class="mt-4 pt-4 border-t border-border">
+                    <h3 class="text-sm font-medium text-muted-foreground mb-2">ประวัติรอบจ่าย</h3>
+                    <div id="hr-payroll-list" class="max-h-[280px] overflow-y-auto"></div>
                 </div>
             </div>
         </div>
 
-        <div class="space-y-4">
-            <div class="rounded-xl border bg-card p-4">
-                <h2 class="font-medium mb-3">พนักงาน</h2>
-                <div id="hr-employees"></div>
-            </div>
-            <div id="hr-payroll-list-wrap" class="rounded-xl border bg-card p-4 hidden">
-                <h2 class="font-medium mb-3">รอบเงินเดือน</h2>
-                <div id="hr-payroll-list" class="max-h-[400px] overflow-y-auto"></div>
-            </div>
+        <div class="rounded-xl border bg-card p-4">
+            <h2 class="font-medium mb-3">พนักงาน</h2>
+            <div id="hr-employees"></div>
         </div>
     </div>
 </div>

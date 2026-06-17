@@ -1,17 +1,8 @@
 import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
+import { daysAgoStr, todayStr } from './donutit-ui.js';
 
 const LOW_STOCK_THRESHOLD = 5;
-
-function todayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function daysAgoStr(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
-}
 
 function isToday(iso) {
   return iso.slice(0, 10) === todayStr();

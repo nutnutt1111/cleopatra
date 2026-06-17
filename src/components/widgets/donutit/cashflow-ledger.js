@@ -2,6 +2,7 @@ import { isLoggedIn, apiFetch } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
+import { daysAgoStr, setStatusEl, showLoginRequired, todayStr } from './donutit-ui.js';
 
 const TYPE_LABELS = {
   INCOME: 'รายรับ',
@@ -14,24 +15,9 @@ const CHANNEL_LABELS = {
   CASH: 'เงินสด',
   TRANSFER: 'โอน',
   CREDIT: 'เครดิต',
-  OTHER: 'อื่นๆ',
 };
 
-function todayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function daysAgoStr(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
-}
-
-function setStatus(el, message, isError = false) {
-  if (!el) return;
-  el.textContent = message;
-  el.className = `text-sm mt-2 ${isError ? 'text-destructive' : 'text-muted-foreground'}`;
-}
+let closesCache = [];
 
 async function loadLedger(from, to) {
   const params = new URLSearchParams();
@@ -82,25 +68,6 @@ function renderLedgerTable(entries) {
       </tr>`;
     })
     .join('');
-
-  tbody.querySelectorAll('[data-void-id]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const id = btn.getAttribute('data-void-id');
-      const reason = prompt('เหตุผลในการยกเลิก:');
-      if (!reason) return;
-      try {
-        const res = await apiFetch(`/api/cashflow/ledger/${id}/void`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reason }),
-        });
-        if (!res.ok) throw new Error((await res.json()).error);
-        await refreshAll();
-      } catch (err) {
-        notify(err.message || 'ยกเลิกไม่สำเร็จ', 'error');
-      }
-    });
-  });
 }
 
 function renderCloses(closes) {
@@ -137,6 +104,27 @@ function formatNet(c) {
   return (netCents / 100).toLocaleString('th-TH', { minimumFractionDigits: 2 });
 }
 
+function isDateLocked(date) {
+  const close = closesCache.find((c) => c.closeDate === date);
+  return Boolean(close?.isLocked);
+}
+
+function updateCloseButton() {
+  const btn = document.getElementById('btn-toggle-close');
+  const date = document.getElementById('close-date')?.value;
+  if (!btn || !date) return;
+
+  if (isDateLocked(date)) {
+    btn.textContent = 'ปลดล็อก (Owner)';
+    btn.className =
+      'w-full px-4 py-2 text-sm font-medium text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/5';
+  } else {
+    btn.textContent = 'ปิดวัน (ล็อก)';
+    btn.className =
+      'w-full px-4 py-2 text-sm font-medium bg-secondary text-secondary-foreground border border-border rounded-lg hover:bg-muted';
+  }
+}
+
 async function refreshAll() {
   const from = document.getElementById('filter-from')?.value;
   const to = document.getElementById('filter-to')?.value;
@@ -144,11 +132,34 @@ async function refreshAll() {
 
   try {
     const [ledger, closes] = await Promise.all([loadLedger(from, to), loadDailyCloses()]);
+    closesCache = closes.closes;
     renderLedgerTable(ledger.entries);
-    renderCloses(closes.closes);
-    setStatus(status, `โหลด ${ledger.entries.length} รายการ`);
+    renderCloses(closesCache);
+    updateCloseButton();
+    setStatusEl(status, `โหลด ${ledger.entries.length} รายการ`);
   } catch (err) {
-    setStatus(status, err.message, true);
+    setStatusEl(status, err.message, true);
+  }
+}
+
+async function handleLedgerVoid(e) {
+  const btn = e.target.closest('[data-void-id]');
+  if (!btn) return;
+
+  const id = btn.getAttribute('data-void-id');
+  const reason = prompt('เหตุผลในการยกเลิก:');
+  if (!reason) return;
+
+  try {
+    const res = await apiFetch(`/api/cashflow/ledger/${id}/void`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error);
+    await refreshAll();
+  } catch (err) {
+    notify(err.message || 'ยกเลิกไม่สำเร็จ', 'error');
   }
 }
 
@@ -158,10 +169,17 @@ export async function initCashflowLedger() {
 
   const fromInput = document.getElementById('filter-from');
   const toInput = document.getElementById('filter-to');
+  const entryDate = document.getElementById('entry-date');
+  const closeDate = document.getElementById('close-date');
+
   if (fromInput && !fromInput.value) fromInput.value = daysAgoStr(7);
   if (toInput && !toInput.value) toInput.value = todayStr();
+  if (entryDate && !entryDate.value) entryDate.value = todayStr();
+  if (closeDate && !closeDate.value) closeDate.value = todayStr();
 
   bindOnce(document.getElementById('btn-filter'), 'click', refreshAll);
+  bindOnce(document.getElementById('ledger-tbody'), 'click', handleLedgerVoid);
+  bindOnce(closeDate, 'change', updateCloseButton);
 
   bindOnce(document.getElementById('btn-add-entry'), 'click', async () => {
     const status = document.getElementById('form-status');
@@ -180,55 +198,44 @@ export async function initCashflowLedger() {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error((await res.json()).error);
-      setStatus(status, 'บันทึกสำเร็จ');
+      setStatusEl(status, 'บันทึกสำเร็จ');
       document.getElementById('entry-amount').value = '';
       document.getElementById('entry-desc').value = '';
       await refreshAll();
     } catch (err) {
-      setStatus(status, err.message, true);
+      setStatusEl(status, err.message, true);
     }
   });
 
-  bindOnce(document.getElementById('btn-daily-close'), 'click', async () => {
-    const date = document.getElementById('close-date')?.value;
-    if (!date) return notify('เลือกวันที่ปิด', 'warning');
-    if (!confirm(`ยืนยันปิดวัน ${date}?`)) return;
-
-    try {
-      const res = await apiFetch('/api/cashflow/daily-close', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ closeDate: date }),
-      });
-      if (!res.ok) throw new Error((await res.json()).error);
-      notify('ปิดวันสำเร็จ', 'success');
-      await refreshAll();
-    } catch (err) {
-      notify(err.message || 'ปิดวันไม่สำเร็จ', 'error');
-    }
-  });
-
-  bindOnce(document.getElementById('btn-unlock'), 'click', async () => {
+  bindOnce(document.getElementById('btn-toggle-close'), 'click', async () => {
     const date = document.getElementById('close-date')?.value;
     if (!date) return notify('เลือกวันที่', 'warning');
-    if (!confirm(`Owner: ปลดล็อกวัน ${date}?`)) return;
+
+    const locked = isDateLocked(date);
+    if (!confirm(locked ? `Owner: ปลดล็อกวัน ${date}?` : `ยืนยันปิดวัน ${date}?`)) return;
 
     try {
-      const res = await apiFetch('/api/cashflow/daily-close/unlock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ closeDate: date }),
-      });
+      const res = locked
+        ? await apiFetch('/api/cashflow/daily-close/unlock', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ closeDate: date }),
+          })
+        : await apiFetch('/api/cashflow/daily-close', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ closeDate: date }),
+          });
       if (!res.ok) throw new Error((await res.json()).error);
-      notify('ปลดล็อกสำเร็จ', 'success');
+      notify(locked ? 'ปลดล็อกสำเร็จ' : 'ปิดวันสำเร็จ', 'success');
       await refreshAll();
     } catch (err) {
-      notify(err.message || 'ปลดล็อกไม่สำเร็จ', 'error');
+      notify(err.message || (locked ? 'ปลดล็อกไม่สำเร็จ' : 'ปิดวันไม่สำเร็จ'), 'error');
     }
   });
 
   if (!(await isLoggedIn())) {
-    setStatus(document.getElementById('ledger-status'), 'เข้าสู่ระบบที่ /login เพื่อดูข้อมูล (dev: owner@donutit.local)', true);
+    showLoginRequired(document.getElementById('ledger-status'));
     return;
   }
 

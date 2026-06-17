@@ -2,6 +2,7 @@ import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
+import { showLoginRequired } from './donutit-ui.js';
 
 function jobStatusBadge(status, label) {
   const text = escapeHtml(label);
@@ -42,7 +43,6 @@ function renderJobs(jobs) {
         ${
           j.status === 'PENDING' || j.status === 'IN_TRANSIT'
             ? `<div class="flex flex-col gap-1 shrink-0">
-            ${j.status === 'PENDING' ? `<button data-transit="${escapeHtml(j.id)}" class="text-xs px-2 py-1 bg-secondary border border-border rounded">กำลังส่ง</button>` : ''}
             <button data-deliver="${escapeHtml(j.id)}" class="text-xs px-2 py-1 bg-primary text-primary-foreground rounded">ส่งสำเร็จ</button>
             <button data-cancel="${escapeHtml(j.id)}" class="text-xs text-destructive hover:underline">ยกเลิก</button>
           </div>`
@@ -52,51 +52,45 @@ function renderJobs(jobs) {
     </div>`,
     )
     .join('');
+}
 
-  el.querySelectorAll('[data-transit]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const res = await apiFetch(`/api/messenger/jobs/${btn.getAttribute('data-transit')}/transit`, { method: 'POST' });
-      if (!res.ok) notify((await res.json()).error, 'error');
-      else renderJobs(await loadJobs());
-    });
-  });
+async function handleJobAction(e) {
+  const deliverBtn = e.target.closest('[data-deliver]');
+  const cancelBtn = e.target.closest('[data-cancel]');
 
-  el.querySelectorAll('[data-deliver]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      if (!confirm('ยืนยันส่งสำเร็จ? ค่าจัดส่งจะบันทึกเป็นรายรับ')) return;
-      const res = await apiFetch(`/api/messenger/jobs/${btn.getAttribute('data-deliver')}/deliver`, { method: 'POST' });
-      if (!res.ok) notify((await res.json()).error, 'error');
-      else {
-        const data = await res.json();
-        notify(`ส่งสำเร็จ ${data.jobNumber}${data.deliveryFeeBaht !== '0.00' ? ` — ค่าส่ง ${data.deliveryFeeBaht} บาท` : ''}`, 'success');
-        renderJobs(await loadJobs());
-      }
-    });
-  });
+  if (deliverBtn) {
+    if (!confirm('ยืนยันส่งสำเร็จ? ค่าจัดส่งจะบันทึกเป็นรายรับ')) return;
+    const res = await apiFetch(`/api/messenger/jobs/${deliverBtn.getAttribute('data-deliver')}/deliver`, { method: 'POST' });
+    if (!res.ok) notify((await res.json()).error, 'error');
+    else {
+      const data = await res.json();
+      notify(`ส่งสำเร็จ ${data.jobNumber}${data.deliveryFeeBaht !== '0.00' ? ` — ค่าส่ง ${data.deliveryFeeBaht} บาท` : ''}`, 'success');
+      renderJobs(await loadJobs());
+    }
+    return;
+  }
 
-  el.querySelectorAll('[data-cancel]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const reason = prompt('เหตุผลยกเลิก:');
-      if (!reason) return;
-      const res = await apiFetch(`/api/messenger/jobs/${btn.getAttribute('data-cancel')}/cancel`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
-      if (!res.ok) notify((await res.json()).error, 'error');
-      else renderJobs(await loadJobs());
+  if (cancelBtn) {
+    const reason = prompt('เหตุผลยกเลิก:');
+    if (!reason) return;
+    const res = await apiFetch(`/api/messenger/jobs/${cancelBtn.getAttribute('data-cancel')}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
     });
-  });
+    if (!res.ok) notify((await res.json()).error, 'error');
+    else renderJobs(await loadJobs());
+  }
 }
 
 export async function initMessenger() {
   if (!document.querySelector('[data-donutit-module="messenger"]')) return;
   if (!(await isLoggedIn())) {
-    document.getElementById('messenger-status')?.replaceChildren(
-      document.createTextNode('เข้าสู่ระบบที่ /login ก่อน'),
-    );
+    showLoginRequired(document.getElementById('messenger-status'));
     return;
   }
+
+  bindOnce(document.getElementById('messenger-jobs'), 'click', handleJobAction);
 
   loadJobs()
     .then(renderJobs)

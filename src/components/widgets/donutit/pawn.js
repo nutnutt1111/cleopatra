@@ -2,6 +2,7 @@ import { apiFetch, isLoggedIn } from './donutit-api.js';
 import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
+import { showLoginRequired } from './donutit-ui.js';
 
 const STATUS_LABELS = {
   ACTIVE: 'ใช้งาน',
@@ -51,7 +52,7 @@ function renderTickets(tickets) {
             ? `<div class="flex flex-col gap-1 shrink-0">
             <button data-interest="${escapeHtml(t.id)}" class="text-xs px-2 py-1 bg-secondary border border-border rounded hover:bg-muted">รับดอกเบี้ย</button>
             <button data-redeem="${escapeHtml(t.id)}" class="text-xs px-2 py-1 bg-primary text-primary-foreground rounded">ไถ่ถอน</button>
-            <button data-void="${escapeHtml(t.id)}" class="text-xs text-destructive hover:underline">void</button>
+            <button data-void="${escapeHtml(t.id)}" class="text-xs text-destructive hover:underline">ยกเลิก</button>
           </div>`
             : ''
         }
@@ -59,75 +60,65 @@ function renderTickets(tickets) {
     </div>`,
     )
     .join('');
+}
 
-  el.querySelectorAll('[data-interest]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const channel = prompt('ช่องทาง CASH หรือ TRANSFER?', 'CASH');
-      if (!channel) return;
-      let transferDetail;
-      if (channel.toUpperCase() === 'TRANSFER') {
-        transferDetail = prompt('รายละเอียดโอน:');
-      }
-      const res = await apiFetch(`/api/pawn/tickets/${btn.getAttribute('data-interest')}/interest`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel: channel.toUpperCase(), transferDetail }),
-      });
-      if (!res.ok) notify((await res.json()).error, 'error');
-      else {
-        const data = await res.json();
-        notify(`รับดอกเบี้ย ${data.amountBaht} บาทสำเร็จ`, 'success');
-        renderTickets(await loadTickets());
-      }
-    });
-  });
+async function handleTicketAction(e) {
+  const interestBtn = e.target.closest('[data-interest]');
+  const redeemBtn = e.target.closest('[data-redeem]');
+  const voidBtn = e.target.closest('[data-void]');
 
-  el.querySelectorAll('[data-redeem]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      if (!confirm('ยืนยันไถ่ถอนเต็มจำนวน?')) return;
-      const channel = prompt('ช่องทาง CASH หรือ TRANSFER?', 'CASH');
-      if (!channel) return;
-      let transferDetail;
-      if (channel.toUpperCase() === 'TRANSFER') {
-        transferDetail = prompt('รายละเอียดโอน:');
-      }
-      const res = await apiFetch(`/api/pawn/tickets/${btn.getAttribute('data-redeem')}/redeem`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel: channel.toUpperCase(), transferDetail }),
-      });
-      if (!res.ok) notify((await res.json()).error, 'error');
-      else {
-        const data = await res.json();
-        notify(`ไถ่ถอนสำเร็จ ${data.amountBaht} บาท`, 'success');
-        renderTickets(await loadTickets());
-      }
+  if (interestBtn) {
+    const res = await apiFetch(`/api/pawn/tickets/${interestBtn.getAttribute('data-interest')}/interest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channel: 'CASH' }),
     });
-  });
+    if (!res.ok) notify((await res.json()).error, 'error');
+    else {
+      const data = await res.json();
+      notify(`รับดอกเบี้ย ${data.amountBaht} บาทสำเร็จ`, 'success');
+      renderTickets(await loadTickets());
+    }
+    return;
+  }
 
-  el.querySelectorAll('[data-void]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const reason = prompt('เหตุผลยกเลิกตั๋ว:');
-      if (!reason) return;
-      const res = await apiFetch(`/api/pawn/tickets/${btn.getAttribute('data-void')}/void`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
-      if (!res.ok) notify((await res.json()).error, 'error');
-      else renderTickets(await loadTickets());
+  if (redeemBtn) {
+    if (!confirm('ยืนยันไถ่ถอนเต็มจำนวน?')) return;
+    const res = await apiFetch(`/api/pawn/tickets/${redeemBtn.getAttribute('data-redeem')}/redeem`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channel: 'CASH' }),
     });
-  });
+    if (!res.ok) notify((await res.json()).error, 'error');
+    else {
+      const data = await res.json();
+      notify(`ไถ่ถอนสำเร็จ ${data.amountBaht} บาท`, 'success');
+      renderTickets(await loadTickets());
+    }
+    return;
+  }
+
+  if (voidBtn) {
+    const reason = prompt('เหตุผลยกเลิกตั๋ว:');
+    if (!reason) return;
+    const res = await apiFetch(`/api/pawn/tickets/${voidBtn.getAttribute('data-void')}/void`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    });
+    if (!res.ok) notify((await res.json()).error, 'error');
+    else renderTickets(await loadTickets());
+  }
 }
 
 export async function initPawn() {
   if (!document.querySelector('[data-donutit-module="pawn"]')) return;
   if (!(await isLoggedIn())) {
-    document.getElementById('pawn-status')?.replaceChildren(
-      document.createTextNode('เข้าสู่ระบบที่ /login ก่อน'),
-    );
+    showLoginRequired(document.getElementById('pawn-status'));
     return;
   }
+
+  bindOnce(document.getElementById('pawn-tickets'), 'click', handleTicketAction);
 
   loadTickets()
     .then(renderTickets)

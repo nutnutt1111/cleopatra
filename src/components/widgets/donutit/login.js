@@ -8,7 +8,6 @@ export async function initLogin() {
   if (!document.querySelector('[data-donutit-module="login"]')) return;
 
   const form = document.getElementById('login-form');
-  const statusEl = document.getElementById('login-status');
 
   bindOnce(form, 'submit', async (e) => {
     e.preventDefault();
@@ -17,7 +16,6 @@ export async function initLogin() {
       btn.disabled = true;
       btn.textContent = 'กำลังเข้าสู่ระบบ…';
     }
-    if (statusEl) statusEl.textContent = '';
 
     try {
       const user = await login(
@@ -30,7 +28,6 @@ export async function initLogin() {
       location.assign(appPath(next));
     } catch (err) {
       notify(err.message, 'error');
-      if (statusEl) statusEl.textContent = err.message;
     } finally {
       if (btn) {
         btn.disabled = false;
