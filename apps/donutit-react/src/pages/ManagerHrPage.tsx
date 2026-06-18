@@ -17,7 +17,7 @@ export function ManagerHrPage() {
       <div className="mb-6">
         <h1 className="text-xl font-semibold">บุคลากร (ผู้จัดการ)</h1>
         <p className="text-sm text-[var(--muted-foreground)]">
-          ดูรายชื่อพนักงานได้ — เงินเดือนและจ่ายเงินเดือนเฉพาะ Owner/HR
+          สิทธิ์ MANAGER — ดูรายชื่อพนักงานได้ · เงินเดือนซ่อน · ไม่มีจ่ายเงินเดือน
         </p>
       </div>
       {error && <p className="text-sm text-red-400 mb-4">{error}</p>}

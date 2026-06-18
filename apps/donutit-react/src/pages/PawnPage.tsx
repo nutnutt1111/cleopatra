@@ -112,6 +112,25 @@ export function PawnPage() {
                     <button type="button" className="btn btn-sm btn-primary" onClick={() => postAction(`/api/pawn/tickets/${t.id}/redeem`, 'ไถ่ถอน {amount} บาท')}>
                       ไถ่ถอน
                     </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-ghost text-red-400"
+                      onClick={async () => {
+                        const reason = window.prompt('เหตุผลยกเลิกตั๋ว:');
+                        if (!reason?.trim()) return;
+                        const res = await apiFetch(`/api/pawn/tickets/${t.id}/void`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ reason: reason.trim() }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) return toast.show(data.error, 'error');
+                        toast.show('ยกเลิกตั๋วแล้ว', 'success');
+                        reload();
+                      }}
+                    >
+                      ยกเลิก
+                    </button>
                   </div>
                 )}
               </div>

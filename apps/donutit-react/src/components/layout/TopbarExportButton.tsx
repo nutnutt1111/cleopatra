@@ -11,6 +11,7 @@ const EXPORTABLE = new Set([
   '/customers',
   '/hr',
   '/manager-hr',
+  '/cashflow-ledger',
 ]);
 
 export function TopbarExportButton() {

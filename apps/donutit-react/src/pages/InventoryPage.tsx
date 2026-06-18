@@ -48,6 +48,7 @@ export function InventoryPage() {
   const toast = useToast();
   const user = getSessionUser();
   const canAdd = user?.role === 'OWNER' || user?.role === 'MANAGER';
+  const showCost = user?.role === 'OWNER' || user?.role === 'MANAGER';
   const [products, setProducts] = useState<Product[]>([]);
   const [drafts, setDrafts] = useState<TradeInDraft[]>([]);
   const [selectedDraftId, setSelectedDraftId] = useState('');
@@ -250,6 +251,7 @@ export function InventoryPage() {
               <th>ประเภท</th>
               <th>สต็อก</th>
               <th>ราคาขาย</th>
+              {showCost && <th>ต้นทุน</th>}
             </tr>
           </thead>
           <tbody id="inv-tbody">
@@ -265,6 +267,7 @@ export function InventoryPage() {
                     : `${p.serials.length} serial`}
                 </td>
                 <td>{p.priceBaht}</td>
+                {showCost && <td>{p.costBaht ?? '—'}</td>}
               </tr>
             ))}
           </tbody>

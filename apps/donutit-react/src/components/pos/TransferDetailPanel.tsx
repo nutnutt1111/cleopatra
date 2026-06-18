@@ -62,8 +62,8 @@ export function TransferDetailPanel({ value, onChange, visible }: Props) {
       </div>
       <div className="field">
         <label>เวลาโอน</label>
-        <input type="time" step={60} value={value.time} onChange={(e) => set('time', e.target.value)} />
-        <p className="text-xs text-[var(--muted-foreground)] mt-1">{formatTransferTimeLabel(value.time)}</p>
+        <input type="time" step={60} id="pos-transfer-time" value={value.time} onChange={(e) => set('time', e.target.value)} />
+        <p id="pos-transfer-time-label" className="text-xs text-[var(--muted-foreground)] mt-1">{formatTransferTimeLabel(value.time)}</p>
       </div>
       {value.bank || value.ref || value.date || value.time ? (
         <p className="text-xs text-[var(--muted-foreground)]" style={{ gridColumn: '1 / -1' }}>

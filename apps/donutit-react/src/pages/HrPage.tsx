@@ -104,7 +104,9 @@ export function HrPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-xl font-semibold">บุคลากร (HR)</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">พนักงาน · เงินเดือน — Owner/HR</p>
+        <p className="text-sm text-[var(--muted-foreground)]">
+          สิทธิ์: {user?.role === 'OWNER' ? 'เจ้าของร้าน — จัดการพนักงาน + จ่ายเงินเดือน' : 'HR — จัดการพนักงาน + จ่ายเงินเดือน'}
+        </p>
       </div>
       {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
 

@@ -110,6 +110,18 @@ export async function exportHrEmployeesCsv() {
   downloadCsv(`hr-employees-${stamp()}.csv`, rowsToCsv(columns, rows));
 }
 
+export async function exportCashflowCsv() {
+  const { entries } = await fetchJson<{ entries: Record<string, unknown>[] }>('/api/cashflow/ledger');
+  const columns = [
+    { key: 'entryDate', label: 'วันที่' },
+    { key: 'type', label: 'ประเภท' },
+    { key: 'channel', label: 'ช่องทาง' },
+    { key: 'amountBaht', label: 'จำนวน' },
+    { key: 'description', label: 'รายละเอียด' },
+  ];
+  downloadCsv(`cashflow-${stamp()}.csv`, rowsToCsv(columns, entries));
+}
+
 const EXPORT_BY_PATH: Record<string, () => Promise<void>> = {
   '/inventory': exportInventoryCsv,
   '/pos': exportPosBillsCsv,
@@ -118,6 +130,7 @@ const EXPORT_BY_PATH: Record<string, () => Promise<void>> = {
   '/customers': exportCustomersCsv,
   '/hr': exportHrEmployeesCsv,
   '/manager-hr': exportHrEmployeesCsv,
+  '/cashflow-ledger': exportCashflowCsv,
 };
 
 export function exportForPath(pathname: string) {

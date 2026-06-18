@@ -150,11 +150,16 @@ export function PosPage() {
             <h3 className="font-medium mb-2">ตะกร้า</h3>
             {!cart.length && <p className="text-sm text-[var(--muted-foreground)]">ยังไม่มีรายการ</p>}
             {cart.map((item, i) => (
-              <div key={i} className="flex justify-between text-sm py-1 border-b border-[var(--border)]">
+              <div key={i} className="flex justify-between items-center text-sm py-1 border-b border-[var(--border)]">
                 <span>
                   {item.name} x{item.qty}
                 </span>
-                <span>{(item.lineTotalCents / 100).toFixed(2)}</span>
+                <span className="flex items-center gap-2">
+                  {(item.lineTotalCents / 100).toFixed(2)}
+                  <button type="button" className="text-xs text-red-400" onClick={() => setCart((c) => c.filter((_, idx) => idx !== i))}>
+                    ลบ
+                  </button>
+                </span>
               </div>
             ))}
             <div className="mt-2 text-sm flex justify-between">
