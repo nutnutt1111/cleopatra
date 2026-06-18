@@ -53,6 +53,7 @@ export function createPosRouter(
           payments: b.payments.map((p) => ({
             channel: p.channel,
             amountBaht: formatBaht(p.amountCents),
+            transferDetail: p.transferDetail,
           })),
         })),
         limit,
@@ -70,7 +71,7 @@ export function createPosRouter(
 
       const body = req.body as {
         lines?: { productId: string; serialItemId?: string; qty?: number }[];
-        payments?: { channel: PaymentChannel; amount: number }[];
+        payments?: { channel: PaymentChannel; amount: number; transferDetail?: string }[];
         discount?: number;
       };
 
@@ -79,6 +80,7 @@ export function createPosRouter(
         payments: (body.payments ?? []).map((p) => ({
           channel: p.channel,
           amountCents: Math.round(p.amount * 100),
+          transferDetail: p.transferDetail,
         })),
         discountCents: body.discount ? Math.round(body.discount * 100) : 0,
       });

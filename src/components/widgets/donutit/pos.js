@@ -82,6 +82,83 @@ function updateTotals() {
   const { subtotal, total } = calcTotals();
   document.getElementById('pos-subtotal')?.replaceChildren(document.createTextNode((subtotal / 100).toFixed(2)));
   document.getElementById('pos-total')?.replaceChildren(document.createTextNode((total / 100).toFixed(2)));
+  syncTransferPanel();
+}
+
+function todayInputDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function nowInputTime() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function formatTransferTimeLabel(value) {
+  if (!value) return 'ยังไม่เลือกเวลา';
+  const [h, m] = value.split(':');
+  return `เวลา ${h}:${m} น.`;
+}
+
+function formatTransferDetail() {
+  const bank = document.getElementById('pos-transfer-bank')?.value.trim();
+  const ref = document.getElementById('pos-transfer-ref')?.value.trim();
+  const date = document.getElementById('pos-transfer-date')?.value;
+  const time = document.getElementById('pos-transfer-time')?.value;
+  const parts = [];
+  if (bank) parts.push(bank);
+  if (ref) parts.push(`อ้างอิง ${ref}`);
+  if (date) {
+    const [y, mo, d] = date.split('-');
+    const dateLabel = `${d}/${mo}/${y}`;
+    parts.push(time ? `${dateLabel} ${time} น.` : dateLabel);
+  } else if (time) {
+    parts.push(`${time} น.`);
+  }
+  return parts.join(' · ');
+}
+
+function updateTransferTimeLabel() {
+  const value = document.getElementById('pos-transfer-time')?.value;
+  const label = document.getElementById('pos-transfer-time-label');
+  if (label) label.textContent = formatTransferTimeLabel(value);
+}
+
+function syncTransferPanel() {
+  const transfer = parseFloat(document.getElementById('pos-pay-transfer')?.value || '0');
+  const panel = document.getElementById('pos-transfer-panel');
+  if (!panel) return;
+  const show = transfer > 0;
+  panel.classList.toggle('hidden', !show);
+  if (show) {
+    const dateEl = document.getElementById('pos-transfer-date');
+    const timeEl = document.getElementById('pos-transfer-time');
+    if (dateEl && !dateEl.value) dateEl.value = todayInputDate();
+    if (timeEl && !timeEl.value) timeEl.value = nowInputTime();
+    updateTransferTimeLabel();
+  }
+}
+
+function clearTransferPanel() {
+  for (const id of ['pos-transfer-bank', 'pos-transfer-ref', 'pos-transfer-date', 'pos-transfer-time']) {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  }
+  updateTransferTimeLabel();
+  document.getElementById('pos-transfer-panel')?.classList.add('hidden');
+}
+
+function bindTransferPanel() {
+  const transferInput = document.getElementById('pos-pay-transfer');
+  const timeInput = document.getElementById('pos-transfer-time');
+  if (transferInput) {
+    bindOnce(transferInput, 'input', syncTransferPanel);
+    bindOnce(transferInput, 'change', syncTransferPanel);
+  }
+  if (timeInput) {
+    bindOnce(timeInput, 'input', updateTransferTimeLabel);
+    bindOnce(timeInput, 'change', updateTransferTimeLabel);
+  }
 }
 
 async function loadBills() {
@@ -106,6 +183,14 @@ async function loadBills() {
           <p class="text-sm mt-1">รวม <strong>${escapeHtml(b.totalBaht)}</strong> บาท
             ${b.payments.length > 1 ? `<span class="text-xs text-primary">(แยกจ่าย ${b.payments.length} ช่องทาง)</span>` : ''}
           </p>
+          ${
+            b.payments.some((p) => p.transferDetail)
+              ? `<p class="text-xs text-primary/80">${b.payments
+                  .filter((p) => p.transferDetail)
+                  .map((p) => escapeHtml(p.transferDetail))
+                  .join(' · ')}</p>`
+              : ''
+          }
           <p class="text-xs text-muted-foreground">${b.lines.map((l) => escapeHtml(l.productName)).join(', ')}</p>
           ${b.status === 'VOIDED' ? `<p class="text-xs text-destructive">ยกเลิก: ${escapeHtml(b.voidReason)}</p>` : ''}
         </div>
@@ -198,6 +283,7 @@ export async function initPos() {
 
   document.getElementById('pos-product') && bindOnce(document.getElementById('pos-product'), 'change', onProductChange);
   document.getElementById('pos-discount') && bindOnce(document.getElementById('pos-discount'), 'input', updateTotals);
+  bindTransferPanel();
 
   renderTradeInDrafts();
   bindOnce(document.getElementById('btn-save-trade-draft'), 'click', () => {
@@ -248,7 +334,13 @@ export async function initPos() {
 
     const payments = [];
     if (cash > 0) payments.push({ channel: 'CASH', amount: cash / 100 });
-    if (transfer > 0) payments.push({ channel: 'TRANSFER', amount: transfer / 100 });
+    if (transfer > 0) {
+      const transferDetail = formatTransferDetail();
+      if (!transferDetail) {
+        return notify('กรอกรายละเอียดการโอน (ธนาคารหรือเวลาโอน)', 'warning');
+      }
+      payments.push({ channel: 'TRANSFER', amount: transfer / 100, transferDetail });
+    }
     if (cash + transfer !== total) {
       return notify(`ยอดชำระ ${((cash + transfer) / 100).toFixed(2)} ไม่ตรงยอดรวม ${(total / 100).toFixed(2)}`, 'warning');
     }
@@ -274,6 +366,7 @@ export async function initPos() {
       renderCart();
       document.getElementById('pos-pay-cash').value = '';
       document.getElementById('pos-pay-transfer').value = '';
+      clearTransferPanel();
       await loadBills();
       await loadProducts();
       renderProductSelect();

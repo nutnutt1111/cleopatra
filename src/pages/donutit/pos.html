@@ -86,13 +86,49 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-xs text-muted-foreground">เงินสด</label>
-                        <input id="pos-pay-cash" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border text-sm" />
+                        <input id="pos-pay-cash" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm" />
                     </div>
                     <div>
                         <label class="text-xs text-muted-foreground">โอน</label>
-                        <input id="pos-pay-transfer" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border text-sm" />
+                        <input id="pos-pay-transfer" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm" />
                     </div>
                 </div>
+
+                <div id="pos-transfer-panel" class="mt-4 p-3 rounded-lg border border-dashed border-border bg-muted/30 hidden">
+                    <p class="text-xs font-medium text-foreground mb-3">รายละเอียดการโอน</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-muted-foreground">ธนาคาร</label>
+                            <input id="pos-transfer-bank" list="pos-bank-list" placeholder="เช่น กสิกร, กรุงไทย"
+                                class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm" />
+                            <datalist id="pos-bank-list">
+                                <option value="กสิกรไทย"></option>
+                                <option value="กรุงไทย"></option>
+                                <option value="กรุงเทพ"></option>
+                                <option value="ไทยพาณิชย์"></option>
+                                <option value="กรุงศรี"></option>
+                                <option value="ทหารไทยธนชาต"></option>
+                            </datalist>
+                        </div>
+                        <div>
+                            <label class="text-xs text-muted-foreground">เลขอ้างอิง / เลขท้ายสลิป</label>
+                            <input id="pos-transfer-ref" placeholder="REF123456"
+                                class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs text-muted-foreground">วันที่โอน</label>
+                            <input id="pos-transfer-date" type="date"
+                                class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm [color-scheme:light] dark:[color-scheme:dark]" />
+                        </div>
+                        <div>
+                            <label class="text-xs text-muted-foreground">เวลาโอน</label>
+                            <input id="pos-transfer-time" type="time" step="60"
+                                class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm [color-scheme:light] dark:[color-scheme:dark]" />
+                            <p id="pos-transfer-time-label" class="mt-1 text-xs text-muted-foreground">ยังไม่เลือกเวลา</p>
+                        </div>
+                    </div>
+                </div>
+
                 <button id="btn-checkout" class="w-full mt-4 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg">
                     ชำระเงิน
                 </button>
