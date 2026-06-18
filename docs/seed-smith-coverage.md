@@ -43,8 +43,7 @@ yarn db:seed     # re-seed บน DB ปัจจุบัน
 ## Prerequisites for verification
 
 ```bash
-yarn dev:api     # API :3004
-yarn dev         # DonutiT :3005 (for route/UX checks)
+yarn dev         # donutit-cleopatra :3005 (API + React, for route/UX checks)
 yarn quality:seed
 yarn quality:hardening   # full gate
 ```

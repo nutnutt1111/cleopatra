@@ -20,13 +20,13 @@ Seven specialized subagents keep delivery safe across financial, permission, reg
 
 | Service | URL |
 |---------|-----|
-| Frontend | [http://localhost:3005](http://localhost:3005) |
-| API | [http://localhost:3004](http://localhost:3004) |
+| App | [http://localhost:3005](http://localhost:3005) (`donutit-cleopatra`) |
+| API | Same origin — [http://localhost:3005/api/...](http://localhost:3005/api/health) |
 
 ```bash
-yarn dev                    # DonutiT :3005
-yarn dev:api                # API :3004
-yarn dev:all                # both
+yarn dev                    # donutit-cleopatra :3005 (API + React)
+yarn dev:api                # API only (internal, proxied in dev)
+yarn dev:ui                 # React UI only (needs dev:api)
 
 # Merge gate (run before release)
 yarn quality:hardening      # route → api → hardtest → seed → ux

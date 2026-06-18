@@ -17,7 +17,7 @@ import { createHrRouter } from './routes/hr.js';
 import { createAuthRouter, createReportsRouter } from './routes/auth.js';
 
 const app = express();
-const PORT = Number(process.env.API_PORT) || 3004;
+const PORT = Number(process.env.API_PORT) || 3004; // internal dev port; browser uses :3005/api via Vite proxy
 const JWT_SECRET = process.env.JWT_SECRET || 'donutit-dev-secret';
 const DEV_JWT_SECRET = 'donutit-dev-secret';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -101,5 +101,5 @@ app.use('/api/messenger', createMessengerRouter(requireAuth, handleError));
 app.use('/api/hr', createHrRouter(requireAuth, handleError));
 
 app.listen(PORT, () => {
-  console.log(`DonutiT API http://localhost:${PORT}`);
+  console.log(`DonutiT API (internal) http://localhost:${PORT} — browser: http://localhost:${process.env.PORT || 3005}/api/...`);
 });
