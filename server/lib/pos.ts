@@ -29,6 +29,7 @@ export type BillLineInput = {
 export type PaymentInput = {
   channel: PaymentChannel;
   amountCents: number;
+  transferDetail?: string;
 };
 
 async function nextBillNumber(tx: Tx, storeId: string): Promise<string> {
@@ -110,6 +111,7 @@ export async function createPosBill(
           create: input.payments.map((p) => ({
             channel: p.channel,
             amountCents: p.amountCents,
+            transferDetail: p.transferDetail ?? null,
           })),
         },
       },

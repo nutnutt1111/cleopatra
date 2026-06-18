@@ -287,11 +287,12 @@ model PosBillLine {
 }
 
 model PosPayment {
-  id          String         @id @default(cuid())
-  billId      String
-  bill        PosBill        @relation(fields: [billId], references: [id], onDelete: Cascade)
-  channel     PaymentChannel
-  amountCents Int
+  id             String         @id @default(cuid())
+  billId         String
+  bill           PosBill        @relation(fields: [billId], references: [id], onDelete: Cascade)
+  channel        PaymentChannel
+  amountCents    Int
+  transferDetail String?
 
   @@index([billId])
 }
