@@ -10,7 +10,7 @@
     "dev:api": "tsx server/index.ts",
     "dev:all": "sh -c 'tsx server/index.ts & vite'",
     "build": "vite build",
-    "preview": "vite preview --port 3003",
+    "preview": "vite preview --port 3005",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",

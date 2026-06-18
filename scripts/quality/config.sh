@@ -8,7 +8,7 @@ if [[ -f "$ROOT_DIR/.env" ]]; then
   set +a
 fi
 
-export QUALITY_BASE_URL="${QUALITY_BASE_URL:-http://localhost:3003}"
+export QUALITY_BASE_URL="${QUALITY_BASE_URL:-http://localhost:3005}"
 export QUALITY_API_URL="${QUALITY_API_URL:-http://localhost:3004}"
 export QUALITY_TIMEOUT="${QUALITY_TIMEOUT:-10}"
 export QUALITY_REPORT_DIR="${QUALITY_REPORT_DIR:-docs/quality/reports}"

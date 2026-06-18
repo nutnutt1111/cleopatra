@@ -141,7 +141,7 @@ export default defineConfig(({ command }) => {
 
         server: {
             host: true,
-            port: Number(process.env.PORT) || 3003,
+            port: Number(process.env.PORT) || 3005,
             open: false,
             https: false,
             proxy: {

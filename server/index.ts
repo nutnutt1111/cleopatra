@@ -23,7 +23,7 @@ const DEV_JWT_SECRET = 'donutit-dev-secret';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const RETURN_LOGIN_TOKEN = process.env.LOGIN_RETURN_TOKEN === 'true';
 
-const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3003')
+const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3005')
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);

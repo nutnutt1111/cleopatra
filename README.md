@@ -30,10 +30,10 @@ yarn install
 cp .env.example .env        # optional — defaults work for dev
 
 yarn db:reset               # migrate + seed dev data
-yarn dev:all                # API :3004 + frontend :3003
+yarn dev:all                # API :3004 + frontend :3005
 ```
 
-Open [http://localhost:3003/login](http://localhost:3003/login) — sign in with `owner@donutit.local` / `donutit-dev`.
+Open [http://localhost:3005/login](http://localhost:3005/login) — sign in with `owner@donutit.local` / `donutit-dev`.
 
 ### Quality gate (before release)
 
@@ -52,7 +52,7 @@ See [docs/quality/README.md](docs/quality/README.md) for all `quality:*` scripts
 | Frontend | Vite, Tailwind CSS v4, vanilla JS widgets |
 | API | Express, Prisma, SQLite (Postgres-ready schema) |
 | Auth | httpOnly cookie JWT (`credentials: 'include'`) |
-| Ports | Frontend **3003**, API **3004** |
+| Ports | Frontend **3005**, API **3004** |
 
 ---
 

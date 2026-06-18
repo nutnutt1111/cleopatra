@@ -73,10 +73,10 @@ Stop merge when any agent returns:
 
 ## Target Environment
 
-**Frontend:** [http://localhost:3003](http://localhost:3003) · **API:** [http://localhost:3004](http://localhost:3004)
+**Frontend:** [http://localhost:3005](http://localhost:3005) · **API:** [http://localhost:3004](http://localhost:3004)
 
 ```bash
-yarn dev              # Vite frontend :3003
+yarn dev              # Vite frontend :3005
 yarn dev:api          # Express API :3004
 yarn dev:all          # both servers
 
