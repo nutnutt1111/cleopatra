@@ -76,13 +76,13 @@ Stop merge when any agent returns:
 
 ## Target Environment
 
-**Frontend:** [http://localhost:3005](http://localhost:3005) · **API:** [http://localhost:3004](http://localhost:3004)
+**App:** [http://localhost:3005](http://localhost:3005) (`donutit-cleopatra`) · **API:** same origin `/api/...`
 
 ```bash
-yarn dev              # React DonutiT :3005 (apps/donutit-react)
+yarn dev              # donutit-cleopatra :3005 (API + React)
+yarn dev:ui           # React UI only
 yarn dev:legacy       # Legacy vanilla :3006
-yarn dev:api          # Express API :3004
-yarn dev:all          # API + React
+yarn dev:api          # Express API only (internal, proxied in dev)
 
 yarn quality:hardening   # full gate: route + api + hardtest + seed + ux
 yarn quality:hardtest    # Grumpy abuse/race simulation

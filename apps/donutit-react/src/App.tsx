@@ -5,6 +5,14 @@ import { Shell } from './components/layout/Shell';
 import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { PosPage } from './pages/PosPage';
+import { HrPage } from './pages/HrPage';
+import { ManagerHrPage } from './pages/ManagerHrPage';
+import { PawnPage } from './pages/PawnPage';
+import { MessengerPage } from './pages/MessengerPage';
+import { CustomersPage } from './pages/CustomersPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { CashflowPage } from './pages/CashflowPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { ToastProvider } from './components/ui/Toast';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -31,9 +39,17 @@ export default function App() {
             <RequireAuth>
               <Shell>
                 <Routes>
-                  <Route path="/" element={<Navigate to="/inventory" replace />} />
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/inventory" element={<InventoryPage />} />
                   <Route path="/pos" element={<PosPage />} />
+                  <Route path="/pawn" element={<PawnPage />} />
+                  <Route path="/messenger" element={<MessengerPage />} />
+                  <Route path="/customers" element={<CustomersPage />} />
+                  <Route path="/cashflow-ledger" element={<CashflowPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/hr" element={<HrPage />} />
+                  <Route path="/manager-hr" element={<ManagerHrPage />} />
                 </Routes>
               </Shell>
             </RequireAuth>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useProductCategories, type ProductCategory } from '../../hooks/useProductCategories';
 
 type Props = {
@@ -8,24 +8,40 @@ type Props = {
   disabled?: boolean;
 };
 
-/** Matches vanilla :3005 — select `inv-category` + separate `+ เพิ่มหมวดหมู่` button (not inside dropdown). */
+/** `/api/inventory/categories` — select + inline add panel (no window.prompt — blocked in some browsers). */
 export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
-  const { categories, loading, createCategory } = useProductCategories();
-  const [adding, setAdding] = useState(false);
+  const { categories, loading, error, createCategory } = useProductCategories();
+  const [open, setOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
+  function openPanel() {
+    setErr(null);
+    setNewName('');
+    setOpen(true);
+  }
 
   async function submitNewCategory() {
-    if (!newName.trim()) return;
+    const name = newName.trim();
+    if (!name) {
+      setErr('กรุณากรอกชื่อหมวดหมู่');
+      inputRef.current?.focus();
+      return;
+    }
     setBusy(true);
     setErr(null);
     try {
-      const category = await createCategory(newName.trim());
+      const category = await createCategory(name);
       onChange(category.id);
       onCreated?.(category);
       setNewName('');
-      setAdding(false);
+      setOpen(false);
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'เพิ่มหมวดหมู่ไม่สำเร็จ');
     } finally {
@@ -38,6 +54,11 @@ export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
       <label htmlFor="inv-category" className="text-xs text-[var(--muted-foreground)]">
         หมวดหมู่
       </label>
+      {error && (
+        <p className="text-xs text-red-400 mt-1" role="alert">
+          โหลดหมวดหมู่ไม่สำเร็จ: {error}
+        </p>
+      )}
       <div className="inventory-form__category-row flex gap-2 mt-1">
         <select
           id="inv-category"
@@ -46,7 +67,7 @@ export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
           disabled={disabled || loading}
           onChange={(e) => onChange(e.target.value)}
         >
-          <option value="">— เลือกหมวดหมู่ —</option>
+          <option value="">{loading ? 'กำลังโหลดหมวดหมู่…' : '— เลือกหมวดหมู่ —'}</option>
           {categories.map((c: ProductCategory) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -58,29 +79,59 @@ export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
           id="inv-btn-add-category"
           className="btn btn-sm whitespace-nowrap shrink-0"
           disabled={disabled || busy}
-          onClick={() => setAdding((v) => !v)}
+          aria-expanded={open}
+          onClick={openPanel}
         >
           + เพิ่มหมวดหมู่
         </button>
       </div>
-      {adding && (
-        <div className="mt-2 flex gap-2 items-center">
-          <input
-            className="flex-1"
-            placeholder="ชื่อหมวดหมู่ใหม่"
-            value={newName}
-            disabled={busy}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), submitNewCategory())}
-          />
-          <button type="button" className="btn btn-sm btn-primary" disabled={busy} onClick={submitNewCategory}>
-            บันทึก
-          </button>
-          <button type="button" className="btn btn-sm btn-ghost" disabled={busy} onClick={() => setAdding(false)}>
-            ยกเลิก
-          </button>
+
+      {open && (
+        <div
+          id="inv-category-add-panel"
+          className="inv-category-add-panel"
+          role="region"
+          aria-label="เพิ่มหมวดหมู่ใหม่"
+        >
+          <p className="inv-category-add-panel__title">เพิ่มหมวดหมู่ใหม่</p>
+          <div className="inv-category-add-panel__row">
+            <input
+              ref={inputRef}
+              id="inv-category-new-name"
+              className="inv-category-add-panel__input"
+              placeholder="ชื่อหมวดหมู่ เช่น iPhone, Accessory"
+              value={newName}
+              disabled={busy}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  void submitNewCategory();
+                }
+                if (e.key === 'Escape') setOpen(false);
+              }}
+            />
+            <button
+              type="button"
+              id="inv-btn-save-category"
+              className="btn btn-sm btn-primary"
+              disabled={busy}
+              onClick={() => void submitNewCategory()}
+            >
+              {busy ? 'กำลังบันทึก…' : 'บันทึก'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost"
+              disabled={busy}
+              onClick={() => setOpen(false)}
+            >
+              ยกเลิก
+            </button>
+          </div>
         </div>
       )}
+
       {err && <p className="text-xs text-red-400 mt-1">{err}</p>}
     </div>
   );

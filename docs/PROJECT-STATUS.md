@@ -1,6 +1,6 @@
 # DonutiT — Project Status
 
-> **Primary app:** `localhost:3005` · [PRIMARY-APP.md](./PRIMARY-APP.md)
+> **Primary app:** `donutit-cleopatra` at `localhost:3005` (UI + `/api` same origin) · [PRIMARY-APP.md](./PRIMARY-APP.md)
 
 > Last updated: **2026-06-16** after Phase E5 (FU-1–3) on `main`.
 
@@ -27,10 +27,10 @@ Store-management platform for Thai retail + pawn: POS, inventory, pawn, messenge
 
 ## Architecture
 
-| Layer | Stack | Port |
-|-------|-------|------|
-| Frontend | Vite + Tailwind v4 + DonutiT widgets | **3005** |
-| API | Express + Prisma + SQLite (Postgres-ready) | **3004** |
+| Layer | Stack | URL |
+|-------|-------|-----|
+| App | React + Vite (`apps/donutit-react`) | **http://localhost:3005** |
+| API | Express + Prisma + SQLite (Postgres-ready) | **/api/...** on same origin |
 | Auth | httpOnly cookie JWT + optional Bearer | — |
 | DB | `prisma/dev.db` (7 migrations) | — |
 
@@ -97,7 +97,7 @@ Store-management platform for Thai retail + pawn: POS, inventory, pawn, messenge
 
 ```bash
 yarn db:reset              # fresh DB + seed
-yarn dev:all               # API :3004 + DonutiT :3005
+yarn dev                   # donutit-cleopatra :3005 (API + React)
 
 yarn quality:hardening     # full gate — use before merge/release
 yarn quality:hardtest      # abuse/race simulation

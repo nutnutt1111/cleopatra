@@ -1,6 +1,6 @@
 # DonutiT
 
-**Primary app:** [http://localhost:3005](http://localhost:3005) (frontend) · API [http://localhost:3004](http://localhost:3004)
+**Primary app:** [http://localhost:3005](http://localhost:3005) (`donutit-cleopatra`) — UI and API on the same origin (`/api/...`)
 
 Store-management platform for Thai retail and pawn operations — POS, inventory, pawn, messenger, cashflow, customers, HR.
 
@@ -19,7 +19,7 @@ Store-management platform for Thai retail and pawn operations — POS, inventory
 | **Messenger** | `/messenger` |
 | **Cashflow** | `/cashflow-ledger` |
 | **Customers** | `/customers` |
-| **HR** | `/hr` |
+| **HR** | `/hr` (Owner/HR) · `/manager-hr` (Manager) |
 | **Settings** | `/settings` |
 
 ---
@@ -31,10 +31,12 @@ yarn install
 yarn --cwd apps/donutit-react install
 
 yarn db:reset               # migrate + seed dev data
-yarn dev:all                # API :3004 + React DonutiT :3005
+yarn dev                    # donutit-cleopatra :3005 (API + React)
 ```
 
 Open [http://localhost:3005/login](http://localhost:3005/login) — `owner@donutit.local` / `donutit-dev`.
+
+**Windows:** [docs/WINDOWS-LOCAL-SETUP.md](docs/WINDOWS-LOCAL-SETUP.md) — sync `C:\Users\HP\Projects\cleopatra` + run `:3005`.
 
 Legacy vanilla UI: `yarn dev:legacy` → port **3006**.
 
@@ -52,20 +54,20 @@ See [docs/quality/README.md](docs/quality/README.md).
 
 | Layer | Technology |
 |-------|------------|
-| **Primary frontend** | React — `apps/donutit-react/` (:3005) |
+| **Primary app** | React — `apps/donutit-react/` at **:3005** |
+| API | Express under `/api/*` on the same origin (proxied in dev) |
 | Legacy vanilla | `src/pages/donutit/` (`yarn dev:legacy` :3006) |
-| API | Express, Prisma, SQLite |
 | Auth | httpOnly cookie JWT |
-| Ports | **3005** (DonutiT) · **3004** (API) |
+| Port | **3005** only (user-facing) |
 
 ---
 
 ## Project Structure
 
 ```
-apps/donutit-react/          # PRIMARY React UI (:3005)
-packages/donutit-shared/     # API, trade-in drafts, export
-server/                      # Express API (:3004)
+apps/donutit-react/          # PRIMARY React UI (donutit-cleopatra :3005)
+packages/donutit-shared/     # /api client, trade-in drafts, export
+server/                      # Express API routes (/api/*)
 src/pages/donutit/           # Legacy vanilla widgets (:3006)
 src/pages/                   # Legacy Cleopatra demos
 docs/PRIMARY-APP.md

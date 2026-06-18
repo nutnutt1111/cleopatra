@@ -21,7 +21,16 @@ type Product = {
   priceBaht: string;
   costBaht?: string | null;
   qtyOnHand?: number | null;
-  serials: { serialNumber: string }[];
+  serials: { serialNumber: string; status?: string; statusLabel?: string }[];
+};
+
+type Movement = {
+  id: string;
+  productName: string;
+  serialNumber: string | null;
+  qtyDelta: number;
+  reason: string;
+  createdAt: string;
 };
 
 const emptyForm = {
@@ -39,11 +48,21 @@ export function InventoryPage() {
   const toast = useToast();
   const user = getSessionUser();
   const canAdd = user?.role === 'OWNER' || user?.role === 'MANAGER';
+  const showCost = user?.role === 'OWNER' || user?.role === 'MANAGER';
   const [products, setProducts] = useState<Product[]>([]);
   const [drafts, setDrafts] = useState<TradeInDraft[]>([]);
   const [selectedDraftId, setSelectedDraftId] = useState('');
+  const [importedDraftId, setImportedDraftId] = useState('');
   const [draftHint, setDraftHint] = useState('');
   const [form, setForm] = useState(emptyForm);
+  const [movements, setMovements] = useState<Movement[]>([]);
+
+  async function loadMovements() {
+    const res = await apiFetch('/api/inventory/movements');
+    if (!res.ok) return;
+    const data = await res.json();
+    setMovements(data.movements);
+  }
 
   async function loadProducts() {
     const res = await apiFetch('/api/inventory/products');
@@ -52,8 +71,12 @@ export function InventoryPage() {
     setProducts(data.products);
   }
 
+  async function refreshAll() {
+    await Promise.all([loadProducts(), loadMovements()]);
+  }
+
   useEffect(() => {
-    loadProducts().catch((e) => toast.show(e.message, 'error'));
+    refreshAll().catch((e) => toast.show(e.message, 'error'));
     setDrafts(listTradeInDrafts());
   }, []);
 
@@ -79,6 +102,7 @@ export function InventoryPage() {
     }));
     const parts = [draft.customerName, draft.notes].filter(Boolean);
     setDraftHint(parts.length ? `จากดราฟ: ${parts.join(' · ')}` : 'ดึงข้อมูลจากดราฟแล้ว');
+    setImportedDraftId(selectedDraftId);
     toast.show(`ดึงข้อมูล "${draft.deviceName}" จากดราฟแล้ว`, 'success');
   }
 
@@ -104,22 +128,29 @@ export function InventoryPage() {
     });
     const data = await res.json();
     if (!res.ok) return toast.show(data.error || 'เพิ่มสินค้าไม่สำเร็จ', 'error');
-    if (selectedDraftId) {
-      removeTradeInDraft(selectedDraftId);
+    const draftToRemove = importedDraftId || selectedDraftId;
+    if (draftToRemove) {
+      removeTradeInDraft(draftToRemove);
       setSelectedDraftId('');
+      setImportedDraftId('');
       setDraftHint('');
       refreshDrafts();
     }
     toast.show(`เพิ่มสินค้า ${data.product.name} แล้ว`, 'success');
     setForm({ ...emptyForm, categoryId: form.categoryId });
-    await loadProducts();
+    await refreshAll();
   }
 
   return (
-    <main className="inventory-page">
+    <main className="inventory-page" data-donutit-module="inventory">
       <div className="mb-4">
         <h1 className="text-xl font-semibold">สินค้าคงคลัง</h1>
         <p className="text-sm text-[var(--muted-foreground)]">เพิ่มสินค้า · ดู serial · ประวัติ movement</p>
+        {!canAdd && (
+          <p className="text-sm text-amber-400 mt-2">
+            บัญชี {user?.role ?? '—'} ดูรายการได้อย่างเดียว — เพิ่มสินค้า/หมวดหมู่ใช้ owner หรือ manager
+          </p>
+        )}
       </div>
 
       {canAdd && (
@@ -153,6 +184,7 @@ export function InventoryPage() {
                     if (!window.confirm('ลบดราฟ Trade-in นี้?')) return;
                     removeTradeInDraft(selectedDraftId);
                     setSelectedDraftId('');
+                    setImportedDraftId('');
                     setDraftHint('');
                     refreshDrafts();
                     toast.show('ลบดราฟแล้ว', 'success');
@@ -222,7 +254,9 @@ export function InventoryPage() {
               <th>ชื่อ</th>
               <th>หมวดหมู่</th>
               <th>ประเภท</th>
+              <th>สต็อก</th>
               <th>ราคาขาย</th>
+              {showCost && <th>ต้นทุน</th>}
             </tr>
           </thead>
           <tbody id="inv-tbody">
@@ -232,11 +266,53 @@ export function InventoryPage() {
                 <td>{p.name}</td>
                 <td>{p.categoryName ?? '—'}</td>
                 <td>{p.trackingType === 'SERIALIZED' ? 'มี Serial' : 'นับจำนวน'}</td>
+                <td>
+                  {p.trackingType === 'QUANTITY'
+                    ? `${p.qtyOnHand ?? 0} ชิ้น`
+                    : `${p.serials.length} serial`}
+                </td>
                 <td>{p.priceBaht}</td>
+                {showCost && <td>{p.costBaht ?? '—'}</td>}
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div className="card" id="inv-serials-panel">
+          <h2 className="font-medium mb-3">Serial</h2>
+          <div id="inv-serials" className="flex flex-wrap gap-2">
+            {products.flatMap((p) =>
+              p.serials.map((s) => (
+                <span key={`${p.id}-${s.serialNumber}`} className="badge">
+                  {s.serialNumber} · {p.name}
+                  {s.statusLabel && (
+                    <span className="ml-1 text-[var(--muted-foreground)]">({s.statusLabel})</span>
+                  )}
+                </span>
+              )),
+            )}
+            {!products.some((p) => p.serials.length) && (
+              <p className="text-sm text-[var(--muted-foreground)]">ไม่มี serial</p>
+            )}
+          </div>
+        </div>
+        <div className="card" id="inv-moves-panel">
+          <h2 className="font-medium mb-3">Movement ล่าสุด</h2>
+          <div id="inv-moves" className="max-h-64 overflow-y-auto text-xs space-y-1">
+            {movements.map((m) => (
+              <div key={m.id} className="py-1 border-b border-[var(--border)]">
+                {new Date(m.createdAt).toLocaleString('th-TH')} · {m.productName}
+                {m.serialNumber ? ` [${m.serialNumber}]` : ''} · {m.qtyDelta > 0 ? '+' : ''}
+                {m.qtyDelta} · {m.reason}
+              </div>
+            ))}
+            {!movements.length && (
+              <p className="text-sm text-[var(--muted-foreground)]">ยังไม่มี movement</p>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );

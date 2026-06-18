@@ -15,6 +15,7 @@ export default defineConfig({
     host: true,
     port: Number(process.env.PORT) || 3005,
     proxy: {
+      // Same-origin API for donutit-cleopatra — browser calls :3005/api/*
       '/api': {
         target: `http://localhost:${process.env.API_PORT || 3004}`,
         changeOrigin: true,
