@@ -42,6 +42,7 @@ export function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [drafts, setDrafts] = useState<TradeInDraft[]>([]);
   const [selectedDraftId, setSelectedDraftId] = useState('');
+  const [importedDraftId, setImportedDraftId] = useState('');
   const [draftHint, setDraftHint] = useState('');
   const [form, setForm] = useState(emptyForm);
 
@@ -79,6 +80,7 @@ export function InventoryPage() {
     }));
     const parts = [draft.customerName, draft.notes].filter(Boolean);
     setDraftHint(parts.length ? `จากดราฟ: ${parts.join(' · ')}` : 'ดึงข้อมูลจากดราฟแล้ว');
+    setImportedDraftId(selectedDraftId);
     toast.show(`ดึงข้อมูล "${draft.deviceName}" จากดราฟแล้ว`, 'success');
   }
 
@@ -104,9 +106,11 @@ export function InventoryPage() {
     });
     const data = await res.json();
     if (!res.ok) return toast.show(data.error || 'เพิ่มสินค้าไม่สำเร็จ', 'error');
-    if (selectedDraftId) {
-      removeTradeInDraft(selectedDraftId);
+    const draftToRemove = importedDraftId || selectedDraftId;
+    if (draftToRemove) {
+      removeTradeInDraft(draftToRemove);
       setSelectedDraftId('');
+      setImportedDraftId('');
       setDraftHint('');
       refreshDrafts();
     }
@@ -116,7 +120,7 @@ export function InventoryPage() {
   }
 
   return (
-    <main className="inventory-page">
+    <main className="inventory-page" data-donutit-module="inventory">
       <div className="mb-4">
         <h1 className="text-xl font-semibold">สินค้าคงคลัง</h1>
         <p className="text-sm text-[var(--muted-foreground)]">เพิ่มสินค้า · ดู serial · ประวัติ movement</p>
@@ -153,6 +157,7 @@ export function InventoryPage() {
                     if (!window.confirm('ลบดราฟ Trade-in นี้?')) return;
                     removeTradeInDraft(selectedDraftId);
                     setSelectedDraftId('');
+                    setImportedDraftId('');
                     setDraftHint('');
                     refreshDrafts();
                     toast.show('ลบดราฟแล้ว', 'success');

@@ -85,7 +85,7 @@ export function PosPage() {
   }
 
   return (
-    <main className="pos-page">
+    <main className="pos-page" data-donutit-module="pos">
       <h1 className="text-xl font-semibold mb-4">ขายหน้าร้าน (POS)</h1>
       <div className="pos-layout">
         <div className="space-y-4">

@@ -11,7 +11,7 @@
     "dev:legacy": "PORT=3006 vite",
     "dev:api": "tsx server/index.ts",
     "dev:all": "yarn dev",
-    "build": "vite build",
+    "build": "yarn --cwd apps/donutit-react build",
     "preview": "yarn --cwd apps/donutit-react preview",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",

@@ -39,6 +39,7 @@ body {
   background: var(--card);
 }
 .cleo-topbar__actions { display: flex; align-items: center; gap: 0.5rem; }
+.topbar-export-btn { font-weight: 500; }
 .cleo-content { flex: 1; overflow: auto; }
 .cleo-page-transition { padding: 1rem; }
 .cleo-sheet {
@@ -61,7 +62,8 @@ body {
 
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
 .field label { display: block; font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 0.25rem; }
-.field input, .field select, .field textarea {
+.field input, .field select, .field textarea,
+.inv-category, .inventory-form__draft select {
   width: 100%;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;

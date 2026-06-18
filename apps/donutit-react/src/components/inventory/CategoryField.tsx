@@ -8,9 +8,9 @@ type Props = {
   disabled?: boolean;
 };
 
-/** Matches vanilla :3005 — select `inv-category` + separate `+ เพิ่มหมวดหมู่` button (not inside dropdown). */
+/** `/api/inventory/categories` — select `#inv-category` + separate `#inv-btn-add-category` (not in dropdown). */
 export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
-  const { categories, loading, createCategory } = useProductCategories();
+  const { categories, loading, error, createCategory } = useProductCategories();
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [busy, setBusy] = useState(false);
@@ -38,6 +38,11 @@ export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
       <label htmlFor="inv-category" className="text-xs text-[var(--muted-foreground)]">
         หมวดหมู่
       </label>
+      {error && (
+        <p className="text-xs text-red-400 mt-1" role="alert">
+          โหลดหมวดหมู่ไม่สำเร็จ: {error}
+        </p>
+      )}
       <div className="inventory-form__category-row flex gap-2 mt-1">
         <select
           id="inv-category"
@@ -46,7 +51,7 @@ export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
           disabled={disabled || loading}
           onChange={(e) => onChange(e.target.value)}
         >
-          <option value="">— เลือกหมวดหมู่ —</option>
+          <option value="">{loading ? 'กำลังโหลดหมวดหมู่…' : '— เลือกหมวดหมู่ —'}</option>
           {categories.map((c: ProductCategory) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -57,7 +62,7 @@ export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
           type="button"
           id="inv-btn-add-category"
           className="btn btn-sm whitespace-nowrap shrink-0"
-          disabled={disabled || busy}
+          disabled={disabled || busy || loading}
           onClick={() => setAdding((v) => !v)}
         >
           + เพิ่มหมวดหมู่

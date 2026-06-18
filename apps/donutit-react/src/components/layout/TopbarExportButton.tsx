@@ -49,8 +49,15 @@ export function TopbarExportButton() {
   }
 
   return (
-    <button type="button" className="cleo-icon-btn" title="ส่งออก" aria-label="ส่งออก" onClick={handleExport}>
-      ⬇
+    <button
+      id="topbar-export-btn"
+      type="button"
+      className="btn btn-sm btn-ghost topbar-export-btn"
+      title="ส่งออก"
+      aria-label="ส่งออก"
+      onClick={handleExport}
+    >
+      Export
     </button>
   );
 }
