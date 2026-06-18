@@ -8,24 +8,21 @@ type Props = {
   disabled?: boolean;
 };
 
-/** `/api/inventory/categories` — select `#inv-category` + separate `#inv-btn-add-category` (not in dropdown). */
+/** `/api/inventory/categories` — select `#inv-category` + `#inv-btn-add-category` (prompt, same as vanilla). */
 export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
   const { categories, loading, error, createCategory } = useProductCategories();
-  const [adding, setAdding] = useState(false);
-  const [newName, setNewName] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  async function submitNewCategory() {
-    if (!newName.trim()) return;
+  async function addCategory() {
+    const name = window.prompt('ชื่อหมวดหมู่ใหม่');
+    if (!name?.trim()) return;
     setBusy(true);
     setErr(null);
     try {
-      const category = await createCategory(newName.trim());
+      const category = await createCategory(name.trim());
       onChange(category.id);
       onCreated?.(category);
-      setNewName('');
-      setAdding(false);
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'เพิ่มหมวดหมู่ไม่สำเร็จ');
     } finally {
@@ -62,30 +59,12 @@ export function CategoryField({ value, onChange, onCreated, disabled }: Props) {
           type="button"
           id="inv-btn-add-category"
           className="btn btn-sm whitespace-nowrap shrink-0"
-          disabled={disabled || busy || loading}
-          onClick={() => setAdding((v) => !v)}
+          disabled={disabled || busy}
+          onClick={addCategory}
         >
           + เพิ่มหมวดหมู่
         </button>
       </div>
-      {adding && (
-        <div className="mt-2 flex gap-2 items-center">
-          <input
-            className="flex-1"
-            placeholder="ชื่อหมวดหมู่ใหม่"
-            value={newName}
-            disabled={busy}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), submitNewCategory())}
-          />
-          <button type="button" className="btn btn-sm btn-primary" disabled={busy} onClick={submitNewCategory}>
-            บันทึก
-          </button>
-          <button type="button" className="btn btn-sm btn-ghost" disabled={busy} onClick={() => setAdding(false)}>
-            ยกเลิก
-          </button>
-        </div>
-      )}
       {err && <p className="text-xs text-red-400 mt-1">{err}</p>}
     </div>
   );

@@ -146,6 +146,11 @@ export function InventoryPage() {
       <div className="mb-4">
         <h1 className="text-xl font-semibold">สินค้าคงคลัง</h1>
         <p className="text-sm text-[var(--muted-foreground)]">เพิ่มสินค้า · ดู serial · ประวัติ movement</p>
+        {!canAdd && (
+          <p className="text-sm text-amber-400 mt-2">
+            บัญชี {user?.role ?? '—'} ดูรายการได้อย่างเดียว — เพิ่มสินค้า/หมวดหมู่ใช้ owner หรือ manager
+          </p>
+        )}
       </div>
 
       {canAdd && (
