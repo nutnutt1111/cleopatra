@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import { mkdirSync, copyFileSync, existsSync } from 'fs';
 
-/** DonutiT clean URL routes → HTML pages */
+/** PRIMARY DonutiT clean URL routes → HTML pages (port 3005). Legacy Cleopatra demos use /pages/… */
 export const DONUTIT_ROUTES = {
     '/': '/pages/donutit/dashboard.html',
     '/dashboard': '/pages/donutit/dashboard.html',

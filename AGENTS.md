@@ -1,6 +1,8 @@
-# DonutiT Cleopatra — Agent Orchestrator
+# DonutiT — Agent Orchestrator
 
-Quality subagents for the DonutiT Cleopatra store-management platform. Use them to coordinate safe, verifiable delivery across POS, Pawn, Inventory, Cashflow, Messenger, Customers, and HR.
+Quality subagents for the **primary DonutiT app** on port **3005**. Legacy Cleopatra template (`/pages/…`) is reference-only — see [docs/PRIMARY-APP.md](docs/PRIMARY-APP.md).
+
+Use agents to coordinate safe delivery across POS, Pawn, Inventory, Cashflow, Messenger, Customers, and HR.
 
 ## Ponytail (lazy senior dev mode)
 
@@ -64,6 +66,7 @@ Stop merge when any agent returns:
 
 ## Shared Artifacts
 
+- `docs/PRIMARY-APP.md` — **primary DonutiT :3005 vs legacy Cleopatra**
 - `docs/PROJECT-STATUS.md` — **master delivery log** (waves 0–5, PR #7, gates)
 - `docs/parity-checklist.md` — module completion truth source
 - `docs/roadmap.md` — planned waves and dependencies

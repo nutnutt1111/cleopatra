@@ -1,4 +1,6 @@
-# DonutiT Cleopatra — Project Status
+# DonutiT — Project Status
+
+> **Primary app:** `localhost:3005` · [PRIMARY-APP.md](./PRIMARY-APP.md)
 
 > Last updated: **2026-06-16** after Phase E5 (FU-1–3) on `main`.
 
@@ -19,7 +21,7 @@ Store-management platform for Thai retail + pawn: POS, inventory, pawn, messenge
 | Production hardening (FU-1–3) | ✅ Complete | Phase E5 · [follow-ups-pr7.md](./follow-ups-pr7.md) |
 
 **Integration branch:** `main` — DonutiT E1–E5 (nav, dashboard, ponytail, hardening)  
-**Upstream template:** Cleopatra v2 dashboard (fork baseline)
+**Upstream template:** Legacy Cleopatra v2 (reference only — not the product)
 
 ---
 
@@ -27,7 +29,7 @@ Store-management platform for Thai retail + pawn: POS, inventory, pawn, messenge
 
 | Layer | Stack | Port |
 |-------|-------|------|
-| Frontend | Vite + Tailwind v4 + DonutiT widgets | **3003** |
+| Frontend | Vite + Tailwind v4 + DonutiT widgets | **3005** |
 | API | Express + Prisma + SQLite (Postgres-ready) | **3004** |
 | Auth | httpOnly cookie JWT + optional Bearer | — |
 | DB | `prisma/dev.db` (7 migrations) | — |
@@ -95,7 +97,7 @@ Store-management platform for Thai retail + pawn: POS, inventory, pawn, messenge
 
 ```bash
 yarn db:reset              # fresh DB + seed
-yarn dev:all               # API :3004 + Vite :3003
+yarn dev:all               # API :3004 + DonutiT :3005
 
 yarn quality:hardening     # full gate — use before merge/release
 yarn quality:hardtest      # abuse/race simulation

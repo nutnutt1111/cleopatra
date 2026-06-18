@@ -1,25 +1,26 @@
-# DonutiT Cleopatra
+# DonutiT
 
-Store-management platform for Thai retail and pawn operations — built on the [Cleopatra](https://github.com/moesaid/cleopatra) admin template (Vite + Tailwind v4).
+**Primary app:** [http://localhost:3005](http://localhost:3005) (frontend) · API [http://localhost:3004](http://localhost:3004)
 
-**Status:** Waves 0–5 complete · [PR #7](https://github.com/nutnutt1111/cleopatra/pull/7) merged (2026-06-14)  
-**Full status:** [docs/PROJECT-STATUS.md](docs/PROJECT-STATUS.md)
+Store-management platform for Thai retail and pawn operations — POS, inventory, pawn, messenger, cashflow, customers, HR.
+
+**Status:** Waves 0–5 complete · [docs/PROJECT-STATUS.md](docs/PROJECT-STATUS.md)  
+**Policy:** [docs/PRIMARY-APP.md](docs/PRIMARY-APP.md) — DonutiT :3005 is the only product surface; everything else is **legacy**.
 
 ---
 
-## Modules
+## Modules (primary)
 
-| Module | Description |
-|--------|-------------|
-| **POS** | Cash sales, split payment, void + stock reversal |
-| **Inventory** | Serialized + quantity products, role-gated cost |
-| **Pawn** | Tickets, interest, redeem, void |
-| **Messenger** | Delivery jobs + fee collection |
-| **Cashflow** | Ledger, daily close, audit trail |
-| **Customers** | Credit sales, installments, receivables |
-| **HR** | Employees, payroll (Owner/HR gated) |
-
-Cleopatra template also includes 4 demo dashboards (Analytics, E-commerce, Crypto, Mission Control), 47+ pages, and SPA navigation.
+| Module | Route |
+|--------|-------|
+| **POS** | `/pos` |
+| **Inventory** | `/inventory` |
+| **Pawn** | `/pawn` |
+| **Messenger** | `/messenger` |
+| **Cashflow** | `/cashflow-ledger` |
+| **Customers** | `/customers` |
+| **HR** | `/hr` |
+| **Settings** | `/settings` |
 
 ---
 
@@ -30,18 +31,18 @@ yarn install
 cp .env.example .env        # optional — defaults work for dev
 
 yarn db:reset               # migrate + seed dev data
-yarn dev:all                # API :3004 + frontend :3005
+yarn dev:all                # API :3004 + DonutiT :3005
 ```
 
-Open [http://localhost:3005/login](http://localhost:3005/login) — sign in with `owner@donutit.local` / `donutit-dev`.
+Open [http://localhost:3005/login](http://localhost:3005/login) — `owner@donutit.local` / `donutit-dev`.
 
 ### Quality gate (before release)
 
 ```bash
-yarn quality:hardening      # route + api + hardtest + seed + ux
+yarn quality:hardening      # primary routes on :3005
 ```
 
-See [docs/quality/README.md](docs/quality/README.md) for all `quality:*` scripts.
+See [docs/quality/README.md](docs/quality/README.md).
 
 ---
 
@@ -49,58 +50,43 @@ See [docs/quality/README.md](docs/quality/README.md) for all `quality:*` scripts
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | Vite, Tailwind CSS v4, vanilla JS widgets |
-| API | Express, Prisma, SQLite (Postgres-ready schema) |
-| Auth | httpOnly cookie JWT (`credentials: 'include'`) |
-| Ports | Frontend **3005**, API **3004** |
+| **Primary frontend** | Vite, Tailwind v4, `src/pages/donutit/` |
+| API | Express, Prisma, SQLite |
+| Auth | httpOnly cookie JWT |
+| Ports | **3005** (DonutiT) · **3004** (API) |
 
 ---
 
 ## Project Structure
 
 ```
-server/                 # Express API
-  index.ts              # Auth, CORS, helmet, routes
-  lib/                  # Business logic (pos, pawn, ledger, …)
-  routes/               # REST handlers per module
-prisma/
-  schema.prisma         # Data model (waves 0–5)
-  seed.ts               # seed-smith fixtures
-src/
-  pages/donutit/        # Module HTML pages
-  components/widgets/donutit/  # JS widgets + donutit-api.js
-  components/ui/        # Buttons, cards, alerts, modals
-  components/widgets/   # Dashboard widgets, charts
-docs/
-  PROJECT-STATUS.md     # ← start here for full delivery log
-  parity-checklist.md   # What's done vs deferred
-  roadmap.md            # Waves + follow-ups
-scripts/quality/        # Automated gates (hardening, hardtest, …)
-.cursor/agents/         # 7 quality subagents
+server/                      # API (primary)
+src/pages/donutit/           # Primary UI pages
+src/components/widgets/donutit/
+src/pages/                   # Legacy Cleopatra template demos (do not extend)
+src/index.html               # Legacy Cleopatra marketing landing
+docs/PRIMARY-APP.md          # Primary vs legacy policy
+scripts/quality/             # Gates target :3005 DonutiT routes
 ```
 
 ---
 
 ## Documentation
 
-- [Project status & wave log](docs/PROJECT-STATUS.md)
+- [Primary app policy](docs/PRIMARY-APP.md)
+- [Project status](docs/PROJECT-STATUS.md)
 - [Parity checklist](docs/parity-checklist.md)
-- [Roadmap & follow-ups](docs/roadmap.md)
-- [Ledger invariants](docs/ledger-invariants.md)
-- [Seed coverage](docs/seed-smith-coverage.md)
-- [Post-merge security (FU-1–3)](docs/follow-ups-pr7.md)
-- [Quality subagents](docs/quality/README.md)
+- [Roadmap](docs/roadmap.md)
 - [Agent orchestrator](AGENTS.md)
-- [Ponytail audit](PONYTAIL_AUDIT.md) — code simplicity baseline
 
 ---
 
-## Cleopatra Template (upstream)
+## Legacy Cleopatra template (reference only)
 
-This repo extends Cleopatra v2.0 — a production-ready admin dashboard template.
+Upstream [Cleopatra](https://github.com/moesaid/cleopatra) v2.0 admin template — demo dashboards and component pages under `/pages/…`. **Not the product.** Do not build new features there.
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — Cleopatra widget architecture
-- [COMPONENT_GUIDE.md](COMPONENT_GUIDE.md) — Component patterns
+- [Legacy ARCHITECTURE.md](ARCHITECTURE.md)
+- [Legacy COMPONENT_GUIDE.md](COMPONENT_GUIDE.md)
 - Original demo: [moesaid.github.io/cleopatra](https://moesaid.github.io/cleopatra/)
 
-MIT © [Mohamed Said](https://moesaid.com) (Cleopatra template)
+MIT © [Mohamed Said](https://moesaid.com) (legacy Cleopatra template)

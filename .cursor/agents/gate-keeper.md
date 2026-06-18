@@ -34,7 +34,7 @@ Return `BLOCK` if:
 - export route has no role gate
 - deleted/cost records are visible without permission
 
-## Permission Matrix (DonutiT Cleopatra)
+## Permission Matrix (DonutiT primary)
 
 | Action | Minimum role | Server guard required |
 |--------|--------------|----------------------|
@@ -51,7 +51,7 @@ UI-only hiding (CSS, conditional render) is **not** sufficient. Every sensitive 
 
 ## Target Environment
 
-**Dev server:** `http://localhost:3003` — ทดสอบ role ผ่าน API routes บนเซิร์ฟเวอร์นี้
+**Dev server:** `http://localhost:3005` — ทดสอบ role ผ่าน API routes บนเซิร์ฟเวอร์นี้
 
 ## When to Invoke
 

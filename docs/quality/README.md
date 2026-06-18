@@ -1,4 +1,6 @@
-# Quality System — DonutiT Cleopatra
+# Quality System — DonutiT (primary :3005)
+
+> Policy: [PRIMARY-APP.md](../PRIMARY-APP.md) — gates target DonutiT on **3005** only. Legacy Cleopatra `/pages/…` is optional extended smoke.
 
 Seven specialized subagents keep delivery safe across financial, permission, regression, documentation, and UX dimensions.
 
@@ -18,11 +20,11 @@ Seven specialized subagents keep delivery safe across financial, permission, reg
 
 | Service | URL |
 |---------|-----|
-| Frontend | [http://localhost:3003](http://localhost:3003) |
+| Frontend | [http://localhost:3005](http://localhost:3005) |
 | API | [http://localhost:3004](http://localhost:3004) |
 
 ```bash
-yarn dev                    # Vite :3003
+yarn dev                    # DonutiT :3005
 yarn dev:api                # API :3004
 yarn dev:all                # both
 

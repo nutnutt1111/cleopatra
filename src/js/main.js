@@ -27,6 +27,7 @@ import { initThemePreview } from '../components/widgets/theme-preview.js';
 import { initDonutitModules } from './donutit-init.js';
 import { initDashboardWidgets } from './dashboard-init.js';
 import { enforceDonutitAuth } from './donutit-auth.js';
+import { initLegacyAppMarker } from './legacy-app.js';
 
 // Router
 import { initRouter } from '../components/layout/router';
@@ -52,6 +53,7 @@ function initComponents() {
 
 // Re-initialize on SPA navigation (including code highlighting)
 document.addEventListener('page:load', async () => {
+    initLegacyAppMarker();
     await renderMenu();
     await enforceDonutitAuth();
     initComponents();
@@ -63,6 +65,7 @@ document.addEventListener('page:load', async () => {
 document.addEventListener('DOMContentLoaded', async () => {
     bindNavbarChrome();
     bindSidebarChrome();
+    initLegacyAppMarker();
     await enforceDonutitAuth();
     await renderMenu();
     initComponents();

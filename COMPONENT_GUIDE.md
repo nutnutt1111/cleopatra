@@ -1,6 +1,8 @@
-# Component Guide
+# Legacy Cleopatra — Component Guide
 
-> How to use and create components in Cleopatra v2.0
+> **Legacy template only.** Build new UI in `src/pages/donutit/` and `src/components/widgets/donutit/`.
+
+> How to use and create components in Cleopatra v2.0 (upstream)
 
 ---
 

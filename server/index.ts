@@ -76,7 +76,7 @@ const loginLimiter = rateLimit({
 app.use(csrfProtect);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'donutit-cleopatra-api', wave: 5 });
+  res.json({ ok: true, service: 'donutit-api', wave: 5 });
 });
 
 app.use(

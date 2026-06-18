@@ -228,7 +228,7 @@ done
 
 # CSRF: mutating POST without token must fail
 code=$(curl -s -o /dev/null -w "%{http_code}" \
-  -H "Origin: http://localhost:3003" \
+  -H "Origin: http://localhost:3005" \
   -H 'Content-Type: application/json' \
   -X POST -b "$OWNER_JAR" \
   -d '{"customerName":"csrf","itemDescription":"x","principal":100,"channel":"CASH"}' \

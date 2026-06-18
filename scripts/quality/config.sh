@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# DonutiT Cleopatra — Quality audit target
+# DonutiT — Quality audit (primary app :3005)
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 if [[ -f "$ROOT_DIR/.env" ]]; then
   set -a

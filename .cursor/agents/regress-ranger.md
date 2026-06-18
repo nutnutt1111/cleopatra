@@ -46,14 +46,14 @@ Build check:
 yarn build
 ```
 
-**Target:** `http://localhost:3003` (DonutiT Cleopatra dev server)
+**Target:** `http://localhost:3005` (DonutiT primary dev server)
 
 Route smoke:
 
 ```bash
 yarn quality:smoke
 # หรือ
-QUALITY_BASE_URL=http://localhost:3003 bash scripts/quality/route-smoke.sh
+QUALITY_BASE_URL=http://localhost:3005 bash scripts/quality/route-smoke.sh
 ```
 
 Full audit (all 7 agents):
@@ -65,7 +65,7 @@ yarn quality:audit
 Override base URL if needed:
 
 ```bash
-QUALITY_BASE_URL=http://localhost:3003 yarn quality:audit
+QUALITY_BASE_URL=http://localhost:3005 yarn quality:audit
 ```
 
 Business-flow checks require seeded data — coordinate with `seed-smith` if fixtures are missing.

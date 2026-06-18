@@ -1,7 +1,7 @@
 {
-  "name": "@moesaid/cleopatra",
+  "name": "donutit",
   "version": "2.0.0",
-  "description": "Cleopatra admin dashboard template built with Vite and Tailwind CSS v4",
+  "description": "DonutiT — primary store-management app (frontend :3005, API :3004). Includes legacy Cleopatra admin template for reference.",
   "author": "Mohamed Said , moesaid.com",
   "license": "MIT",
   "type": "module",
@@ -30,7 +30,11 @@
     "postgit": "git push -u origin master && git subtree push --prefix dist origin gh-pages"
   },
   "keywords": [
-    "cleopatra",
+    "donutit",
+    "store-management",
+    "pos",
+    "pawn",
+    "cleopatra-legacy",
     "vite",
     "tailwind",
     "tailwindcss",

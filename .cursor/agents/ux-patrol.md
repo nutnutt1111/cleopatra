@@ -52,7 +52,7 @@ Store staff use these flows under time pressure. Failures here are **BLOCK USABI
 
 ## Target Environment
 
-**Dev server:** `http://localhost:3003` — ตรวจ UX บนหน้าจอพนักงานที่รันบนพอร์ตนี้
+**Dev server:** `http://localhost:3005` — ตรวจ UX บนหน้าจอพนักงานที่รันบนพอร์ตนี้
 
 ## When to Invoke
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# DonutiT Cleopatra — Quality audit (all 7 agents + Wave 5 hardening)
+# DonutiT — Quality audit (primary :3005)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -20,7 +20,7 @@ bash "$SCRIPT_DIR/api-smoke.sh" > /tmp/api-smoke.log 2>&1 && api_ok=true || api_
 bash "$SCRIPT_DIR/ux-patrol.sh" > /tmp/ux-patrol.log 2>&1 && ux_ok=true || ux_ok=false
 
 {
-  echo "# DonutiT Cleopatra — Quality Audit Report"
+  echo "# DonutiT — Quality Audit Report (primary :3005)"
   echo ""
   echo "- **เมื่อ:** $TIMESTAMP"
   echo "- **Frontend:** $QUALITY_BASE_URL"

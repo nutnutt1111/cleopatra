@@ -21,7 +21,7 @@ Map task dependencies before implementation starts. Prevent agents from working 
 - Decide whether the task can run in parallel or must run sequentially.
 - Warn if the task is too large and should be split.
 
-## Project Context (DonutiT Cleopatra)
+## Project Context (DonutiT primary)
 
 High-risk modules and typical dependency order:
 
@@ -42,7 +42,7 @@ Shared-risk file patterns to scan:
 
 ## Target Environment
 
-**Dev server:** `http://localhost:3003` — รัน `yarn quality:audit` หลังเปิดเซิร์ฟเวอร์
+**Dev server:** `http://localhost:3005` — รัน `yarn quality:audit` หลังเปิดเซิร์ฟเวอร์
 
 ## When to Invoke
 
