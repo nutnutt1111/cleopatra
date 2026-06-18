@@ -188,6 +188,7 @@ export async function createProduct(
     cost?: number;
     qtyOnHand?: number;
     serialNumbers?: string[];
+    categoryId?: string | null;
   },
 ) {
   assertRole(user, 'OWNER', 'MANAGER');
@@ -200,6 +201,13 @@ export async function createProduct(
   const costCents = input.cost != null ? parseBahtToCents(input.cost) : 0;
   if (priceCents <= 0) throw new InventoryError('ราคาขายต้องมากกว่า 0');
 
+  if (input.categoryId) {
+    const cat = await prisma.productCategory.findFirst({
+      where: { id: input.categoryId, storeId: user.storeId },
+    });
+    if (!cat) throw new InventoryError('ไม่พบหมวดหมู่', 404);
+  }
+
   return prisma.$transaction(async (tx) => {
     const dup = await tx.product.findUnique({
       where: { storeId_sku: { storeId: user.storeId, sku } },
@@ -211,6 +219,7 @@ export async function createProduct(
     const product = await tx.product.create({
       data: {
         storeId: user.storeId,
+        categoryId: input.categoryId ?? null,
         sku,
         name,
         trackingType: input.trackingType,
@@ -256,5 +265,47 @@ export async function createProduct(
     }
 
     return product;
+  });
+}
+
+const DEFAULT_CATEGORY_NAMES = ['iPhone', 'Samsung', 'Xiaomi', 'Tablet', 'Accessory', 'Other'];
+
+export async function listProductCategories(storeId: string) {
+  const existing = await prisma.productCategory.findMany({
+    where: { storeId },
+    orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+  });
+  if (existing.length > 0) return existing;
+
+  await prisma.productCategory.createMany({
+    data: DEFAULT_CATEGORY_NAMES.map((name, i) => ({ storeId, name, sortOrder: i })),
+  });
+  return prisma.productCategory.findMany({
+    where: { storeId },
+    orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+  });
+}
+
+export async function createProductCategory(user: AuthUser, name: string) {
+  assertRole(user, 'OWNER', 'MANAGER');
+  const trimmed = name.trim();
+  if (!trimmed) throw new InventoryError('กรุณาระบุชื่อหมวดหมู่');
+
+  const dup = await prisma.productCategory.findUnique({
+    where: { storeId_name: { storeId: user.storeId, name: trimmed } },
+  });
+  if (dup) throw new InventoryError('หมวดหมู่นี้มีแล้ว', 409);
+
+  const maxSort = await prisma.productCategory.aggregate({
+    where: { storeId: user.storeId },
+    _max: { sortOrder: true },
+  });
+
+  return prisma.productCategory.create({
+    data: {
+      storeId: user.storeId,
+      name: trimmed,
+      sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
+    },
   });
 }

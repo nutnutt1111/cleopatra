@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type { AuthUser } from '../lib/auth.js';
-import { canViewCost, createProduct, InventoryError } from '../lib/inventory.js';
+import { canViewCost, createProduct, createProductCategory, InventoryError, listProductCategories } from '../lib/inventory.js';
 import { formatBaht } from '../lib/ledger-utils.js';
 import { prisma } from '../lib/prisma.js';
 
@@ -18,6 +18,29 @@ export function createInventoryRouter(
 ) {
   const router = Router();
 
+  router.get('/categories', requireAuth, async (req, res) => {
+    try {
+      const user = (req as AuthedRequest).user;
+      const categories = await listProductCategories(user.storeId);
+      res.json({
+        categories: categories.map((c) => ({ id: c.id, name: c.name })),
+      });
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
+  router.post('/categories', requireAuth, async (req, res) => {
+    try {
+      const user = (req as AuthedRequest).user;
+      const body = req.body as { name?: string };
+      const category = await createProductCategory(user, body.name ?? '');
+      res.status(201).json({ ok: true, category: { id: category.id, name: category.name } });
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
+
   router.get('/products', requireAuth, async (req, res) => {
     try {
       const user = (req as AuthedRequest).user;
@@ -26,6 +49,7 @@ export function createInventoryRouter(
       const products = await prisma.product.findMany({
         where: { storeId: user.storeId, isActive: true },
         include: {
+          category: { select: { id: true, name: true } },
           serialItems: { where: { status: 'AVAILABLE' }, orderBy: { serialNumber: 'asc' } },
         },
         orderBy: { name: 'asc' },
@@ -36,6 +60,8 @@ export function createInventoryRouter(
           id: p.id,
           sku: p.sku,
           name: p.name,
+          categoryId: p.categoryId,
+          categoryName: p.category?.name ?? null,
           trackingType: p.trackingType,
           priceBaht: formatBaht(p.priceCents),
           priceCents: p.priceCents,
@@ -64,6 +90,7 @@ export function createInventoryRouter(
         price?: number;
         cost?: number;
         qtyOnHand?: number;
+        categoryId?: string | null;
         serialNumbers?: string[];
       };
       const product = await createProduct(user, {
@@ -74,6 +101,7 @@ export function createInventoryRouter(
         cost: body.cost != null ? Number(body.cost) : undefined,
         qtyOnHand: body.qtyOnHand != null ? Number(body.qtyOnHand) : undefined,
         serialNumbers: body.serialNumbers,
+        categoryId: body.categoryId ?? null,
       });
       res.status(201).json({ ok: true, product: { id: product.id, sku: product.sku, name: product.name } });
     } catch (err) {

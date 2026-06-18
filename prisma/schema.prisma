@@ -121,6 +121,7 @@ model Store {
   dailyCloses   DailyClose[]
   auditLogs     AuditLog[]
   products      Product[]
+  productCategories ProductCategory[]
   serialItems   SerialItem[]
   stockMoves    StockMovement[]
   posBills      PosBill[]
@@ -168,10 +169,26 @@ model User {
   @@index([role])
 }
 
+model ProductCategory {
+  id        String    @id @default(cuid())
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id])
+  name      String
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@unique([storeId, name])
+  @@index([storeId, sortOrder])
+}
+
 model Product {
-  id           String       @id @default(cuid())
+  id           String           @id @default(cuid())
   storeId      String
-  store        Store        @relation(fields: [storeId], references: [id])
+  store        Store            @relation(fields: [storeId], references: [id])
+  categoryId   String?
+  category     ProductCategory? @relation(fields: [categoryId], references: [id])
   sku          String
   name         String
   trackingType TrackingType @default(QUANTITY)
@@ -187,6 +204,7 @@ model Product {
 
   @@unique([storeId, sku])
   @@index([storeId, trackingType])
+  @@index([storeId, categoryId])
 }
 
 model SerialItem {

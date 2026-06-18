@@ -66,6 +66,7 @@ async function main() {
   await prisma.posBill.deleteMany({ where: { storeId: store.id } });
   await prisma.serialItem.deleteMany({ where: { storeId: store.id } });
   await prisma.product.deleteMany({ where: { storeId: store.id } });
+  await prisma.productCategory.deleteMany({ where: { storeId: store.id } });
   await prisma.auditLog.deleteMany({ where: { storeId: store.id } });
   await prisma.ledgerEntry.deleteMany({ where: { storeId: store.id } });
   await prisma.dailyClose.deleteMany({ where: { storeId: store.id } });
@@ -123,9 +124,17 @@ async function main() {
   });
 
   // Wave 2 — Products
+  const iphoneCat = await prisma.productCategory.create({
+    data: { storeId: store.id, name: 'iPhone', sortOrder: 0 },
+  });
+  const accessoryCat = await prisma.productCategory.create({
+    data: { storeId: store.id, name: 'Accessory', sortOrder: 4 },
+  });
+
   const phone = await prisma.product.create({
     data: {
       storeId: store.id,
+      categoryId: iphoneCat.id,
       sku: 'PHONE-001',
       name: 'มือถือมือสอง',
       trackingType: 'SERIALIZED',
@@ -143,6 +152,7 @@ async function main() {
   const cable = await prisma.product.create({
     data: {
       storeId: store.id,
+      categoryId: accessoryCat.id,
       sku: 'CABLE-USB',
       name: 'สายชาร์จ USB',
       trackingType: 'QUANTITY',

@@ -10,6 +10,22 @@ function toggleTypeFields() {
   document.getElementById('inv-serial-wrap')?.classList.toggle('hidden', type !== 'SERIALIZED');
 }
 
+async function loadCategories(selectId) {
+  const select = document.getElementById(selectId);
+  if (!select) return [];
+  const res = await apiFetch('/api/inventory/categories');
+  if (!res.ok) throw new Error((await res.json()).error);
+  const { categories } = await res.json();
+  const prev = select.value;
+  select.innerHTML =
+    '<option value="">— เลือกหมวดหมู่ —</option>' +
+    categories.map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join('');
+  if (prev && [...select.options].some((o) => o.value === prev)) {
+    select.value = prev;
+  }
+  return categories;
+}
+
 async function refresh() {
   const [prodRes, moveRes] = await Promise.all([
     apiFetch('/api/inventory/products'),
@@ -32,6 +48,7 @@ async function refresh() {
             return `<tr class="border-b border-border">
         <td class="px-4 py-3 text-sm">${escapeHtml(p.sku)}</td>
         <td class="px-4 py-3 text-sm">${escapeHtml(p.name)}</td>
+        <td class="px-4 py-3 text-sm">${escapeHtml(p.categoryName ?? '—')}</td>
         <td class="px-4 py-3 text-sm">${p.trackingType === 'SERIALIZED' ? 'มี Serial' : 'นับจำนวน'}</td>
         <td class="px-4 py-3 text-sm">${escapeHtml(stock)}</td>
         <td class="px-4 py-3 text-sm text-right">${escapeHtml(p.priceBaht)}</td>
@@ -39,7 +56,7 @@ async function refresh() {
       </tr>`;
           })
           .join('')
-      : '<tr><td colspan="6" class="px-4 py-8 text-center text-muted-foreground">ยังไม่มีสินค้า — เพิ่มรายการด้านบน</td></tr>';
+      : '<tr><td colspan="7" class="px-4 py-8 text-center text-muted-foreground">ยังไม่มีสินค้า — เพิ่มรายการด้านบน</td></tr>';
   }
 
   const serialEl = document.getElementById('inv-serials');
@@ -92,14 +109,39 @@ export async function initInventory() {
   bindOnce(document.getElementById('inv-type'), 'change', toggleTypeFields);
   toggleTypeFields();
 
+  if (canAdd) {
+    loadCategories('inv-category').catch((e) => notify(e.message, 'error'));
+
+    bindOnce(document.getElementById('inv-btn-add-category'), 'click', async () => {
+      const name = window.prompt('ชื่อหมวดหมู่ใหม่');
+      if (!name?.trim()) return;
+      const res = await apiFetch('/api/inventory/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        notify(data.error || 'เพิ่มหมวดหมู่ไม่สำเร็จ', 'error');
+        return;
+      }
+      await loadCategories('inv-category');
+      const select = document.getElementById('inv-category');
+      if (select) select.value = data.category.id;
+      notify(`เพิ่มหมวดหมู่ "${data.category.name}" แล้ว`, 'success');
+    });
+  }
+
   bindOnce(document.getElementById('inv-btn-add'), 'click', async () => {
     const trackingType = document.getElementById('inv-type').value;
+    const categoryId = document.getElementById('inv-category')?.value || null;
     const body = {
       sku: document.getElementById('inv-sku').value.trim(),
       name: document.getElementById('inv-name').value.trim(),
       trackingType,
       price: Number(document.getElementById('inv-price').value),
       cost: Number(document.getElementById('inv-cost').value) || 0,
+      categoryId: categoryId || undefined,
     };
     if (trackingType === 'SERIALIZED') {
       body.serialNumbers = document
