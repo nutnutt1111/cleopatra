@@ -19,7 +19,7 @@ Store-management platform for Thai retail and pawn operations — POS, inventory
 | **Messenger** | `/messenger` |
 | **Cashflow** | `/cashflow-ledger` |
 | **Customers** | `/customers` |
-| **HR** | `/hr` |
+| **HR** | `/hr` (Owner/HR) · `/manager-hr` (Manager) |
 | **Settings** | `/settings` |
 
 ---

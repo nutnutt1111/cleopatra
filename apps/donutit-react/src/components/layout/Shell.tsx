@@ -1,22 +1,29 @@
 import { Link, useLocation } from 'react-router-dom';
+import type { AuthUser } from '@shared/api';
 import { getSessionUser, logout } from '@shared/api';
 import { TopbarExportButton } from './TopbarExportButton';
 
-const NAV = [
-  { href: '/inventory', label: 'สินค้าคงคลัง' },
-  { href: '/pos', label: 'ขายหน้าร้าน' },
+type NavItem = { href: string; label: string; show: (user: AuthUser | null) => boolean };
+
+const NAV: NavItem[] = [
+  { href: '/inventory', label: 'สินค้าคงคลัง', show: () => true },
+  { href: '/pos', label: 'ขายหน้าร้าน', show: () => true },
+  { href: '/hr', label: 'บุคลากร (HR)', show: (u) => u?.role === 'OWNER' || u?.role === 'HR' },
+  { href: '/manager-hr', label: 'บุคลากร', show: (u) => u?.role === 'MANAGER' },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const user = getSessionUser();
+  const navItems = NAV.filter((item) => item.show(user));
 
   return (
     <div className="cleo-shell">
       <aside className="cleo-sidebar">
-        <div className="font-semibold mb-4">DonutiT</div>
+        <div className="font-semibold mb-1">DonutiT</div>
+        <p className="text-[10px] text-[var(--muted-foreground)] mb-4">donutit-cleopatra</p>
         <nav>
-          {NAV.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.href}
               to={item.href}

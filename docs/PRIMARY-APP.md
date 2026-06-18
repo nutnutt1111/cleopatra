@@ -13,7 +13,7 @@
 | Shared logic | `packages/donutit-shared/` — relative `/api` client, trade-in drafts, export CSV |
 | Backend | `server/` — Express routes mounted under `/api/*` |
 | Dev command | `yarn dev` → API + React on **3005** (Vite proxies `/api` to internal backend) |
-| Routes | `/login`, `/inventory`, `/pos`, `/hr`, … — all call API in this repo on the same origin |
+| Routes | `/login`, `/inventory`, `/pos`, `/hr`, `/manager-hr` — all call API in this repo on the same origin |
 | Quality gates | `scripts/quality/config.sh` → `QUALITY_BASE_URL` and `QUALITY_API_URL` default **3005** |
 
 ### Dev architecture (single origin)
@@ -34,6 +34,7 @@ In local dev, Vite on **3005** proxies `/api` to the Express process (default in
 | ลบ ปกติ/ด่วน → ดราฟ Trade-in | `InventoryPage` draft import + `TradeInSection` on POS |
 | ปุ่ม Export topbar | `TopbarExportButton` in `cleo-topbar__actions` |
 | เวลาโอน (native time) | `TransferDetailPanel` — `input[type=time]` + label preview |
+| HR + ผู้จัดการ | `HrPage` (`/hr`) · `ManagerHrPage` (`/manager-hr`) — role-based nav ใน sidebar |
 
 **Do not** use external React previews or old ports (e.g. 3003) unless synced from this repo.
 

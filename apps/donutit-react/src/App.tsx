@@ -5,6 +5,8 @@ import { Shell } from './components/layout/Shell';
 import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { PosPage } from './pages/PosPage';
+import { HrPage } from './pages/HrPage';
+import { ManagerHrPage } from './pages/ManagerHrPage';
 import { ToastProvider } from './components/ui/Toast';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -34,6 +36,8 @@ export default function App() {
                   <Route path="/" element={<Navigate to="/inventory" replace />} />
                   <Route path="/inventory" element={<InventoryPage />} />
                   <Route path="/pos" element={<PosPage />} />
+                  <Route path="/hr" element={<HrPage />} />
+                  <Route path="/manager-hr" element={<ManagerHrPage />} />
                 </Routes>
               </Shell>
             </RequireAuth>
