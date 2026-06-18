@@ -1,9 +1,11 @@
 ---
-description: DonutiT Cleopatra quality gates and high-risk file conventions
+description: DonutiT primary app quality gates (:3005) and high-risk file conventions
 alwaysApply: true
 ---
 
-# DonutiT Cleopatra Quality Conventions
+# DonutiT Primary App Quality Conventions
+
+**Primary surface:** `localhost:3005` — `src/pages/donutit/`. Legacy Cleopatra `/pages/…` is out of scope unless labeled legacy smoke. See `docs/PRIMARY-APP.md`.
 
 ## Before Multi-Module Work
 

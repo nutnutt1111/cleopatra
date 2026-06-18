@@ -1,4 +1,4 @@
-# seed-smith Coverage — DonutiT Cleopatra
+# seed-smith Coverage — DonutiT
 
 > Verified by `yarn quality:seed` after `yarn db:seed`
 
@@ -44,7 +44,7 @@ yarn db:seed     # re-seed บน DB ปัจจุบัน
 
 ```bash
 yarn dev:api     # API :3004
-yarn dev         # Vite :3003 (for route/UX checks)
+yarn dev         # DonutiT :3005 (for route/UX checks)
 yarn quality:seed
 yarn quality:hardening   # full gate
 ```

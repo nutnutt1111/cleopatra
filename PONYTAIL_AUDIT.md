@@ -1,4 +1,4 @@
-# Ponytail Audit — Cleopatra
+# Ponytail Audit — Legacy Cleopatra baseline (primary app: DonutiT)
 
 Audit using [ponytail](https://github.com/nutnutt1111/ponytail) principles. Ranked by impact.
 

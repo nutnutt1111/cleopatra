@@ -1,6 +1,8 @@
-# Architecture
+# Legacy Cleopatra — Architecture
 
-> Project structure and rules for Cleopatra v2.0
+> **Legacy template only.** Primary product is **DonutiT** on port **3005** — see [docs/PRIMARY-APP.md](docs/PRIMARY-APP.md).
+
+> Project structure and rules for Cleopatra v2.0 (upstream)
 
 ---
 

@@ -1,4 +1,4 @@
-# DonutiT Cleopatra — Parity Checklist
+# DonutiT — Parity Checklist
 
 > Maintained by `doc-janitor`. Mark `[x]` only with code + smoke evidence.
 

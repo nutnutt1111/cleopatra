@@ -27,7 +27,7 @@ Create and maintain reliable test data for POS, Pawn, Inventory, Cashflow, Messe
 - Make seed data idempotent where possible.
 - Document how to reset and rerun.
 
-## Project Context (DonutiT Cleopatra)
+## Project Context (DonutiT primary)
 
 Seed scripts should live under `prisma/seed.ts` (or `prisma/seeds/`) and reference dev-only fixtures. Never embed production credentials or real customer PII.
 
@@ -47,7 +47,7 @@ npx prisma db seed
 
 ## Target Environment
 
-**Dev server:** `http://localhost:3003` — seed ใช้ร่วมกับ regression ที่ `yarn quality:audit`
+**Dev server:** `http://localhost:3005` — seed ใช้ร่วมกับ regression ที่ `yarn quality:audit`
 
 ## When to Invoke
 

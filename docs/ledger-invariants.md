@@ -1,6 +1,6 @@
 # Ledger Invariants — ledger-hawk
 
-> DonutiT Cleopatra Wave 1. Rerun these scenarios after any financial change.
+> DonutiT Wave 1. Rerun these scenarios after any financial change.
 
 ## Invariants
 

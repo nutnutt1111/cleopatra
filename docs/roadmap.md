@@ -1,4 +1,4 @@
-# DonutiT Cleopatra — Roadmap
+# DonutiT — Roadmap
 
 > Maintained by `doc-janitor` and `map-master`. Do not mark phases complete without parity evidence.
 

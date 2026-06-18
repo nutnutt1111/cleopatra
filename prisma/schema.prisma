@@ -1,4 +1,4 @@
-// DonutiT Cleopatra — Waves 0–5 (see docs/PROJECT-STATUS.md)
+// DonutiT — primary app schema (see docs/PRIMARY-APP.md)
 
 generator client {
   provider = "prisma-client"

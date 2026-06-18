@@ -59,7 +59,7 @@ Return `BLOCK` if:
 
 ## Target Environment
 
-**Dev server:** `http://localhost:3003` — ตรวจ flow การเงินผ่าน API/UI บนเซิร์ฟเวอร์นี้
+**Dev server:** `http://localhost:3005` — ตรวจ flow การเงินผ่าน API/UI บนเซิร์ฟเวอร์นี้
 
 ## When to Invoke
 

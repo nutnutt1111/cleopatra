@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Extended checks — build, sidebar, Cleopatra pages, UX, parity cross-check
+# Extended checks — build, sidebar, legacy Cleopatra pages, UX, parity cross-check
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -38,11 +38,11 @@ for r in "${donut_routes[@]}"; do
   fi
 done
 echo ""
-echo "- Cleopatra มี \`/pages/apps/inventory.html\` แต่ DonutiT ต้องการ \`/inventory\` แยกต่างหาก"
+echo "- Legacy Cleopatra มี \`/pages/apps/inventory.html\` แต่ DonutiT ต้องการ \`/inventory\` แยกต่างหาก"
 echo ""
 
-# ── Cleopatra template pages smoke ────────────────────────────
-echo "### Cleopatra Template Routes (regress-ranger)"
+# ── Legacy Cleopatra template pages smoke ────────────────────────────
+echo "### Legacy Cleopatra Template Routes (regress-ranger)"
 echo ""
 cleo_routes=(
   "/pages/"

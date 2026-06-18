@@ -14,7 +14,7 @@ const __dirname = dirname(__filename);
 // Get all HTML files for multi-page setup (recursively scans subfolders)
 function getHtmlPages() {
     const pages = {
-        // Landing page at root
+        // Legacy Cleopatra marketing landing (not primary — DonutiT uses donutitRoutesPlugin for /)
         main: resolve(__dirname, 'src/index.html'),
     };
 
@@ -109,7 +109,7 @@ export default defineConfig(({ command }) => {
             handlebars({
                 partialDirectory: getPartialDirectories(),
                 context: {
-                    title: 'DonutiT — Store Management',
+                    title: 'DonutiT — Store Management', // primary app default
                     base, // Make base path available in templates
                 },
                 helpers: {
