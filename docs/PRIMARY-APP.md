@@ -1,40 +1,47 @@
 # DonutiT — Primary App Policy
 
-> **Canonical product:** DonutiT on **http://localhost:3005** (Vite) + API **http://localhost:3004**
+> **Canonical product:** DonutiT React on **http://localhost:3005** + API **http://localhost:3004**
 
 ## Primary (ใช้งานจริง)
 
 | What | Where |
 |------|--------|
-| App | DonutiT store management |
-| Frontend | `yarn dev` → port **3005** |
+| **React UI** | `apps/donutit-react/` — `cleo-shell`, `InventoryPage`, `PosPage`, `TransferDetailPanel` |
+| Shared logic | `packages/donutit-shared/` — API, trade-in drafts, export CSV |
+| Frontend | `yarn dev` or `yarn dev:all` → port **3005** |
 | API | `yarn dev:api` → port **3004** |
-| Pages | `src/pages/donutit/*` |
-| Routes | `/login`, `/dashboard`, `/pos`, `/inventory`, `/pawn`, `/messenger`, `/cashflow-ledger`, `/customers`, `/hr`, `/settings` |
-| Widgets | `src/components/widgets/donutit/*` |
-| Layout | `src/components/layout/start.html`, `start-auth.html` |
+| Routes | `/login`, `/inventory`, `/pos` (more modules → add in React) |
 | Quality gates | `scripts/quality/config.sh` → `QUALITY_BASE_URL` default **3005** |
 
-**Do not** treat React previews, external forks, or old ports (e.g. 3003) as the product surface.
+### Today's features (ported to React)
+
+| Feature | React location |
+|---------|----------------|
+| หมวดหมู่ + ปุ่มเพิ่มแยก | `InventoryPage` — `+ เพิ่มหมวดหมู่` |
+| ลบ ปกติ/ด่วน → ดราฟ Trade-in | `InventoryPage` draft import + `TradeInSection` on POS |
+| ปุ่ม Export topbar | `TopbarExportButton` in `cleo-topbar__actions` |
+| เวลาโอน (native time) | `TransferDetailPanel` — `input[type=time]` + label preview |
+
+**Do not** use external React previews or old ports (e.g. 3003) unless synced from this repo.
 
 ## Legacy (เก็บไว้อ้างอิงเท่านั้น)
 
 | What | Label | Where |
 |------|--------|--------|
+| Vanilla JS DonutiT | **Legacy vanilla** | `src/pages/donutit/*` — `yarn dev:legacy` → port **3006** |
 | Upstream admin template | **Legacy Cleopatra** | `src/pages/*` (except `donutit/`) |
 | Marketing landing | **Legacy Cleopatra** | `src/index.html` |
-| Demo dashboards | **Legacy Cleopatra demos** | `/pages/index.html`, `index-e-commerce.html`, … |
+| Demo dashboards | **Legacy Cleopatra demos** | `/pages/index.html`, … |
 | Template docs | **Legacy Cleopatra** | `ARCHITECTURE.md`, `COMPONENT_GUIDE.md` |
-| Old navbar widget | **Legacy Cleopatra** | `src/components/widgets/navbar/navbar.html` |
-| Docs layout | **Legacy Cleopatra** | `src/components/layout/docs-start.html` |
-| Extended quality smoke | **Legacy Cleopatra routes** | `scripts/quality/run-extended.sh` |
 
-Legacy pages show a banner and are **not** in the DonutiT sidebar. New features go only in `src/pages/donutit/` and `server/`.
+Legacy pages show a banner. **New features go in `apps/donutit-react/` and `server/` only.**
 
 ## Commands
 
 ```bash
-yarn dev:all          # Primary: API :3004 + DonutiT :3005
-yarn quality:hardening # Gates target primary routes on :3005
-yarn quality:audit:extended  # Optional legacy Cleopatra page smoke
+yarn install
+yarn --cwd apps/donutit-react install   # first time
+yarn dev:all          # API :3004 + React DonutiT :3005
+yarn dev:legacy       # Legacy vanilla UI :3006 (optional)
+yarn quality:hardening
 ```
