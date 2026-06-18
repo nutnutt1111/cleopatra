@@ -36,6 +36,8 @@ yarn dev                    # donutit-cleopatra :3005 (API + React)
 
 Open [http://localhost:3005/login](http://localhost:3005/login) — `owner@donutit.local` / `donutit-dev`.
 
+**Windows:** [docs/WINDOWS-LOCAL-SETUP.md](docs/WINDOWS-LOCAL-SETUP.md) — sync `C:\Users\HP\Projects\cleopatra` + run `:3005`.
+
 Legacy vanilla UI: `yarn dev:legacy` → port **3006**.
 
 ### Quality gate (before release)
