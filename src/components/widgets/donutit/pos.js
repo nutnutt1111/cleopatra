@@ -3,6 +3,11 @@ import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
 import { showLoginRequired } from './donutit-ui.js';
+import {
+  listTradeInDrafts,
+  saveTradeInDraft,
+  formatDraftLabel,
+} from './trade-in-draft.js';
 
 let productsCache = [];
 
@@ -141,6 +146,37 @@ async function handleCartAction(e) {
   renderCart();
 }
 
+function renderTradeInDrafts() {
+  const el = document.getElementById('pos-trade-drafts');
+  if (!el) return;
+  const drafts = listTradeInDrafts();
+  if (!drafts.length) {
+    el.innerHTML = '<p class="text-muted-foreground">ยังไม่มีดราฟ — บันทึกจากฟอร์มด้านบน</p>';
+    return;
+  }
+  el.innerHTML = drafts
+    .slice(0, 5)
+    .map(
+      (d) => `<div class="py-1 border-b border-border">${escapeHtml(formatDraftLabel(d))}</div>`,
+    )
+    .join('');
+}
+
+function clearTradeInForm() {
+  for (const id of [
+    'pos-trade-device',
+    'pos-trade-serial',
+    'pos-trade-sku',
+    'pos-trade-cost',
+    'pos-trade-price',
+    'pos-trade-customer',
+    'pos-trade-notes',
+  ]) {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  }
+}
+
 export async function initPos() {
   if (!document.querySelector('[data-donutit-module="pos"]')) return;
   if (!(await isLoggedIn())) {
@@ -162,6 +198,24 @@ export async function initPos() {
 
   document.getElementById('pos-product') && bindOnce(document.getElementById('pos-product'), 'change', onProductChange);
   document.getElementById('pos-discount') && bindOnce(document.getElementById('pos-discount'), 'input', updateTotals);
+
+  renderTradeInDrafts();
+  bindOnce(document.getElementById('btn-save-trade-draft'), 'click', () => {
+    const deviceName = document.getElementById('pos-trade-device')?.value.trim();
+    if (!deviceName) return notify('กรอกชื่อเครื่องก่อนบันทึกดราฟ', 'warning');
+    saveTradeInDraft({
+      deviceName,
+      serialNumber: document.getElementById('pos-trade-serial')?.value || '',
+      sku: document.getElementById('pos-trade-sku')?.value || '',
+      costBaht: Number(document.getElementById('pos-trade-cost')?.value) || 0,
+      priceBaht: Number(document.getElementById('pos-trade-price')?.value) || 0,
+      customerName: document.getElementById('pos-trade-customer')?.value || '',
+      notes: document.getElementById('pos-trade-notes')?.value || '',
+    });
+    notify('บันทึกดราฟ Trade-in แล้ว — ไปดึงที่หน้าสินค้าคงคลัง', 'success');
+    clearTradeInForm();
+    renderTradeInDrafts();
+  });
 
   bindOnce(document.getElementById('btn-add-line'), 'click', () => {
     const sel = document.getElementById('pos-product');

@@ -43,6 +43,45 @@
             </div>
 
             <div class="rounded-xl border bg-card p-4">
+                <h2 class="font-medium mb-3">Trade-in (รับเครื่องแลก)</h2>
+                <p class="text-xs text-muted-foreground mb-3">บันทึกดราฟเพื่อนำไปเพิ่มสินค้าในคลังภายหลัง</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="text-xs text-muted-foreground">ชื่อเครื่อง / รุ่น</label>
+                        <input id="pos-trade-device" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" placeholder="iPhone 14 Pro 128GB" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">Serial / IMEI</label>
+                        <input id="pos-trade-serial" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" placeholder="SN123456" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">SKU (ถ้ามี)</label>
+                        <input id="pos-trade-sku" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" placeholder="PHONE-TI-001" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">ต้นทุนรับเข้า (บาท)</label>
+                        <input id="pos-trade-cost" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">ราคาขายเป้า (บาท)</label>
+                        <input id="pos-trade-price" type="number" min="0" step="0.01" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">ลูกค้า</label>
+                        <input id="pos-trade-customer" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" placeholder="ชื่อลูกค้า" />
+                    </div>
+                    <div>
+                        <label class="text-xs text-muted-foreground">หมายเหตุ</label>
+                        <input id="pos-trade-notes" class="w-full mt-1 px-3 py-2 rounded-lg border border-border bg-background text-sm" placeholder="สภาพเครื่อง ฯลฯ" />
+                    </div>
+                </div>
+                <button id="btn-save-trade-draft" type="button" class="w-full mt-4 px-4 py-2 text-sm font-medium border border-border rounded-lg hover:bg-muted">
+                    บันทึกดราฟ Trade-in
+                </button>
+                <div id="pos-trade-drafts" class="mt-3 space-y-1 max-h-32 overflow-y-auto text-xs text-muted-foreground"></div>
+            </div>
+
+            <div class="rounded-xl border bg-card p-4">
                 <h2 class="font-medium mb-3">ชำระเงิน (แยกจ่ายได้)</h2>
                 <div class="grid grid-cols-2 gap-3">
                     <div>

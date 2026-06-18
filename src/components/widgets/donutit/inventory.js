@@ -3,6 +3,12 @@ import { escapeHtml } from './escape-html.js';
 import { bindOnce } from './bind-once.js';
 import { notify } from './notify.js';
 import { showLoginRequired } from './donutit-ui.js';
+import {
+  listTradeInDrafts,
+  getTradeInDraft,
+  removeTradeInDraft,
+  formatDraftLabel,
+} from './trade-in-draft.js';
 
 function toggleTypeFields() {
   const type = document.getElementById('inv-type')?.value;
@@ -24,6 +30,52 @@ async function loadCategories(selectId) {
     select.value = prev;
   }
   return categories;
+}
+
+function refreshDraftSelect() {
+  const select = document.getElementById('inv-trade-draft');
+  if (!select) return;
+  const prev = select.value;
+  const drafts = listTradeInDrafts();
+  select.innerHTML =
+    '<option value="">— เลือกดราฟจาก POS —</option>' +
+    drafts.map((d) => `<option value="${escapeHtml(d.id)}">${escapeHtml(formatDraftLabel(d))}</option>`).join('');
+  if (prev && drafts.some((d) => d.id === prev)) {
+    select.value = prev;
+  }
+}
+
+function applyTradeInDraft(draft) {
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value ?? '';
+  };
+  set('inv-name', draft.deviceName);
+  set('inv-sku', draft.sku || suggestSku(draft));
+  set('inv-cost', draft.costBaht || '');
+  set('inv-price', draft.priceBaht || '');
+  if (draft.serialNumber) {
+    const typeEl = document.getElementById('inv-type');
+    if (typeEl) typeEl.value = 'SERIALIZED';
+    toggleTypeFields();
+    set('inv-serials-input', draft.serialNumber);
+  }
+  const hint = document.getElementById('inv-draft-hint');
+  if (hint) {
+    const parts = [draft.customerName, draft.notes].filter(Boolean);
+    hint.textContent = parts.length ? `จากดราฟ: ${parts.join(' · ')}` : 'ดึงข้อมูลจากดราฟแล้ว';
+    hint.classList.remove('hidden');
+  }
+}
+
+function suggestSku(draft) {
+  const base = (draft.deviceName || 'TRADEIN')
+    .replace(/[^a-zA-Z0-9ก-๙]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 20)
+    .toUpperCase();
+  const tail = draft.serialNumber ? `-${draft.serialNumber.slice(-4)}` : '';
+  return `${base || 'TRADEIN'}${tail}`;
 }
 
 async function refresh() {
@@ -111,6 +163,30 @@ export async function initInventory() {
 
   if (canAdd) {
     loadCategories('inv-category').catch((e) => notify(e.message, 'error'));
+    refreshDraftSelect();
+
+    bindOnce(document.getElementById('inv-btn-import-draft'), 'click', () => {
+      const id = document.getElementById('inv-trade-draft')?.value;
+      if (!id) return notify('เลือกดราฟก่อน', 'warning');
+      const draft = getTradeInDraft(id);
+      if (!draft) {
+        notify('ไม่พบดราฟ — อาจถูกลบแล้ว', 'error');
+        refreshDraftSelect();
+        return;
+      }
+      applyTradeInDraft(draft);
+      notify(`ดึงข้อมูล "${draft.deviceName}" จากดราฟแล้ว`, 'success');
+    });
+
+    bindOnce(document.getElementById('inv-btn-delete-draft'), 'click', () => {
+      const id = document.getElementById('inv-trade-draft')?.value;
+      if (!id) return notify('เลือกดราฟที่จะลบ', 'warning');
+      if (!window.confirm('ลบดราฟ Trade-in นี้?')) return;
+      removeTradeInDraft(id);
+      refreshDraftSelect();
+      document.getElementById('inv-draft-hint')?.classList.add('hidden');
+      notify('ลบดราฟแล้ว', 'success');
+    });
 
     bindOnce(document.getElementById('inv-btn-add-category'), 'click', async () => {
       const name = window.prompt('ชื่อหมวดหมู่ใหม่');
@@ -163,6 +239,12 @@ export async function initInventory() {
       return;
     }
     notify(`เพิ่มสินค้า ${data.product.name} แล้ว`, 'success');
+    const draftId = document.getElementById('inv-trade-draft')?.value;
+    if (draftId) {
+      removeTradeInDraft(draftId);
+      refreshDraftSelect();
+      document.getElementById('inv-draft-hint')?.classList.add('hidden');
+    }
     document.getElementById('inv-sku').value = '';
     document.getElementById('inv-name').value = '';
     await refresh();

@@ -9,6 +9,21 @@
 
     <div id="inv-add-panel" class="rounded-xl border bg-card p-4 mb-6 hidden">
         <h2 class="font-medium mb-3">เพิ่มสินค้าใหม่</h2>
+        <div class="mb-4 p-3 rounded-lg border border-dashed border-border bg-muted/30">
+            <label class="text-xs text-muted-foreground">ดึงจากดราฟ Trade-in (POS)</label>
+            <div class="flex flex-col sm:flex-row gap-2 mt-1">
+                <select id="inv-trade-draft" class="flex-1 min-w-0 px-3 py-2 rounded-lg border border-border bg-background text-sm">
+                    <option value="">— เลือกดราฟจาก POS —</option>
+                </select>
+                <button type="button" id="inv-btn-import-draft" class="shrink-0 px-3 py-2 text-sm font-medium border border-border rounded-lg hover:bg-muted whitespace-nowrap">
+                    ดึงข้อมูล
+                </button>
+                <button type="button" id="inv-btn-delete-draft" class="shrink-0 px-3 py-2 text-sm text-destructive border border-border rounded-lg hover:bg-muted whitespace-nowrap">
+                    ลบดราฟ
+                </button>
+            </div>
+            <p id="inv-draft-hint" class="text-xs text-muted-foreground mt-2 hidden"></p>
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
                 <label class="text-xs text-muted-foreground">SKU</label>
