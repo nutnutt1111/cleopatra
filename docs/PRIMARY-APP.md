@@ -17,7 +17,7 @@
 
 | Feature | React location |
 |---------|----------------|
-| หมวดหมู่ + ปุ่มเพิ่มแยก | `InventoryPage` — `+ เพิ่มหมวดหมู่` |
+| หมวดหมู่ + ปุ่มเพิ่มแยก | `CategoryField` — `#inv-category` + `#inv-btn-add-category` |
 | ลบ ปกติ/ด่วน → ดราฟ Trade-in | `InventoryPage` draft import + `TradeInSection` on POS |
 | ปุ่ม Export topbar | `TopbarExportButton` in `cleo-topbar__actions` |
 | เวลาโอน (native time) | `TransferDetailPanel` — `input[type=time]` + label preview |
