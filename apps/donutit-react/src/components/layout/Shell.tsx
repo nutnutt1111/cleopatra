@@ -9,6 +9,9 @@ type NavItem = { href: string; label: string; show: (user: AuthUser | null) => b
 const NAV: NavItem[] = [
   { href: '/inventory', label: 'สินค้าคงคลัง', show: () => true },
   { href: '/pos', label: 'ขายหน้าร้าน', show: () => true },
+  { href: '/pawn', label: 'จำนำ', show: () => true },
+  { href: '/messenger', label: 'Messenger', show: () => true },
+  { href: '/customers', label: 'ลูกค้า', show: () => true },
   { href: '/hr', label: 'บุคลากร (HR)', show: (u) => u?.role === 'OWNER' || u?.role === 'HR' },
   { href: '/manager-hr', label: 'บุคลากร', show: (u) => u?.role === 'MANAGER' },
 ];

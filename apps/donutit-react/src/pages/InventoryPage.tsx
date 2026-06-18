@@ -21,7 +21,16 @@ type Product = {
   priceBaht: string;
   costBaht?: string | null;
   qtyOnHand?: number | null;
-  serials: { serialNumber: string }[];
+  serials: { serialNumber: string; status?: string; statusLabel?: string }[];
+};
+
+type Movement = {
+  id: string;
+  productName: string;
+  serialNumber: string | null;
+  qtyDelta: number;
+  reason: string;
+  createdAt: string;
 };
 
 const emptyForm = {
@@ -45,6 +54,14 @@ export function InventoryPage() {
   const [importedDraftId, setImportedDraftId] = useState('');
   const [draftHint, setDraftHint] = useState('');
   const [form, setForm] = useState(emptyForm);
+  const [movements, setMovements] = useState<Movement[]>([]);
+
+  async function loadMovements() {
+    const res = await apiFetch('/api/inventory/movements');
+    if (!res.ok) return;
+    const data = await res.json();
+    setMovements(data.movements);
+  }
 
   async function loadProducts() {
     const res = await apiFetch('/api/inventory/products');
@@ -53,8 +70,12 @@ export function InventoryPage() {
     setProducts(data.products);
   }
 
+  async function refreshAll() {
+    await Promise.all([loadProducts(), loadMovements()]);
+  }
+
   useEffect(() => {
-    loadProducts().catch((e) => toast.show(e.message, 'error'));
+    refreshAll().catch((e) => toast.show(e.message, 'error'));
     setDrafts(listTradeInDrafts());
   }, []);
 
@@ -116,7 +137,7 @@ export function InventoryPage() {
     }
     toast.show(`เพิ่มสินค้า ${data.product.name} แล้ว`, 'success');
     setForm({ ...emptyForm, categoryId: form.categoryId });
-    await loadProducts();
+    await refreshAll();
   }
 
   return (
@@ -227,6 +248,7 @@ export function InventoryPage() {
               <th>ชื่อ</th>
               <th>หมวดหมู่</th>
               <th>ประเภท</th>
+              <th>สต็อก</th>
               <th>ราคาขาย</th>
             </tr>
           </thead>
@@ -237,11 +259,52 @@ export function InventoryPage() {
                 <td>{p.name}</td>
                 <td>{p.categoryName ?? '—'}</td>
                 <td>{p.trackingType === 'SERIALIZED' ? 'มี Serial' : 'นับจำนวน'}</td>
+                <td>
+                  {p.trackingType === 'QUANTITY'
+                    ? `${p.qtyOnHand ?? 0} ชิ้น`
+                    : `${p.serials.length} serial`}
+                </td>
                 <td>{p.priceBaht}</td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div className="card" id="inv-serials-panel">
+          <h2 className="font-medium mb-3">Serial</h2>
+          <div id="inv-serials" className="flex flex-wrap gap-2">
+            {products.flatMap((p) =>
+              p.serials.map((s) => (
+                <span key={`${p.id}-${s.serialNumber}`} className="badge">
+                  {s.serialNumber} · {p.name}
+                  {s.statusLabel && (
+                    <span className="ml-1 text-[var(--muted-foreground)]">({s.statusLabel})</span>
+                  )}
+                </span>
+              )),
+            )}
+            {!products.some((p) => p.serials.length) && (
+              <p className="text-sm text-[var(--muted-foreground)]">ไม่มี serial</p>
+            )}
+          </div>
+        </div>
+        <div className="card" id="inv-moves-panel">
+          <h2 className="font-medium mb-3">Movement ล่าสุด</h2>
+          <div id="inv-moves" className="max-h-64 overflow-y-auto text-xs space-y-1">
+            {movements.map((m) => (
+              <div key={m.id} className="py-1 border-b border-[var(--border)]">
+                {new Date(m.createdAt).toLocaleString('th-TH')} · {m.productName}
+                {m.serialNumber ? ` [${m.serialNumber}]` : ''} · {m.qtyDelta > 0 ? '+' : ''}
+                {m.qtyDelta} · {m.reason}
+              </div>
+            ))}
+            {!movements.length && (
+              <p className="text-sm text-[var(--muted-foreground)]">ยังไม่มี movement</p>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );
