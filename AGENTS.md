@@ -79,9 +79,10 @@ Stop merge when any agent returns:
 **Frontend:** [http://localhost:3005](http://localhost:3005) · **API:** [http://localhost:3004](http://localhost:3004)
 
 ```bash
-yarn dev              # Vite frontend :3005
+yarn dev              # React DonutiT :3005 (apps/donutit-react)
+yarn dev:legacy       # Legacy vanilla :3006
 yarn dev:api          # Express API :3004
-yarn dev:all          # both servers
+yarn dev:all          # API + React
 
 yarn quality:hardening   # full gate: route + api + hardtest + seed + ux
 yarn quality:hardtest    # Grumpy abuse/race simulation

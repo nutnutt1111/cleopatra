@@ -28,13 +28,15 @@ Store-management platform for Thai retail and pawn operations — POS, inventory
 
 ```bash
 yarn install
-cp .env.example .env        # optional — defaults work for dev
+yarn --cwd apps/donutit-react install
 
 yarn db:reset               # migrate + seed dev data
-yarn dev:all                # API :3004 + DonutiT :3005
+yarn dev:all                # API :3004 + React DonutiT :3005
 ```
 
 Open [http://localhost:3005/login](http://localhost:3005/login) — `owner@donutit.local` / `donutit-dev`.
+
+Legacy vanilla UI: `yarn dev:legacy` → port **3006**.
 
 ### Quality gate (before release)
 
@@ -50,7 +52,8 @@ See [docs/quality/README.md](docs/quality/README.md).
 
 | Layer | Technology |
 |-------|------------|
-| **Primary frontend** | Vite, Tailwind v4, `src/pages/donutit/` |
+| **Primary frontend** | React — `apps/donutit-react/` (:3005) |
+| Legacy vanilla | `src/pages/donutit/` (`yarn dev:legacy` :3006) |
 | API | Express, Prisma, SQLite |
 | Auth | httpOnly cookie JWT |
 | Ports | **3005** (DonutiT) · **3004** (API) |
@@ -60,13 +63,12 @@ See [docs/quality/README.md](docs/quality/README.md).
 ## Project Structure
 
 ```
-server/                      # API (primary)
-src/pages/donutit/           # Primary UI pages
-src/components/widgets/donutit/
-src/pages/                   # Legacy Cleopatra template demos (do not extend)
-src/index.html               # Legacy Cleopatra marketing landing
-docs/PRIMARY-APP.md          # Primary vs legacy policy
-scripts/quality/             # Gates target :3005 DonutiT routes
+apps/donutit-react/          # PRIMARY React UI (:3005)
+packages/donutit-shared/     # API, trade-in drafts, export
+server/                      # Express API (:3004)
+src/pages/donutit/           # Legacy vanilla widgets (:3006)
+src/pages/                   # Legacy Cleopatra demos
+docs/PRIMARY-APP.md
 ```
 
 ---
