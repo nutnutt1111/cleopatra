@@ -9,6 +9,8 @@ import {
   removeTradeInDraft,
   formatDraftLabel,
 } from './trade-in-draft.js';
+import { registerPageExport } from '../navbar/topbar-export.js';
+import { downloadCsv, rowsToCsv } from './export-csv.js';
 
 function toggleTypeFields() {
   const type = document.getElementById('inv-type')?.value;
@@ -76,6 +78,38 @@ function suggestSku(draft) {
     .toUpperCase();
   const tail = draft.serialNumber ? `-${draft.serialNumber.slice(-4)}` : '';
   return `${base || 'TRADEIN'}${tail}`;
+}
+
+function registerInventoryExport() {
+  registerPageExport('inventory', async () => {
+    const res = await apiFetch('/api/inventory/products');
+    if (!res.ok) throw new Error((await res.json()).error);
+    const { products } = await res.json();
+    const columns = [
+      { key: 'sku', label: 'SKU' },
+      { key: 'name', label: 'ชื่อ' },
+      { key: 'categoryName', label: 'หมวดหมู่' },
+      { key: 'trackingLabel', label: 'ประเภท' },
+      { key: 'stockLabel', label: 'สต็อก' },
+      { key: 'priceBaht', label: 'ราคาขาย' },
+      { key: 'costBaht', label: 'ต้นทุน' },
+    ];
+    const rows = products.map((p) => ({
+      sku: p.sku,
+      name: p.name,
+      categoryName: p.categoryName ?? '',
+      trackingLabel: p.trackingType === 'SERIALIZED' ? 'มี Serial' : 'นับจำนวน',
+      stockLabel:
+        p.trackingType === 'QUANTITY'
+          ? `${p.qtyOnHand} ชิ้น`
+          : `${p.serials.length} serial`,
+      priceBaht: p.priceBaht,
+      costBaht: p.costBaht ?? '',
+    }));
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadCsv(`inventory-${stamp}.csv`, rowsToCsv(columns, rows));
+    notify('ส่งออกรายการสินค้าแล้ว', 'success');
+  });
 }
 
 async function refresh() {
@@ -158,6 +192,7 @@ export async function initInventory() {
   const panel = document.getElementById('inv-add-panel');
   if (canAdd && panel) panel.classList.remove('hidden');
 
+  registerInventoryExport();
   bindOnce(document.getElementById('inv-type'), 'change', toggleTypeFields);
   toggleTypeFields();
 

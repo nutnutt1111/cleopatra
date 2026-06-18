@@ -4,6 +4,7 @@
 
 import { getSessionUser, isLoggedIn, logout } from '../donutit/donutit-api.js';
 import { appPath } from '../../../js/donutit-paths.js';
+import { initTopbarExport, refreshTopbarExportVisibility } from './topbar-export.js';
 
 let navbarChromeBound = false;
 let logoutBound = false;
@@ -43,6 +44,8 @@ export async function refreshNavbarSession() {
     if (settingsLink) settingsLink.classList.add('hidden');
     if (logoutBtn) logoutBtn.classList.add('hidden');
   }
+
+  refreshTopbarExportVisibility();
 }
 
 export function bindNavbarChrome() {
@@ -52,6 +55,7 @@ export function bindNavbarChrome() {
     initUserDropdown();
     initThemeSwitcher();
     bindNavbarLogout();
+    initTopbarExport();
 }
 
 function bindNavbarLogout() {
